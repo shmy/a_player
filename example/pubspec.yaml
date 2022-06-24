@@ -33,6 +33,7 @@ dependencies:
   rpx: ^0.0.1
   battery_plus: ^2.1.4
   connectivity_plus: ^2.3.5
+  wakelock: ^0.6.1+2
 
 dev_dependencies:
   flutter_test:

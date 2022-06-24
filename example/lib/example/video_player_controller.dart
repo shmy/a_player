@@ -8,6 +8,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:wakelock/wakelock.dart';
 
 class LableValue<T> {
   final String label;
@@ -16,7 +17,7 @@ class LableValue<T> {
   LableValue(this.label, this.value);
 }
 
-class VideoPlayerController {
+class VideoPlayerController with WidgetsBindingObserver {
   late final APlayerControllerInterface playerController;
   final Rx<APlayerValue> value = Rx<APlayerValue>(APlayerValue.uninitialized());
   final RxList<String> playlist = RxList<String>([]);
@@ -64,6 +65,8 @@ class VideoPlayerController {
   final Rxn<int> batteryLevel = Rxn<int>();
   final Rxn<BatteryState> batteryState = Rxn<BatteryState>();
   final Rxn<String> currentTime = Rxn<String>();
+  bool _appPaused = false;
+  bool _willPlayResumed = false;
   Timer? _currentTimer;
   StreamSubscription<ConnectivityResult>? _connectivityResultSubscription;
   StreamSubscription<BatteryState>? _batteryStateSubscription;
@@ -71,9 +74,11 @@ class VideoPlayerController {
 
   VideoPlayerController() {
     playerController = APlayerNetworkController()..addListener(_listener);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   Future<void> initialize() {
+    Wakelock.enable();
     return playerController.initialize();
   }
 
@@ -202,10 +207,35 @@ class VideoPlayerController {
     _currentTimer = null;
   }
   void dispose() {
+    Wakelock.disable();
+    WidgetsBinding.instance.removeObserver(this);
     playerController.dispose();
-  }
 
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch(state) {
+      case AppLifecycleState.paused: {
+        _appPaused = true;
+        _willPlayResumed = playerValue.isStarted;
+        playerController.pause();
+        break;
+      }
+      case AppLifecycleState.resumed: {
+        _appPaused = false;
+        if (_willPlayResumed) {
+          playerController.play();
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
   void _listener() {
+    if (_appPaused && !playerValue.isPaused) {
+      playerController.pause();
+    }
     value.value = playerController.value;
   }
 }
