@@ -2,6 +2,7 @@ package tech.shmy.a_player
 
 import android.content.Context
 import android.graphics.SurfaceTexture
+import android.util.Log
 import android.view.Surface
 import com.aliyun.player.AliPlayer
 import com.aliyun.player.AliPlayerFactory
@@ -135,7 +136,8 @@ class APlayer(
         player?.setOnLoadingStatusListener(object : IPlayer.OnLoadingStatusListener {
             override fun onLoadingBegin() {
                 videoEvent = videoEvent.copy(
-                    isBuffering = true
+                    isBuffering = true,
+                    bufferingPercentage = 0
                 )
                 sendEvent()
             }
@@ -146,6 +148,7 @@ class APlayer(
                     bufferingSpeed = p1
                 )
                 sendEvent()
+
             }
 
             override fun onLoadingEnd() {
@@ -202,13 +205,19 @@ class APlayer(
 
     private fun seekTo(position: Long): Unit {
         player?.seekTo(position, IPlayer.SeekMode.Accurate)
+        if (player != null) {
+            videoEvent = videoEvent.copy(
+                position = position
+            )
+            sendEvent()
+        }
     }
 
     private fun setSpeed(speed: Float): Unit {
         player?.speed = speed
         if (player != null) {
             videoEvent = videoEvent.copy(
-                playSpeed = player!!.speed
+                playSpeed = speed
             )
             sendEvent()
         }

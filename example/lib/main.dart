@@ -1,7 +1,10 @@
 import 'package:a_player_example/network_player_page.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:rpx/rpx.dart';
 
-void main() {
+void main() async {
+  await Rpx.init();
   runApp(const MyApp());
 }
 
@@ -15,7 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return const GetMaterialApp(
       home: MainPage(),
     );
   }
@@ -32,9 +35,7 @@ class MainPage extends StatelessWidget {
       body: ListView(
         children: [
           MaterialButton(onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-              return const NetworkPlayerPage();
-            }));
+            Get.to(() => const NetworkPlayerPage());
           }, child: const Text('NetworkPlayerPage'),)
         ],
       ),
