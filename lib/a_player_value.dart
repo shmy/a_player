@@ -45,7 +45,7 @@ class APlayerValue {
 
   bool get isIdle => state == _APlayerState.idle;
 
-  bool get isInitialized => ![_APlayerState.unknow, _APlayerState.idle, _APlayerState.error].contains(state);
+  bool get isInitialized => state == _APlayerState.initalized;
 
   bool get isPrepared => state == _APlayerState.prepared;
 

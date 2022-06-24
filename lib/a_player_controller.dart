@@ -30,6 +30,7 @@ abstract class APlayerControllerInterface extends ValueNotifier<APlayerValue> {
     }
   }
 
+  Future<void> setDataSouce(String source);
   Future<void> play() async {
     await methodChannel?.invokeMethod('play');
   }

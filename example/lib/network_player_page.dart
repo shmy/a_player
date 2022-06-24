@@ -15,10 +15,10 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
 
   @override
   void initState() {
-    controller = APlayerNetworkController(
-        "https://vfx.mtime.cn/Video/2019/03/19/mp4/190319104618910544.mp4",
-        isAutoPlay: true)
-      ..initialize();
+    controller = APlayerNetworkController()
+      ..initialize().then((_) {
+        controller.setDataSouce("https://vfx.mtime.cn/Video/2019/03/12/mp4/190312083533415853.mp4");
+      });
     super.initState();
   }
 
