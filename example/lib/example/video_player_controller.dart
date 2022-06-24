@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_network_controller.dart';
@@ -8,6 +9,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:orientation/orientation.dart';
 import 'package:wakelock/wakelock.dart';
 
 class LableValue<T> {
@@ -59,6 +61,10 @@ class VideoPlayerController with WidgetsBindingObserver {
     LableValue<bool>('硬件解码', true),
     LableValue<bool>('软件解码', false),
   ];
+  final List<DeviceOrientation> _fullScreenOrientations = [
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight
+  ];
   final Connectivity _connectivity = Connectivity();
   final Battery _battery = Battery();
   final Rxn<ConnectivityResult> connectivityResult = Rxn<ConnectivityResult>();
@@ -68,8 +74,10 @@ class VideoPlayerController with WidgetsBindingObserver {
   bool _appPaused = false;
   bool _willPlayResumed = false;
   Timer? _currentTimer;
+  DeviceOrientation _deviceOrientation = DeviceOrientation.landscapeLeft;
   StreamSubscription<ConnectivityResult>? _connectivityResultSubscription;
   StreamSubscription<BatteryState>? _batteryStateSubscription;
+  StreamSubscription<DeviceOrientation>? _deviceOrientationSubscription;
   APlayerValue get playerValue => value.value;
 
   VideoPlayerController() {
@@ -79,9 +87,23 @@ class VideoPlayerController with WidgetsBindingObserver {
 
   Future<void> initialize() {
     Wakelock.enable();
+    _deviceOrientationSubscription = OrientationPlugin.onOrientationChange.listen((evnet) {
+      if (_fullScreenOrientations.contains(evnet)) {
+        _deviceOrientation = evnet;
+        if (isFullscreen.value) {
+          _rotateFullscreen();
+        }
+      }
+    });
     return playerController.initialize();
   }
-
+  Future<void> _rotateFullscreen() async {
+    if (Platform.isAndroid) {
+      OrientationPlugin.forceOrientation(_deviceOrientation);
+    } else if (Platform.isIOS) {
+      SystemChrome.setPreferredOrientations([_deviceOrientation]);
+    }
+  }
   void setPlaylist(List<String> playlist) {
     this.playlist.assignAll(playlist);
   }
@@ -127,7 +149,7 @@ class VideoPlayerController with WidgetsBindingObserver {
   void _enterFullscreen(Widget widget) async {
     await Future.wait([
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []),
-      SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]),
+      _rotateFullscreen(),
       _refreshSystemInfo(),
       () async {
         Get.to(
@@ -209,6 +231,8 @@ class VideoPlayerController with WidgetsBindingObserver {
   void dispose() {
     Wakelock.disable();
     WidgetsBinding.instance.removeObserver(this);
+    _removeListener();
+    _deviceOrientationSubscription?.cancel();
     playerController.dispose();
 
   }
