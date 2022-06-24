@@ -31,6 +31,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   get: ^4.6.5
   rpx: ^0.0.1
+  battery_plus: ^2.1.4
+  connectivity_plus: ^2.3.5
 
 dev_dependencies:
   flutter_test:

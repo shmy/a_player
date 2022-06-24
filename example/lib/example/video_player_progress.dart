@@ -34,8 +34,8 @@ class VideoPlayerProgress extends StatefulWidget {
   }) : super(key: key);
 
   final Duration buffered;
-  final int position;
-  final int duration;
+  final Duration position;
+  final Duration duration;
   final ui.Image? handleImage;
   final VideoPlayerProgressColors colors;
   final ValueChanged<double>? onChangeStart;
@@ -51,17 +51,18 @@ class VideoPlayerProgress extends StatefulWidget {
 
 class _VideoPlayerProgressState extends State<VideoPlayerProgress> {
   double _lastPosition = 0.0;
-
+  int get duration => widget.duration.inMilliseconds;
+  int get position => widget.position.inMilliseconds;
   void _calcRelativePosition(Offset globalPosition) {
     final box = context.findRenderObject()! as RenderBox;
     final Offset tapPos = box.globalToLocal(globalPosition);
     final double relative = tapPos.dx / box.size.width;
-    _lastPosition = widget.duration * relative;
+    _lastPosition = duration * relative;
     if (_lastPosition < 0) {
       _lastPosition = 0;
     }
-    if (_lastPosition > widget.duration) {
-      _lastPosition = widget.duration.toDouble();
+    if (_lastPosition > duration) {
+      _lastPosition = duration.toDouble();
     }
   }
 
@@ -89,8 +90,8 @@ class _VideoPlayerProgressState extends State<VideoPlayerProgress> {
           color: Colors.transparent,
           child: CustomPaint(
             painter: _ProgressBarPainter(
-              duration: widget.duration,
-              position: widget.position,
+              duration: duration,
+              position: position,
               buffered: widget.buffered,
               colors: widget.colors,
               barHeight: widget.barHeight,
@@ -149,7 +150,7 @@ class _ProgressBarPainter extends CustomPainter {
     final double playedPart =
     playedPartPercent > 1 ? size.width : playedPartPercent * size.width;
 
-    final double bufferedPartPercent = buffered.inSeconds / duration;
+    final double bufferedPartPercent = buffered.inMilliseconds / duration;
     final double bufferedEndPart =
     bufferedPartPercent > 1 ? size.width : bufferedPartPercent * size.width;
     canvas.drawRRect(

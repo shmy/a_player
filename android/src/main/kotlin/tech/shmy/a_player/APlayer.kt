@@ -74,6 +74,9 @@ class APlayer(
 
     private fun createPlayer(): Unit {
         player = AliPlayerFactory.createAliPlayer(context)
+        val config = player!!.config
+        config.mMaxBufferDuration = 1000 * 60 * 10
+        player!!.config = config
         setupPlayer()
     }
 

@@ -25,7 +25,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             'https://new.iskcd.com/20220422/e9LNmEMj/index.m3u8',
             'https://m3u8.taopianplay.com/taopian/ecd7f271-487e-48d6-9873-9edc06e79ce8/1e995a1c-d91d-4e6a-8716-2f76f90f9394/47916/40be6fca-f3f7-4078-9c9e-aba8d0a3512b/SD/playlist.m3u8',
           ])
-          ..playByIndex(0);
+          ..playByIndex(3);
       });
     super.initState();
   }

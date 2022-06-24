@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_network_controller.dart';
 import 'package:a_player/a_player_value.dart';
+import 'package:battery_plus/battery_plus.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -24,7 +26,7 @@ class VideoPlayerController {
   final RxBool isShowSettings = false.obs;
   final RxBool isLocked = false.obs;
   final RxBool isTempSeekEnable = false.obs;
-  final RxDouble tempSeekPosition = (0.0).obs;
+  final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
   final List<LableValue<double>> speedList = [
     LableValue<double>('0.5', 0.5),
     LableValue<double>('1.0', 1.0),
@@ -56,7 +58,15 @@ class VideoPlayerController {
     LableValue<bool>('硬件解码', true),
     LableValue<bool>('软件解码', false),
   ];
-
+  final Connectivity _connectivity = Connectivity();
+  final Battery _battery = Battery();
+  final Rxn<ConnectivityResult> connectivityResult = Rxn<ConnectivityResult>();
+  final Rxn<int> batteryLevel = Rxn<int>();
+  final Rxn<BatteryState> batteryState = Rxn<BatteryState>();
+  final Rxn<String> currentTime = Rxn<String>();
+  Timer? _currentTimer;
+  StreamSubscription<ConnectivityResult>? _connectivityResultSubscription;
+  StreamSubscription<BatteryState>? _batteryStateSubscription;
   APlayerValue get playerValue => value.value;
 
   VideoPlayerController() {
@@ -113,6 +123,7 @@ class VideoPlayerController {
     await Future.wait([
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []),
       SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]),
+      _refreshSystemInfo(),
       () async {
         Get.to(
           () => WillPopScope(
@@ -138,6 +149,7 @@ class VideoPlayerController {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
           overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]),
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
+      _removeListener(),
       () async {
         Get.back();
       }(),
@@ -163,7 +175,32 @@ class VideoPlayerController {
       Get.back();
     }
   }
-
+  Future<void> _refreshSystemInfo() async {
+    var connectivityResult = await _connectivity.checkConnectivity();
+    var batteryLevel = await _battery.batteryLevel;
+    var batteryState = await _battery.batteryState;
+    this.connectivityResult.value = connectivityResult;
+    this.batteryLevel.value = batteryLevel;
+    this.batteryState.value = batteryState;
+    _connectivityResultSubscription = _connectivity.onConnectivityChanged.listen((event) {
+      this.connectivityResult.value = event;
+    });
+    _batteryStateSubscription = _battery.onBatteryStateChanged.listen((event) {
+      this.batteryState.value = event;
+    });
+    _currentTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final DateTime now = DateTime.now();
+      currentTime.value = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    });
+  }
+  Future<void> _removeListener() async {
+    _connectivityResultSubscription?.cancel();
+    _batteryStateSubscription?.cancel();
+    _currentTimer?.cancel();
+    _connectivityResultSubscription = null;
+    _batteryStateSubscription = null;
+    _currentTimer = null;
+  }
   void dispose() {
     playerController.dispose();
   }
