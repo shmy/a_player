@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_network_controller.dart';
 import 'package:a_player/a_player_value.dart';
@@ -20,7 +22,7 @@ class VideoPlayerController {
   final RxBool isQuickPlaying = false.obs;
   final RxBool isFullscreen = false.obs;
   final RxBool isShowSettings = false.obs;
-  final RxBool isLocked = true.obs;
+  final RxBool isLocked = false.obs;
   final RxBool isTempSeekEnable = false.obs;
   final RxDouble tempSeekPosition = (0.0).obs;
   final List<LableValue<double>> speedList = [
@@ -94,12 +96,12 @@ class VideoPlayerController {
     isShowBar.value = false;
     isShowSettings.value = !isShowSettings.value;
   }
+
   void toggleLock() {
     isLocked.value = !isLocked.value;
   }
 
   void toggleFullscreen(Widget widget) {
-    final List<Future<void>> tasks = [];
     if (isFullscreen.value) {
       _exitFullscreen();
     } else {
@@ -107,24 +109,32 @@ class VideoPlayerController {
     }
   }
 
-  void _enterFullscreen(Widget widget) {
-    Future.wait([
+  void _enterFullscreen(Widget widget) async {
+    await Future.wait([
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []),
       SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]),
       () async {
-        Get.to(() => WillPopScope(
+        Get.to(
+          () => WillPopScope(
             onWillPop: () async {
+              if (isLocked.value) {
+                isShowBar.value = true;
+                return false;
+              }
               _exitFullscreen();
               return true;
             },
-            child: widget));
+            child: widget,
+          ),
+          transition: Transition.noTransition,
+        );
       }(),
     ]);
     isFullscreen.value = !isFullscreen.value;
   }
 
-  void _exitFullscreen() {
-    Future.wait([
+  void _exitFullscreen() async {
+    await Future.wait([
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
           overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]),
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
