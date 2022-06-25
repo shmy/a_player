@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:orientation/orientation.dart';
+import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
@@ -21,6 +22,7 @@ class LableValue<T> {
 
   LableValue(this.label, this.value);
 }
+
 mixin _VideoPlayerOptions {
   final List<LableValue<double>> speedList = [
     LableValue<double>('0.5', 0.5),
@@ -63,8 +65,10 @@ mixin _VideoPlayerOrientationPlugin {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight
   ];
+
   void _initOrientationPlugin() {
-    _deviceOrientationSubscription = OrientationPlugin.onOrientationChange.listen((evnet) {
+    _deviceOrientationSubscription =
+        OrientationPlugin.onOrientationChange.listen((evnet) {
       if (_fullScreenOrientations.contains(evnet)) {
         _deviceOrientation = evnet;
         if (isFullscreen.value) {
@@ -73,9 +77,11 @@ mixin _VideoPlayerOrientationPlugin {
       }
     });
   }
+
   void _deinitOrientationPlugin() {
     _deviceOrientationSubscription?.cancel();
   }
+
   void _rotateFullscreen() {}
 }
 mixin _VideoPlayerVolumeBrightnessPlugin {
@@ -83,25 +89,36 @@ mixin _VideoPlayerVolumeBrightnessPlugin {
   final ScreenBrightness _screenBrightness = ScreenBrightness();
   final RxDouble volume = (0.0).obs;
   final RxDouble brightness = (0.0).obs;
+  final Duration _throttleDuration = const Duration(milliseconds: 100);
 
-  late final Throttle<double> _volumeThrottle;
-  late final Throttle<double> _brightnessThrottle;
+  Throttle<double>? _volumeThrottle;
+  Throttle<double>? _brightnessThrottle;
   StreamSubscription<double>? _screenBrightnessSubscription;
 
   void _initVolumeBrightnessPlugin() {
     _volumeController.listener((value) {
       volume.value = value;
     });
-    _screenBrightnessSubscription = _screenBrightness.onCurrentBrightnessChanged.listen((value) {
+    _screenBrightnessSubscription =
+        _screenBrightness.onCurrentBrightnessChanged.listen((value) {
       brightness.value = value;
     });
     _volumeController.getVolume().then((value) {
       volume.value = value;
+      _volumeThrottle = Throttle<double>(_throttleDuration, initialValue: value,
+          onChanged: (value) {
+        _volumeController.setVolume(value, showSystemUI: false);
+      });
     });
     _screenBrightness.current.then((value) {
       brightness.value = value;
+      _brightnessThrottle = Throttle<double>(_throttleDuration,
+          initialValue: value, onChanged: (value) {
+        _screenBrightness.setScreenBrightness(value);
+      });
     });
   }
+
   void _deinitVolumeBrightnessPlugin() {
     _screenBrightnessSubscription?.cancel();
     _volumeController.removeListener();
@@ -126,8 +143,10 @@ mixin _VideoPlayerBatteryConnectivityPlugin {
     this.batteryLevel.value = batteryLevel;
     this.batteryState.value = batteryState;
   }
+
   void _initBatteryConnectivityPlugin() {
-    _connectivityResultSubscription = _connectivity.onConnectivityChanged.listen((event) {
+    _connectivityResultSubscription =
+        _connectivity.onConnectivityChanged.listen((event) {
       connectivityResult.value = event;
     });
     _batteryStateSubscription = _battery.onBatteryStateChanged.listen((event) {
@@ -135,9 +154,11 @@ mixin _VideoPlayerBatteryConnectivityPlugin {
     });
     _currentTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final DateTime now = DateTime.now();
-      currentTime.value = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+      currentTime.value =
+          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     });
   }
+
   void _deinitBatteryConnectivityPlugin() {
     _connectivityResultSubscription?.cancel();
     _batteryStateSubscription?.cancel();
@@ -149,13 +170,22 @@ mixin _VideoPlayerBatteryConnectivityPlugin {
 }
 mixin _VideoPlayerGestureDetector {
   APlayerControllerInterface get playerController;
+
   APlayerValue get playerValue;
+  double get _currentVolume;
+  double get _currentBrightness;
+  double get _fullPlayerWidth;
+  double get _fullPlayerHeight;
   final RxBool isShowBar = false.obs;
   final RxBool isQuickPlaying = false.obs;
   final RxBool isShowSettings = false.obs;
+  final RxBool isShowVolumeControl = false.obs;
+  final RxBool isShowBrightnessControl = false.obs;
   final RxBool isLocked = false.obs;
   final RxBool isTempSeekEnable = false.obs;
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
+  double _startDx = 0.0;
+  double _startDy = 0.0;
 
   void onTap() {
     if (isShowSettings.value) {
@@ -164,6 +194,7 @@ mixin _VideoPlayerGestureDetector {
     }
     isShowBar.value = !isShowBar.value;
   }
+
   void onDoubleTap() {
     if (playerValue.isPaused) {
       playerController.play();
@@ -171,18 +202,58 @@ mixin _VideoPlayerGestureDetector {
       playerController.pause();
     }
   }
+
   void onLongPressStart() {
     playerController.setSpeed(5.0);
     playerController.play();
     isQuickPlaying.value = true;
   }
+
   void onLongPressEnd() {
     playerController.setSpeed(1.0);
     isQuickPlaying.value = false;
   }
+
   void onHorizontalDragStart(DragStartDetails details) {}
+
   void onHorizontalDragUpdate(DragUpdateDetails details) {}
+
   void onHorizontalDragEnd(DragEndDetails details) {}
+
+  void onVerticalDragStart(DragStartDetails details) {
+    _startDx = details.localPosition.dx;
+    _startDy = details.localPosition.dy;
+    final isLeft = _startDx < _fullPlayerWidth / 2;
+    if (isLeft) {
+      isShowBrightnessControl.value = true;
+    } else {
+      isShowVolumeControl.value = true;
+    }
+  }
+
+  void onVerticalDragUpdate(DragUpdateDetails details) {
+    final moveDistY = details.localPosition.dy - _startDy;
+    final isLeft = _startDx < _fullPlayerWidth / 2;
+    double seekValue = (isLeft ? _currentBrightness : _currentVolume) + moveDistY / -(_fullPlayerHeight / 10);
+    if (seekValue > 1.0) {
+      seekValue = 1.0;
+    }
+    if (seekValue < 0.0) {
+      seekValue = 0.0;
+    }
+    if (isLeft) {
+      setBrightness(seekValue);
+    } else {
+      setVolume(seekValue);
+    }
+    _startDy = details.localPosition.dy;
+  }
+
+  void onVerticalDragEnd(DragEndDetails details) {
+    isShowVolumeControl.value = false;
+    isShowBrightnessControl.value = false;
+  }
+
   void toggleSettings() {
     isShowBar.value = false;
     isShowSettings.value = !isShowSettings.value;
@@ -191,10 +262,18 @@ mixin _VideoPlayerGestureDetector {
   void toggleLock() {
     isLocked.value = !isLocked.value;
   }
-
+  void setVolume(double value);
+  void setBrightness(double value);
 }
 
-class VideoPlayerController with _VideoPlayerOptions, _VideoPlayerOrientationPlugin, _VideoPlayerVolumeBrightnessPlugin, _VideoPlayerBatteryConnectivityPlugin, _VideoPlayerGestureDetector, WidgetsBindingObserver {
+class VideoPlayerController
+    with
+        _VideoPlayerOptions,
+        _VideoPlayerOrientationPlugin,
+        _VideoPlayerVolumeBrightnessPlugin,
+        _VideoPlayerBatteryConnectivityPlugin,
+        _VideoPlayerGestureDetector,
+        WidgetsBindingObserver {
   @override
   late final APlayerControllerInterface playerController;
   final Rx<APlayerValue> value = Rx<APlayerValue>(APlayerValue.uninitialized());
@@ -218,6 +297,7 @@ class VideoPlayerController with _VideoPlayerOptions, _VideoPlayerOrientationPlu
     _initBatteryConnectivityPlugin();
     return playerController.initialize();
   }
+
   @override
   Future<void> _rotateFullscreen() async {
     if (Platform.isAndroid) {
@@ -226,6 +306,7 @@ class VideoPlayerController with _VideoPlayerOptions, _VideoPlayerOrientationPlu
       SystemChrome.setPreferredOrientations([_deviceOrientation]);
     }
   }
+
   void setPlaylist(List<String> playlist) {
     this.playlist.assignAll(playlist);
   }
@@ -300,32 +381,54 @@ class VideoPlayerController with _VideoPlayerOptions, _VideoPlayerOrientationPlu
     _deinitVolumeBrightnessPlugin();
     _deinitBatteryConnectivityPlugin();
     playerController.dispose();
-
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch(state) {
-      case AppLifecycleState.paused: {
-        _appPaused = true;
-        _willPlayResumed = playerValue.isStarted;
-        playerController.pause();
-        break;
-      }
-      case AppLifecycleState.resumed: {
-        _appPaused = false;
-        if (_willPlayResumed) {
-          playerController.play();
+    switch (state) {
+      case AppLifecycleState.paused:
+        {
+          _appPaused = true;
+          _willPlayResumed = playerValue.isStarted;
+          playerController.pause();
+          break;
         }
-        break;
-      }
+      case AppLifecycleState.resumed:
+        {
+          _appPaused = false;
+          if (_willPlayResumed) {
+            playerController.play();
+          }
+          break;
+        }
       default:
         break;
     }
   }
+
   void _listener() {
     if (_appPaused && !playerValue.isPaused) {
       playerController.pause();
     }
     value.value = playerController.value;
   }
+
+  @override
+  void setBrightness(double value) {
+    _brightnessThrottle?.setValue(value);
+  }
+
+  @override
+  void setVolume(double value) {
+    _volumeThrottle?.setValue(value);
+  }
+
+  @override
+  double get _currentVolume => volume.value;
+  @override
+  double get _currentBrightness => brightness.value;
+  @override
+  double get _fullPlayerWidth => Get.width;
+  @override
+  double get _fullPlayerHeight => isFullscreen.value ? Get.height : 240.rpx;
 }

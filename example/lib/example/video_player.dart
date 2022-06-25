@@ -28,6 +28,8 @@ class VideoPlayer extends StatelessWidget {
 
   double get secondaryFontSize =>
       controller.isFullscreen.value ? 12.rpx : 10.rpx;
+  double get volumeBrightnessDisplayWidth =>
+      controller.isFullscreen.value ? 120.rpx : 80.rpx;
 
   BoxShadow get overlayShadow => BoxShadow(
         color: Colors.black.withOpacity(0.15),
@@ -354,10 +356,10 @@ class VideoPlayer extends StatelessWidget {
           bottom: 0,
           width: width,
           child: Container(
-            color: Colors.black.withOpacity(0.7),
+            color: Colors.black.withOpacity(0.8),
             child: ListView(
               padding:
-                  EdgeInsets.symmetric(vertical: 10.rpx, horizontal: 15.rpx),
+                  EdgeInsets.all(10.rpx),
               children: [
                 _buildTitle('播放速度'),
                 _buildRadius(
@@ -421,9 +423,12 @@ class VideoPlayer extends StatelessWidget {
   }
 
   Widget _buildTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(color: Colors.grey),
+    return Padding(
+      padding: EdgeInsets.only(top: 20.rpx, bottom: 10.rpx),
+      child: Text(
+        title,
+        style: const TextStyle(color: Colors.grey),
+      ),
     );
   }
 
@@ -489,10 +494,74 @@ class VideoPlayer extends StatelessWidget {
             controller.onHorizontalDragUpdate(details),
         onHorizontalDragEnd: (details) =>
             controller.onHorizontalDragEnd(details),
+        onVerticalDragStart: (details) =>
+            controller.onVerticalDragStart(details),
+        onVerticalDragUpdate: (details) =>
+            controller.onVerticalDragUpdate(details),
+        onVerticalDragEnd: (details) =>
+            controller.onVerticalDragEnd(details),
       ),
     );
   }
+  Widget _buildVolumeBrightnessDisplay({
+  required IconData icon,
+  required bool isShow,
+  required double value,
+}) {
+    return  Positioned(
+      top: barHeight,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: AnimatedOpacity(
+          duration: _animationDuration,
+          opacity: isShow ? 1 : 0,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [overlayShadow],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 18.rpx, color: Colors.white,),
+                    SizedBox(width: 5.rpx),
+                    Text('${(value * 100).toStringAsFixed(0)}%',)
+                  ],
+                ),
+                SizedBox(height: 7.rpx),
+                SizedBox(
+                  height: 2.rpx,
+                  width: volumeBrightnessDisplayWidth,
+                  child: Stack(
+                    children: [
+                      Container(
+                        color: Colors.white.withOpacity(0.3),
+                        height: double.infinity,
+                        width: double.infinity,
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: value,
+                        child: Builder(
+                            builder: (context) {
+                              return Container(
+                                color: Theme.of(context).primaryColor,
+                              );
+                            }
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
 
+  }
   Positioned _buildIndicator() {
     return Positioned.fill(
       child: Stack(
@@ -526,6 +595,16 @@ class VideoPlayer extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+          _buildVolumeBrightnessDisplay(
+            icon: Icons.brightness_high,
+            isShow: controller.isShowBrightnessControl.value,
+            value: controller.brightness.value,
+          ),
+          _buildVolumeBrightnessDisplay(
+            icon: Icons.volume_up_sharp,
+            isShow: controller.isShowVolumeControl.value,
+            value: controller.volume.value,
           ),
           Positioned.fill(
             child: Center(
