@@ -15,7 +15,11 @@ import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
-
+enum VideoPlayerPlayMode {
+  loop,
+  listLoop,
+  pauseAfterCompleted,
+}
 class LableValue<T> {
   final String label;
   final T value;
@@ -37,16 +41,22 @@ mixin _VideoPlayerOptions {
     LableValue<double>('5.0', 5.0),
   ];
   final List<LableValue<APlayerFit>> fitList = [
-    LableValue<APlayerFit>('默认', APlayerFit.fitDefault),
+    LableValue<APlayerFit>('适应', APlayerFit.fitDefault),
     LableValue<APlayerFit>('拉伸', APlayerFit.fitStretch),
-    LableValue<APlayerFit>('充满', APlayerFit.fitFill),
+    LableValue<APlayerFit>('填充', APlayerFit.fitFill),
     LableValue<APlayerFit>('16:9', APlayerFit.fit16x9),
     LableValue<APlayerFit>('4:3', APlayerFit.fit4x3),
     LableValue<APlayerFit>('1:1', APlayerFit.fit1x1),
   ];
 
+  final List<LableValue<VideoPlayerPlayMode>> playModeList = [
+    LableValue<VideoPlayerPlayMode>('列表循环', VideoPlayerPlayMode.listLoop),
+    LableValue<VideoPlayerPlayMode>('单集循环', VideoPlayerPlayMode.loop),
+    LableValue<VideoPlayerPlayMode>('播完暂停', VideoPlayerPlayMode.pauseAfterCompleted),
+  ];
+
   final List<LableValue<int>> mirrorModeList = [
-    LableValue<int>('正常', 0),
+    LableValue<int>('默认', 0),
     LableValue<int>('水平镜像', 1),
     LableValue<int>('垂直镜像', 2),
   ];
@@ -174,8 +184,6 @@ mixin _VideoPlayerGestureDetector {
   APlayerValue get playerValue;
   double get _currentVolume;
   double get _currentBrightness;
-  double get _fullPlayerWidth;
-  double get _fullPlayerHeight;
   final RxBool isShowBar = false.obs;
   final RxBool isQuickPlaying = false.obs;
   final RxBool isShowSettings = false.obs;
@@ -186,6 +194,7 @@ mixin _VideoPlayerGestureDetector {
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
   double _startDx = 0.0;
   double _startDy = 0.0;
+  Duration _startDxValue = Duration.zero;
   double _startDyValue = 0.0;
 
   void onTap() {
@@ -215,16 +224,35 @@ mixin _VideoPlayerGestureDetector {
     isQuickPlaying.value = false;
   }
 
-  void onHorizontalDragStart(DragStartDetails details) {}
+  void onHorizontalDragStart(DragStartDetails details) {
+    _startDx = details.localPosition.dx;
+    _startDxValue = playerValue.position;
+    isTempSeekEnable.value = true;
+  }
 
-  void onHorizontalDragUpdate(DragUpdateDetails details) {}
+  void onHorizontalDragUpdate(DragUpdateDetails details) {
+    final moveDistX = details.localPosition.dx - _startDx;
+    final dist = 5.rpx;
+    double seekValue = _startDyValue + moveDistX ~/ dist;
+    tempSeekPosition.value = _startDxValue + Duration(milliseconds: (seekValue * 1000).toInt());
+    if (tempSeekPosition.value < Duration.zero) {
+      tempSeekPosition.value = Duration.zero;
+    }
+    if (tempSeekPosition.value > playerValue.duration) {
+      tempSeekPosition.value = playerValue.duration;
+    }
+  }
 
-  void onHorizontalDragEnd(DragEndDetails details) {}
+  void onHorizontalDragEnd(DragEndDetails details) {
+    isTempSeekEnable.value = false;
+    playerController.seekTo(tempSeekPosition.value.inMilliseconds);
+    playerController.play();
+  }
 
   void onVerticalDragStart(DragStartDetails details) {
     _startDx = details.localPosition.dx;
     _startDy = details.localPosition.dy;
-    final isLeft = _startDx < _fullPlayerWidth / 2;
+    final isLeft = _startDx < Get.width / 2;
     if (isLeft) {
       _startDyValue = _currentBrightness;
       isShowBrightnessControl.value = true;
@@ -236,9 +264,10 @@ mixin _VideoPlayerGestureDetector {
 
   void onVerticalDragUpdate(DragUpdateDetails details) {
     final moveDistY = details.localPosition.dy - _startDy;
-    final isLeft = _startDx < _fullPlayerWidth / 2;
+    final isLeft = _startDx < Get.width / 2;
     const steps = 100;
-    double seekValue = _startDyValue + -moveDistY ~/ (_fullPlayerHeight / steps) / steps;
+    final dist = 4.rpx;
+    double seekValue = _startDyValue + -moveDistY ~/ dist / steps;
     if (seekValue > 1.0) {
       seekValue = 1.0;
     }
@@ -281,7 +310,7 @@ class VideoPlayerController
   late final APlayerControllerInterface playerController;
   final Rx<APlayerValue> value = Rx<APlayerValue>(APlayerValue.uninitialized());
   final RxList<String> playlist = RxList<String>([]);
-
+  VideoPlayerPlayMode playMode = VideoPlayerPlayMode.listLoop;
   bool _appPaused = false;
   bool _willPlayResumed = false;
 
@@ -318,7 +347,9 @@ class VideoPlayerController
     playerController.setDataSouce(playlist[index]);
     playerController.prepare();
   }
-
+  void setPlayMode(VideoPlayerPlayMode mode) {
+    playMode = mode;
+  }
   void toggleFullscreen(Widget widget) {
     if (isFullscreen.value) {
       _exitFullscreen();
@@ -430,8 +461,4 @@ class VideoPlayerController
   double get _currentVolume => volume.value;
   @override
   double get _currentBrightness => brightness.value;
-  @override
-  double get _fullPlayerWidth => Get.width;
-  @override
-  double get _fullPlayerHeight => isFullscreen.value ? Get.height : 240.rpx;
 }

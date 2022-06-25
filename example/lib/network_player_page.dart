@@ -18,6 +18,8 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
       ..initialize().then((value) {
         controller
           ..setPlaylist([
+            'https://video.pddugc.com/backbone-video/2022-06-21/9d29d0f5668c0f5c1256748b3386313d.mp4',
+            'https://g.gszyvv.com:65/20220506/aU8xJQ47/index.m3u8',
             'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
             'https://g.gszyvv.com:65/20220619/ytW2Mt0c/index.m3u8',
             'https://v.gszyvv.com:65/20220619/k9xJdBO1/index.m3u8',
@@ -25,7 +27,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             'https://new.iskcd.com/20220422/e9LNmEMj/index.m3u8',
             'https://m3u8.taopianplay.com/taopian/ecd7f271-487e-48d6-9873-9edc06e79ce8/1e995a1c-d91d-4e6a-8716-2f76f90f9394/47916/40be6fca-f3f7-4078-9c9e-aba8d0a3512b/SD/playlist.m3u8',
           ])
-          ..playByIndex(3);
+          ..playByIndex(1);
       });
     super.initState();
   }

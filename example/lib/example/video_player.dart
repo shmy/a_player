@@ -231,7 +231,7 @@ class VideoPlayer extends StatelessWidget {
                   width: gap,
                 ),
                 Text(
-                  VideoPlayerUtil.formatDuration(
+                  VideoPlayerUtil.formatDuration(controller.isTempSeekEnable.value? controller.tempSeekPosition.value:
                       controller.playerValue.position),
                   style: TextStyle(fontSize: primaryFontSize),
                 ),
@@ -373,13 +373,19 @@ class VideoPlayer extends StatelessWidget {
                   value: controller.playerController.fit,
                   onTap: controller.playerController.setFit,
                 ),
+                _buildTitle('播放方式'),
+                _buildRadius(
+                  options: controller.playModeList,
+                  value: controller.playMode,
+                  onTap: controller.setPlayMode,
+                ),
                 _buildTitle('镜像翻转'),
                 _buildRadius(
                   options: controller.mirrorModeList,
                   value: controller.playerValue.mirrorMode,
                   onTap: controller.playerController.setMirrorMode,
                 ),
-                _buildTitle('解码方式'),
+                _buildTitle('解码方式', subtitle: '如遇播放异常，可尝试切换'),
                 _buildRadius(
                   options: controller.decoderList,
                   value: controller.playerValue.enableHardwareDecoder,
@@ -422,12 +428,26 @@ class VideoPlayer extends StatelessWidget {
     );
   }
 
-  Widget _buildTitle(String title) {
+  Widget _buildTitle(String title, {
+    String? subtitle
+}) {
     return Padding(
       padding: EdgeInsets.only(top: 20.rpx, bottom: 10.rpx),
-      child: Text(
-        title,
-        style: const TextStyle(color: Colors.grey),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(color: Colors.grey),
+          ),
+          if (subtitle != null)
+          SizedBox(width: 5.rpx,),
+          if (subtitle != null)
+          Text(
+            '($subtitle)',
+            style: TextStyle(color: Colors.grey, fontSize: secondaryFontSize),
+          ),
+        ],
       ),
     );
   }
@@ -562,6 +582,7 @@ class VideoPlayer extends StatelessWidget {
     );
 
   }
+
   Positioned _buildIndicator() {
     return Positioned.fill(
       child: Stack(
@@ -590,6 +611,28 @@ class VideoPlayer extends StatelessWidget {
                           style: TextStyle(fontSize: secondaryFontSize),
                         ),
                       ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: barHeight,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Obx(
+                    () => AnimatedOpacity(
+                  duration: _animationDuration,
+                  opacity: controller.isTempSeekEnable.value ? 1 : 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [overlayShadow],
+                    ),
+                    child: Text(
+                      '${VideoPlayerUtil.formatDuration(controller.tempSeekPosition.value)}/${VideoPlayerUtil.formatDuration(controller.playerValue.duration)}',
+                      style: TextStyle(fontSize: primaryFontSize),
                     ),
                   ),
                 ),
