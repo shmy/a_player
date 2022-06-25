@@ -186,6 +186,7 @@ mixin _VideoPlayerGestureDetector {
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
   double _startDx = 0.0;
   double _startDy = 0.0;
+  double _startDyValue = 0.0;
 
   void onTap() {
     if (isShowSettings.value) {
@@ -225,8 +226,10 @@ mixin _VideoPlayerGestureDetector {
     _startDy = details.localPosition.dy;
     final isLeft = _startDx < _fullPlayerWidth / 2;
     if (isLeft) {
+      _startDyValue = _currentBrightness;
       isShowBrightnessControl.value = true;
     } else {
+      _startDyValue = _currentVolume;
       isShowVolumeControl.value = true;
     }
   }
@@ -234,7 +237,8 @@ mixin _VideoPlayerGestureDetector {
   void onVerticalDragUpdate(DragUpdateDetails details) {
     final moveDistY = details.localPosition.dy - _startDy;
     final isLeft = _startDx < _fullPlayerWidth / 2;
-    double seekValue = (isLeft ? _currentBrightness : _currentVolume) + moveDistY / -(_fullPlayerHeight / 10);
+    const steps = 100;
+    double seekValue = _startDyValue + -moveDistY ~/ (_fullPlayerHeight / steps) / steps;
     if (seekValue > 1.0) {
       seekValue = 1.0;
     }
@@ -246,7 +250,6 @@ mixin _VideoPlayerGestureDetector {
     } else {
       setVolume(seekValue);
     }
-    _startDy = details.localPosition.dy;
   }
 
   void onVerticalDragEnd(DragEndDetails details) {
