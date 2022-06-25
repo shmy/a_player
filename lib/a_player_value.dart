@@ -1,16 +1,51 @@
+import 'package:flutter/material.dart';
+
 class APlayerRatio {
   APlayerRatio._();
   static const double ratio16x9 = 16 / 9;
   static const double ratio4x3 = 4 / 3;
   static const double ratio1x1 = 1.0;
 }
-enum APlayerFit {
-  fitDefault,
-  fit16x9,
-  fit4x3,
-  fit1x1,
-  fitStretch,
-  fitFill
+// enum APlayerFit {
+//   fitDefault,
+//   fit16x9,
+//   fit4x3,
+//   fit1x1,
+//   fitStretch,
+//   fitFill
+// }
+class APlayerFit {
+  const APlayerFit(
+      {this.alignment = Alignment.center,
+        this.aspectRatio = -1,
+        this.sizeFactor = 1.0});
+  final Alignment alignment;
+  final double aspectRatio;
+  final double sizeFactor;
+
+  static const APlayerFit fill = APlayerFit(
+    sizeFactor: 1.0,
+    aspectRatio: double.infinity,
+    alignment: Alignment.center,
+  );
+
+  static const APlayerFit contain = APlayerFit(
+    sizeFactor: 1.0,
+    aspectRatio: -1,
+    alignment: Alignment.center,
+  );
+
+  static const APlayerFit cover = APlayerFit(
+    sizeFactor: -0.5,
+    aspectRatio: -1,
+    alignment: Alignment.center,
+  );
+
+  static const APlayerFit fitWidth = APlayerFit(sizeFactor: -1.5);
+  static const APlayerFit fitHeight = APlayerFit(sizeFactor: -2.5);
+  static const APlayerFit ar16_9 = APlayerFit(aspectRatio: 16.0 / 9.0);
+  static const APlayerFit ar4_3 = APlayerFit(aspectRatio: 4.0 / 3.0);
+  static const APlayerFit ar1_1 = APlayerFit(aspectRatio: 1.0 / 1.0);
 }
 
 class _APlayerState {

@@ -41,12 +41,12 @@ mixin _VideoPlayerOptions {
     LableValue<double>('5.0', 5.0),
   ];
   final List<LableValue<APlayerFit>> fitList = [
-    LableValue<APlayerFit>('适应', APlayerFit.fitDefault),
-    LableValue<APlayerFit>('拉伸', APlayerFit.fitStretch),
-    LableValue<APlayerFit>('填充', APlayerFit.fitFill),
-    LableValue<APlayerFit>('16:9', APlayerFit.fit16x9),
-    LableValue<APlayerFit>('4:3', APlayerFit.fit4x3),
-    LableValue<APlayerFit>('1:1', APlayerFit.fit1x1),
+    LableValue<APlayerFit>('适应', APlayerFit.contain),
+    LableValue<APlayerFit>('拉伸', APlayerFit.fill),
+    LableValue<APlayerFit>('填充', APlayerFit.cover),
+    LableValue<APlayerFit>('16:9', APlayerFit.ar16_9),
+    LableValue<APlayerFit>('4:3', APlayerFit.ar4_3),
+    LableValue<APlayerFit>('1:1', APlayerFit.ar1_1),
   ];
 
   final List<LableValue<VideoPlayerPlayMode>> playModeList = [
@@ -68,7 +68,7 @@ mixin _VideoPlayerOptions {
 }
 mixin _VideoPlayerOrientationPlugin {
   final RxBool isFullscreen = false.obs;
-  DeviceOrientation _deviceOrientation = DeviceOrientation.landscapeLeft;
+  DeviceOrientation _deviceOrientation = DeviceOrientation.landscapeRight;
   StreamSubscription<DeviceOrientation>? _deviceOrientationSubscription;
 
   final List<DeviceOrientation> _fullScreenOrientations = [

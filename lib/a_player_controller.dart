@@ -9,7 +9,7 @@ abstract class APlayerControllerInterface extends ValueNotifier<APlayerValue> {
   EventChannel? eventChannel;
   MethodChannel? methodChannel;
   int textureId = -1;
-  APlayerFit _fit = APlayerFit.fitDefault;
+  APlayerFit _fit = APlayerFit.contain;
 
   APlayerControllerInterface() : super(APlayerValue.uninitialized());
 
