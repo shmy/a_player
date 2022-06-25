@@ -121,6 +121,12 @@ class APlayer(
                     )
                     sendEvent()
                 }
+                InfoCode.CurrentDownloadSpeed -> {
+                    videoEvent = videoEvent.copy(
+                        bufferingSpeed = it.extraValue,
+                    )
+                    sendEvent()
+                }
                 InfoCode.BufferedPosition -> {
                     videoEvent = videoEvent.copy(
                         buffered = it.extraValue,
@@ -148,7 +154,6 @@ class APlayer(
             override fun onLoadingProgress(p0: Int, p1: Float) {
                 videoEvent = videoEvent.copy(
                     bufferingPercentage = p0,
-                    bufferingSpeed = p1
                 )
                 sendEvent()
 

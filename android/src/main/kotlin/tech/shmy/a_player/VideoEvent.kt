@@ -13,6 +13,6 @@ data class VideoEvent(
     public val enableHardwareDecoder: Boolean = true,
     public val isBuffering: Boolean = false,
     public val bufferingPercentage: Int = 0,
-    public val bufferingSpeed: Float = 0f,
+    public val bufferingSpeed: Long = 0,
     public val buffered: Long = 0,
 )

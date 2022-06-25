@@ -6,14 +6,6 @@ class APlayerRatio {
   static const double ratio4x3 = 4 / 3;
   static const double ratio1x1 = 1.0;
 }
-// enum APlayerFit {
-//   fitDefault,
-//   fit16x9,
-//   fit4x3,
-//   fit1x1,
-//   fitStretch,
-//   fitFill
-// }
 class APlayerFit {
   const APlayerFit(
       {this.alignment = Alignment.center,
@@ -73,7 +65,7 @@ class APlayerValue {
   final bool enableHardwareDecoder;
   final bool isBuffering;
   final int bufferingPercentage;
-  final double bufferingSpeed;
+  final int bufferingSpeed;
   final Duration buffered;
 
   bool get isUnknow => state == _APlayerState.unknow;

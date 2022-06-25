@@ -28,6 +28,7 @@ class VideoPlayer extends StatelessWidget {
 
   double get secondaryFontSize =>
       controller.isFullscreen.value ? 12.rpx : 10.rpx;
+
   double get volumeBrightnessDisplayWidth =>
       controller.isFullscreen.value ? 120.rpx : 80.rpx;
 
@@ -65,6 +66,7 @@ class VideoPlayer extends StatelessWidget {
                 _buildTop(),
                 _buildBottom(),
                 _buildSettings(),
+                _buildSelections(),
                 if (controller.isLocked.value && controller.isFullscreen.value)
                   _buildLockedView(),
                 if (controller.isFullscreen.value) _buildRight(),
@@ -125,11 +127,13 @@ class VideoPlayer extends StatelessWidget {
                   SizedBox(
                     width: gap,
                   ),
-                  const Expanded(
-                    child: Text(
-                      '惊奇队长[腾讯]',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Expanded(
+                    child: Obx(
+                      () => Text(
+                        controller.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                   SizedBox(
@@ -231,8 +235,10 @@ class VideoPlayer extends StatelessWidget {
                   width: gap,
                 ),
                 Text(
-                  VideoPlayerUtil.formatDuration(controller.isTempSeekEnable.value? controller.tempSeekPosition.value:
-                      controller.playerValue.position),
+                  VideoPlayerUtil.formatDuration(
+                      controller.isTempSeekEnable.value
+                          ? controller.tempSeekPosition.value
+                          : controller.playerValue.position),
                   style: TextStyle(fontSize: primaryFontSize),
                 ),
                 SizedBox(
@@ -291,7 +297,7 @@ class VideoPlayer extends StatelessWidget {
                 ),
                 if (controller.isFullscreen.value)
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => controller.toggleSelections(),
                     child: const Text('选集'),
                   ),
                 SizedBox(
@@ -348,7 +354,7 @@ class VideoPlayer extends StatelessWidget {
     return Obx(
       () {
         final double width =
-            Get.width / (controller.isFullscreen.value ? 2 : 1.35);
+            Get.width / (controller.isFullscreen.value ? 2.5 : 1.35);
         return AnimatedPositioned(
           duration: _animationDuration,
           top: 0,
@@ -358,8 +364,7 @@ class VideoPlayer extends StatelessWidget {
           child: Container(
             color: Colors.black.withOpacity(0.8),
             child: ListView(
-              padding:
-                  EdgeInsets.all(10.rpx),
+              padding: EdgeInsets.only(bottom: 10.rpx, left: 10.rpx, right: 10.rpx),
               children: [
                 _buildTitle('播放速度'),
                 _buildRadius(
@@ -399,6 +404,59 @@ class VideoPlayer extends StatelessWidget {
     );
   }
 
+  Widget _buildSelections() {
+    final double width = Get.width / 2.5;
+    return AnimatedPositioned(
+      duration: _animationDuration,
+      top: 0,
+      right: controller.isShowSelections.value ? 0 : -width,
+      bottom: 0,
+      width: width,
+      child: Container(
+        color: Colors.black.withOpacity(0.8),
+        padding: EdgeInsets.symmetric(vertical: 10.rpx),
+        child: Obx(
+              () => ListView.builder(
+            padding: EdgeInsets.all(10.rpx),
+            itemBuilder: (BuildContext context, int index) {
+              return Obx(() {
+                final item = controller.playlist[index];
+                final isSelected =
+                    controller.currentPlayIndex.value == index;
+                return Builder(builder: (context) {
+                  final color = isSelected
+                      ? Theme.of(context).primaryColor
+                      : Colors.white;
+                  return GestureDetector(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.rpx,
+                        vertical: 6.rpx,
+                      ),
+                      margin: EdgeInsets.symmetric(
+                        vertical: 6.rpx,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: color),
+                        borderRadius: BorderRadius.circular(4.rpx),
+                      ),
+                      child: Text(
+                        item.title,
+                        style: TextStyle(color: color),
+                      ),
+                    ),
+                    onTap: () => controller.playByIndex(index),
+                  );
+                });
+              });
+            },
+            itemCount: controller.playlist.length,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLockedView() {
     return Positioned.fill(
       child: GestureDetector(
@@ -428,11 +486,9 @@ class VideoPlayer extends StatelessWidget {
     );
   }
 
-  Widget _buildTitle(String title, {
-    String? subtitle
-}) {
+  Widget _buildTitle(String title, {String? subtitle}) {
     return Padding(
-      padding: EdgeInsets.only(top: 20.rpx, bottom: 10.rpx),
+      padding: EdgeInsets.only(top: 10.rpx, bottom: 6.rpx),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -441,12 +497,14 @@ class VideoPlayer extends StatelessWidget {
             style: const TextStyle(color: Colors.grey),
           ),
           if (subtitle != null)
-          SizedBox(width: 5.rpx,),
+            SizedBox(
+              width: 5.rpx,
+            ),
           if (subtitle != null)
-          Text(
-            '($subtitle)',
-            style: TextStyle(color: Colors.grey, fontSize: secondaryFontSize),
-          ),
+            Text(
+              '($subtitle)',
+              style: TextStyle(color: Colors.grey, fontSize: secondaryFontSize),
+            ),
         ],
       ),
     );
@@ -518,17 +576,17 @@ class VideoPlayer extends StatelessWidget {
             controller.onVerticalDragStart(details),
         onVerticalDragUpdate: (details) =>
             controller.onVerticalDragUpdate(details),
-        onVerticalDragEnd: (details) =>
-            controller.onVerticalDragEnd(details),
+        onVerticalDragEnd: (details) => controller.onVerticalDragEnd(details),
       ),
     );
   }
+
   Widget _buildVolumeBrightnessDisplay({
-  required IconData icon,
-  required bool isShow,
-  required double value,
-}) {
-    return  Positioned(
+    required IconData icon,
+    required bool isShow,
+    required double value,
+  }) {
+    return Positioned(
       top: barHeight,
       left: 0,
       right: 0,
@@ -545,9 +603,15 @@ class VideoPlayer extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, size: 18.rpx, color: Colors.white,),
+                    Icon(
+                      icon,
+                      size: 18.rpx,
+                      color: Colors.white,
+                    ),
                     SizedBox(width: 5.rpx),
-                    Text('${(value * 100).toStringAsFixed(0)}%',)
+                    Text(
+                      '${(value * 100).toStringAsFixed(0)}%',
+                    )
                   ],
                 ),
                 SizedBox(height: 7.rpx),
@@ -563,13 +627,11 @@ class VideoPlayer extends StatelessWidget {
                       ),
                       FractionallySizedBox(
                         widthFactor: value,
-                        child: Builder(
-                            builder: (context) {
-                              return Container(
-                                color: Theme.of(context).primaryColor,
-                              );
-                            }
-                        ),
+                        child: Builder(builder: (context) {
+                          return Container(
+                            color: Theme.of(context).primaryColor,
+                          );
+                        }),
                       ),
                     ],
                   ),
@@ -580,7 +642,6 @@ class VideoPlayer extends StatelessWidget {
         ),
       ),
     );
-
   }
 
   Positioned _buildIndicator() {
@@ -623,7 +684,7 @@ class VideoPlayer extends StatelessWidget {
             right: 0,
             child: Center(
               child: Obx(
-                    () => AnimatedOpacity(
+                () => AnimatedOpacity(
                   duration: _animationDuration,
                   opacity: controller.isTempSeekEnable.value ? 1 : 0,
                   child: Container(
@@ -652,9 +713,9 @@ class VideoPlayer extends StatelessWidget {
           Positioned.fill(
             child: Center(
               child: Obx(
-                () => AnimatedScale(
+                () => AnimatedOpacity(
                   duration: _animationDuration,
-                  scale: controller.playerValue.isBuffering ||
+                  opacity: controller.playerValue.isBuffering ||
                           controller.playerValue.isUnknow ||
                           controller.playerValue.isIdle ||
                           controller.playerValue.isInitialized
@@ -674,18 +735,18 @@ class VideoPlayer extends StatelessWidget {
     return DefaultTextStyle(
       style: TextStyle(fontSize: secondaryFontSize),
       child: Container(
-        height: 50.rpx,
-        width: 50.rpx,
+        height: 70.rpx,
+        width: 70.rpx,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50.rpx),
+          borderRadius: BorderRadius.circular(70.rpx),
           boxShadow: [overlayShadow],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              height: 28.rpx,
-              width: 28.rpx,
+              height: 30.rpx,
+              width: 30.rpx,
               child: Stack(
                 children: [
                   CircularProgressIndicator(
@@ -695,18 +756,15 @@ class VideoPlayer extends StatelessWidget {
                   Positioned(
                     child: Center(
                       child: Obx(
-                        () => Text(controller.playerValue.bufferingPercentage
-                            .toString()),
+                        () => Text('${controller.playerValue.bufferingPercentage}%'),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            if (controller.playerValue.bufferingSpeed != 0.0)
               SizedBox(height: gap),
-            if (controller.playerValue.bufferingSpeed != 0.0)
-              Obx(() => Text('${controller.playerValue.bufferingSpeed}kb/s')),
+              Obx(() => Text('${VideoPlayerUtil.formatBytes(controller.playerValue.bufferingSpeed)}/s', style: TextStyle(fontSize: secondaryFontSize),)),
           ],
         ),
       ),

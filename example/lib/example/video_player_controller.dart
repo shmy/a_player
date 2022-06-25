@@ -20,13 +20,20 @@ enum VideoPlayerPlayMode {
   listLoop,
   pauseAfterCompleted,
 }
+
 class LableValue<T> {
   final String label;
   final T value;
 
   LableValue(this.label, this.value);
 }
+class VideoPlayerItem<T> {
+  final String source;
+  final String title;
+  final T extra;
 
+  VideoPlayerItem(this.source, this.title, this.extra);
+}
 mixin _VideoPlayerOptions {
   final List<LableValue<double>> speedList = [
     LableValue<double>('0.5', 0.5),
@@ -191,6 +198,7 @@ mixin _VideoPlayerGestureDetector {
   final RxBool isShowBrightnessControl = false.obs;
   final RxBool isLocked = false.obs;
   final RxBool isTempSeekEnable = false.obs;
+  final RxBool isShowSelections = false.obs;
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
   double _startDx = 0.0;
   double _startDy = 0.0;
@@ -200,6 +208,10 @@ mixin _VideoPlayerGestureDetector {
   void onTap() {
     if (isShowSettings.value) {
       toggleSettings();
+      return;
+    }
+    if (isShowSelections.value) {
+      toggleSelections();
       return;
     }
     isShowBar.value = !isShowBar.value;
@@ -294,6 +306,11 @@ mixin _VideoPlayerGestureDetector {
   void toggleLock() {
     isLocked.value = !isLocked.value;
   }
+
+  void toggleSelections() {
+    isShowBar.value = false;
+    isShowSelections.value = !isShowSelections.value;
+  }
   void setVolume(double value);
   void setBrightness(double value);
 }
@@ -309,10 +326,18 @@ class VideoPlayerController
   @override
   late final APlayerControllerInterface playerController;
   final Rx<APlayerValue> value = Rx<APlayerValue>(APlayerValue.uninitialized());
-  final RxList<String> playlist = RxList<String>([]);
+  final RxList<VideoPlayerItem> playlist = RxList<VideoPlayerItem>([]);
+  final RxInt currentPlayIndex = (-1).obs;
   VideoPlayerPlayMode playMode = VideoPlayerPlayMode.listLoop;
   bool _appPaused = false;
   bool _willPlayResumed = false;
+  String get title {
+    final int index = currentPlayIndex.value;
+    if (index == -1) {
+      return '';
+    }
+    return playlist[index].title;
+  }
 
   @override
   APlayerValue get playerValue => value.value;
@@ -339,17 +364,19 @@ class VideoPlayerController
     }
   }
 
-  void setPlaylist(List<String> playlist) {
+  void setPlaylist(List<VideoPlayerItem> playlist) {
     this.playlist.assignAll(playlist);
   }
 
   void playByIndex(int index) {
-    playerController.setDataSouce(playlist[index]);
+    currentPlayIndex.value = index;
+    playerController.setDataSouce(playlist[index].source);
     playerController.prepare();
   }
   void setPlayMode(VideoPlayerPlayMode mode) {
     playMode = mode;
   }
+
   void toggleFullscreen(Widget widget) {
     if (isFullscreen.value) {
       _exitFullscreen();
@@ -414,6 +441,7 @@ class VideoPlayerController
     _deinitOrientationPlugin();
     _deinitVolumeBrightnessPlugin();
     _deinitBatteryConnectivityPlugin();
+    currentPlayIndex.value = -1;
     playerController.dispose();
   }
 

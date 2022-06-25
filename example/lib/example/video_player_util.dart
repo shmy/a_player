@@ -1,12 +1,4 @@
 class VideoPlayerUtil {
-  static String dateTimeFormat(DateTime dateTime) {
-    return "${dateFormat(dateTime)} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}";
-  }
-
-  static String dateFormat(DateTime dateTime) {
-    return "${dateTime.year.toString()}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
-  }
-
   static String formatDuration(Duration duration) {
     int seconds = duration.inMilliseconds ~/ 1000;
     final int hours = seconds ~/ 3600;
@@ -38,10 +30,27 @@ class VideoPlayerUtil {
     return formattedTime;
   }
 
-  static String intForDateTime(int time, {int length = 16}) {
-    return DateTime.fromMillisecondsSinceEpoch(time * 1000)
-        .toLocal()
-        .toString()
-        .substring(0, length);
+  static String formatBytes(int count) {
+    String unit = 'b';
+    double result = count.toDouble();
+    if (result >= 1024) {
+      result = result / 1024;
+      unit = 'KB';
+    }
+    if (result >= 1024) {
+      result = result / 1024;
+
+      unit = 'MB';
+    }
+    if (result >= 1024) {
+      result = result / 1024;
+
+      unit = 'GB';
+    }
+    if (result >= 1024) {
+      result = result / 1024;
+      unit = 'TB';
+    }
+    return '${result.toStringAsFixed(2)} $unit';
   }
 }
