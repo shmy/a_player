@@ -157,7 +157,11 @@ class VideoPlayer extends StatelessWidget {
             const Expanded(child: SizedBox()),
             if (controller.currentTime.value != null)
               Expanded(
-                  child: Center(child: Text(controller.currentTime.value!, style: TextStyle(fontSize: 10.rpx, fontWeight: FontWeight.bold),))),
+                  child: Center(
+                      child: Text(
+                controller.currentTime.value!,
+                style: TextStyle(fontSize: 10.rpx, fontWeight: FontWeight.bold),
+              ))),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -219,7 +223,7 @@ class VideoPlayer extends StatelessWidget {
                     icon = Icons.play_arrow;
                   }
                   return _buildClickableIcon(
-                      icon: icon, onTap: controller.togglePlay);
+                      icon: icon, onTap: () => controller.onDoubleTap());
                 }),
                 SizedBox(
                   width: gap,
@@ -390,7 +394,7 @@ class VideoPlayer extends StatelessWidget {
   Widget _buildLockedView() {
     return Positioned.fill(
       child: GestureDetector(
-        onTap: () => controller.toggleBar(),
+        onTap: () => controller.onTap(),
         child: Container(
           color: Colors.transparent,
           child: Align(
@@ -475,10 +479,16 @@ class VideoPlayer extends StatelessWidget {
     return Positioned.fill(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => controller.toggleBar(),
-        onDoubleTap: () => controller.togglePlay(),
-        onLongPressStart: (_) => controller.startQuickPlay(),
-        onLongPressEnd: (_) => controller.endQuickPlay(),
+        onTap: () => controller.onTap(),
+        onDoubleTap: () => controller.onDoubleTap(),
+        onLongPressStart: (_) => controller.onLongPressStart(),
+        onLongPressEnd: (_) => controller.onLongPressEnd(),
+        onHorizontalDragStart: (details) =>
+            controller.onHorizontalDragStart(details),
+        onHorizontalDragUpdate: (details) =>
+            controller.onHorizontalDragUpdate(details),
+        onHorizontalDragEnd: (details) =>
+            controller.onHorizontalDragEnd(details),
       ),
     );
   }
