@@ -26,6 +26,8 @@ class VideoPlayer extends StatelessWidget {
 
   double get gap => controller.isFullscreen.value ? 10.rpx : 6.rpx;
 
+  double get percentSize => controller.isFullscreen.value ? 10.rpx : 8.rpx;
+
   double get primaryFontSize => controller.isFullscreen.value ? 16.rpx : 14.rpx;
 
   double get secondaryFontSize =>
@@ -715,7 +717,8 @@ class VideoPlayer extends StatelessWidget {
             value: controller.volume.value,
           ),
           _buildCenterIndicator(
-            isShow: controller.playerValue.isBuffering ||
+            isShow: controller.isResolveing.value ||
+                controller.playerValue.isBuffering ||
                 controller.playerValue.isUnknow ||
                 controller.playerValue.isIdle ||
                 controller.playerValue.isInitialized,
@@ -760,9 +763,7 @@ class VideoPlayer extends StatelessWidget {
     return _buildCenterIndicator(
       isShow: controller.playerValue.isCompletion,
       child: _buildClickableIcon(
-          icon: Icons.refresh,
-          onTap: () => {},
-          size: indicatorSize),
+          icon: Icons.refresh, onTap: () => {}, size: indicatorSize),
     );
   }
 
@@ -802,19 +803,49 @@ class VideoPlayer extends StatelessWidget {
             SizedBox(
               height: indicatorSize,
               width: indicatorSize,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.rpx,
-                color: Colors.white,
-                backgroundColor: Colors.white.withOpacity(0.3),
-                value: controller.playerValue.bufferingPercentage / 100,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.rpx,
+                      color: Colors.white,
+                      backgroundColor: Colors.white.withOpacity(0.3),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Obx(
+                            () => Text(
+                                '${controller.playerValue.bufferingPercentage}'),
+                          ),
+                          Text(
+                            '%',
+                            style: TextStyle(fontSize: percentSize),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(height: gap),
             Obx(
-              () => Text(
-                '${VideoPlayerUtil.formatBytes(controller.playerValue.bufferingSpeed)}/s',
-                style: TextStyle(fontSize: secondaryFontSize),
-              ),
+              () {
+                String text =
+                    '${VideoPlayerUtil.formatBytes(controller.playerValue.bufferingSpeed)}/s';
+                if (controller.isResolveing.value) {
+                  text = '解析中...';
+                }
+                return Text(
+                  text,
+                  style: TextStyle(fontSize: secondaryFontSize),
+                );
+              },
             ),
           ],
         ),

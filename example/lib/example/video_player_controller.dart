@@ -341,6 +341,7 @@ mixin _VideoPlayerGestureDetector {
 
 mixin _VideoPlayerResolver {
   VideoSourceResolver? _videoPlayerResolver;
+  RxBool isResolveing = false.obs;
 }
 
 class VideoPlayerController
@@ -401,11 +402,16 @@ class VideoPlayerController
   }
 
   void playByIndex(int index) async {
+    isResolveing.value = true;
     currentPlayIndex.value = index;
+    playerController.stop();
     final resolve = await _videoPlayerResolver!.call(playlist[index]);
     (playerController as APlayerNetworkController)
         .setDataSouce(resolve.url, headers: resolve.headers);
-    playerController.prepare();
+    if (index == currentPlayIndex.value) {
+      isResolveing.value = false;
+      playerController.prepare();
+    }
   }
 
   void setPlayMode(VideoPlayerPlayMode mode) {

@@ -179,8 +179,7 @@ class APlayer(
             bufferingPercentage = 0,
             errorDescription = "",
         )
-        player?.stop()
-        player?.clearScreen()
+        stop();
         sendEvent()
     }
     private fun setNetworkDataSource(config: Map<String, Any>): Unit {
@@ -202,7 +201,6 @@ class APlayer(
             player!!.setDataSource(urlSource)
         }
     }
-
     private fun prepare(isAutoPlay: Boolean): Unit {
         player?.isAutoPlay = isAutoPlay
         player?.prepare()
@@ -222,6 +220,7 @@ class APlayer(
 
     private fun stop(): Unit {
         player?.stop()
+        player?.clearScreen()
     }
 
     private fun seekTo(position: Long): Unit {
