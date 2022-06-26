@@ -16,12 +16,18 @@ import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
-typedef VideoSourceResolver = Future<VideoSourceResolve> Function(VideoPlayerItem playerItem);
+
+typedef VideoSourceResolver = Future<VideoSourceResolve> Function(
+    VideoPlayerItem playerItem);
+
 class VideoSourceResolve {
+  final bool isSuccess;
   final String url;
   final List<APlayerConfigHeader> headers;
-  VideoSourceResolve(this.url, this.headers);
+
+  VideoSourceResolve(this.isSuccess, this.url, this.headers);
 }
+
 enum VideoPlayerPlayMode {
   loop,
   listLoop,
@@ -213,6 +219,7 @@ mixin _VideoPlayerGestureDetector {
   final RxBool isTempSeekEnable = false.obs;
   final RxBool isShowSelections = false.obs;
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
+  Timer? _showBarTimer;
   double _startDx = 0.0;
   double _startDy = 0.0;
   Duration _startDxValue = Duration.zero;
@@ -230,7 +237,7 @@ mixin _VideoPlayerGestureDetector {
     if (playerValue.isCompletion) {
       _rePlay();
     }
-    isShowBar.value = !isShowBar.value;
+    _toggleBar();
   }
 
   void _rePlay() {
@@ -321,7 +328,7 @@ mixin _VideoPlayerGestureDetector {
   }
 
   void toggleSettings() {
-    isShowBar.value = false;
+    _hideBar();
     isShowSettings.value = !isShowSettings.value;
   }
 
@@ -330,18 +337,42 @@ mixin _VideoPlayerGestureDetector {
   }
 
   void toggleSelections() {
-    isShowBar.value = false;
+    _hideBar();
     isShowSelections.value = !isShowSelections.value;
   }
 
   void setVolume(double value);
 
   void setBrightness(double value);
+
+  void _showBar() {
+    _clearShowBarTimer();
+    isShowBar.value = true;
+    _showBarTimer = Timer(const Duration(seconds: 3), _hideBar);
+  }
+
+  void _hideBar() {
+    isShowBar.value = false;
+  }
+
+  void _toggleBar() {
+    if (isShowBar.value) {
+      _hideBar();
+    } else {
+      _showBar();
+    }
+  }
+
+  void _clearShowBarTimer() {
+    _showBarTimer?.cancel();
+    _showBarTimer = null;
+  }
 }
 
 mixin _VideoPlayerResolver {
   VideoSourceResolver? _videoPlayerResolver;
   RxBool isResolveing = false.obs;
+  RxBool isResolveFailed = false.obs;
 }
 
 class VideoPlayerController
@@ -363,13 +394,19 @@ class VideoPlayerController
   bool _appPaused = false;
   bool _willPlayResumed = false;
 
-  String get title {
-    final int index = currentPlayIndex.value;
-    if (index == -1) {
-      return '';
+  VideoPlayerItem? get currentPlayItem {
+    if (currentPlayIndex.value == -1) {
+      return null;
     }
-    return playlist[index].title;
+    if (currentPlayIndex.value > playlist.length) {
+      return null;
+    }
+    return playlist[currentPlayIndex.value];
   }
+
+  String get currentPlayUrl => currentPlayItem?.source ?? '';
+
+  String get title => currentPlayItem?.title ?? '';
 
   @override
   APlayerValue get playerValue => value.value;
@@ -379,12 +416,12 @@ class VideoPlayerController
     WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<void> initialize(VideoSourceResolver resolver) {
+  Future<void> initialize() {
     Wakelock.enable();
-    _videoPlayerResolver = resolver;
     _initOrientationPlugin();
     _initVolumeBrightnessPlugin();
     _initBatteryConnectivityPlugin();
+    _showBar();
     return playerController.initialize();
   }
 
@@ -397,19 +434,26 @@ class VideoPlayerController
     }
   }
 
+  void setResolver(VideoSourceResolver resolver) {
+    _videoPlayerResolver = resolver;
+  }
+
   void setPlaylist(List<VideoPlayerItem> playlist) {
     this.playlist.assignAll(playlist);
   }
 
   void playByIndex(int index) async {
+    _showBar();
+    isResolveFailed.value = true;
     isResolveing.value = true;
     currentPlayIndex.value = index;
     playerController.stop();
     final resolve = await _videoPlayerResolver!.call(playlist[index]);
-    (playerController as APlayerNetworkController)
-        .setDataSouce(resolve.url, headers: resolve.headers);
-    if (index == currentPlayIndex.value) {
-      isResolveing.value = false;
+    isResolveFailed.value = resolve.isSuccess;
+    isResolveing.value = false;
+    if (index == currentPlayIndex.value && isResolveFailed.value) {
+      (playerController as APlayerNetworkController)
+          .setDataSouce(resolve.url, headers: resolve.headers);
       playerController.prepare();
     }
   }
@@ -447,7 +491,7 @@ class VideoPlayerController
           () => WillPopScope(
             onWillPop: () async {
               if (isLocked.value) {
-                isShowBar.value = true;
+                _showBar();
                 return false;
               }
               _exitFullscreen();
@@ -495,6 +539,7 @@ class VideoPlayerController
     _deinitVolumeBrightnessPlugin();
     _deinitBatteryConnectivityPlugin();
     currentPlayIndex.value = -1;
+    _clearShowBarTimer();
     playerController.dispose();
   }
 
@@ -533,6 +578,24 @@ class VideoPlayerController
         }
       }
     }
+  }
+
+  void onSeekChangeStart(double value) {
+    isTempSeekEnable.value = true;
+    tempSeekPosition.value =
+        Duration(milliseconds: value.toInt());
+    _clearShowBarTimer();
+  }
+  void onSeekChanged(double value) {
+    tempSeekPosition.value = Duration(milliseconds: value.toInt());
+  }
+
+  void onSeekChangeEnd(double value) {
+    isTempSeekEnable.value = false;
+    tempSeekPosition.value = Duration.zero;
+    playerController.seekTo(value.toInt());
+    playerController.play();
+    _showBar();
   }
 
   @override

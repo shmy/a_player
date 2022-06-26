@@ -15,14 +15,14 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
 
   @override
   void initState() {
-    controller = VideoPlayerController()
-      ..initialize((item) async {
-        await Future.delayed(const Duration(seconds: 3));
-        return VideoSourceResolve(item.source, [
-          APlayerConfigHeader('user-Agent',
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36 Edg/103.0.1264.37'),
-        ]);
-      }).then((value) {
+    controller = VideoPlayerController()..setResolver((item) async {
+      await Future.delayed(const Duration(seconds: 3));
+      return VideoSourceResolve(true, item.source, [
+        APlayerConfigHeader('user-Agent',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36 Edg/103.0.1264.37'),
+      ]);
+    })
+      ..initialize().then((value) {
         controller
           ..setPlaylist([
             VideoPlayerItem(
