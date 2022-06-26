@@ -334,7 +334,7 @@ class VideoPlayer extends StatelessWidget {
                     () => _buildClickableIcon(
                   icon:
                   controller.isLocked.value ? Icons.lock : Icons.lock_open,
-                  onTap: controller.toggleLock,
+                  onTap: () => controller.toggleLock(),
                 ),
               ),
             ),
