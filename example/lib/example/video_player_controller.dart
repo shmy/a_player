@@ -485,6 +485,7 @@ class VideoPlayerController
       _rotateFullscreen(),
       () async {
         _refreshBatteryConnectivity();
+        _showBar();
       }(),
       () async {
         Get.to(
@@ -513,6 +514,7 @@ class VideoPlayerController
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
       () async {
         _deinitBatteryConnectivityPlugin();
+        _showBar();
       }(),
       () async {
         Get.back();
