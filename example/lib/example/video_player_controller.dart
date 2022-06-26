@@ -334,6 +334,9 @@ mixin _VideoPlayerGestureDetector {
 
   void toggleLock() {
     isLocked.value = !isLocked.value;
+    if (!isLocked.value) {
+      _showBar();
+    }
   }
 
   void toggleSelections() {
