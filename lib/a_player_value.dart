@@ -86,13 +86,6 @@ class APlayerValue {
 
   bool get isError => state == _APlayerState.error;
 
-  double get aspectRatio {
-    if (height == 0.0) {
-      return APlayerRatio.ratio16x9;
-    }
-    return width / height;
-  }
-
   APlayerValue(
       {required this.state,
       required this.errorDescription,

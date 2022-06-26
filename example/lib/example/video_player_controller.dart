@@ -215,9 +215,15 @@ mixin _VideoPlayerGestureDetector {
       toggleSelections();
       return;
     }
+    if (playerValue.isCompletion) {
+      _rePlay();
+    }
     isShowBar.value = !isShowBar.value;
   }
-
+  void _rePlay() {
+    playerController.seekTo(0);
+    playerController.play();
+  }
   void onDoubleTap() {
     if (playerValue.isPaused) {
       playerController.play();

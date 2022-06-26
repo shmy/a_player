@@ -22,6 +22,8 @@ class VideoPlayer extends StatelessWidget {
 
   double get iconSize => controller.isFullscreen.value ? 28.rpx : 24.rpx;
 
+  double get indicatorSize => controller.isFullscreen.value ? 42.rpx : 32.rpx;
+
   double get gap => controller.isFullscreen.value ? 10.rpx : 6.rpx;
 
   double get primaryFontSize => controller.isFullscreen.value ? 16.rpx : 14.rpx;
@@ -225,7 +227,9 @@ class VideoPlayer extends StatelessWidget {
                   if (controller.playerValue.isStarted) {
                     icon = Icons.pause;
                   }
-                  if (controller.playerValue.isPaused) {
+                  if (controller.playerValue.isPaused ||
+                      controller.playerValue.isError ||
+                      controller.playerValue.isCompletion) {
                     icon = Icons.play_arrow;
                   }
                   return _buildClickableIcon(
@@ -364,7 +368,8 @@ class VideoPlayer extends StatelessWidget {
           child: Container(
             color: Colors.black.withOpacity(0.8),
             child: ListView(
-              padding: EdgeInsets.only(bottom: 10.rpx, left: 10.rpx, right: 10.rpx),
+              padding:
+                  EdgeInsets.only(bottom: 10.rpx, left: 10.rpx, right: 10.rpx),
               children: [
                 _buildTitle('播放速度'),
                 _buildRadius(
@@ -416,13 +421,12 @@ class VideoPlayer extends StatelessWidget {
         color: Colors.black.withOpacity(0.8),
         padding: EdgeInsets.symmetric(vertical: 10.rpx),
         child: Obx(
-              () => ListView.builder(
+          () => ListView.builder(
             padding: EdgeInsets.all(10.rpx),
             itemBuilder: (BuildContext context, int index) {
               return Obx(() {
                 final item = controller.playlist[index];
-                final isSelected =
-                    controller.currentPlayIndex.value == index;
+                final isSelected = controller.currentPlayIndex.value == index;
                 return Builder(builder: (context) {
                   final color = isSelected
                       ? Theme.of(context).primaryColor
@@ -544,7 +548,7 @@ class VideoPlayer extends StatelessWidget {
   }
 
   Widget _buildClickableIcon(
-      {required IconData icon, required VoidCallback onTap}) {
+      {required IconData icon, required VoidCallback onTap, double? size}) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -552,7 +556,7 @@ class VideoPlayer extends StatelessWidget {
         String.fromCharCode(icon.codePoint),
         style: TextStyle(
           fontFamily: _iconFontFamily,
-          fontSize: iconSize,
+          fontSize: size ?? iconSize,
         ),
       ),
     );
@@ -603,10 +607,10 @@ class VideoPlayer extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      icon,
-                      size: 18.rpx,
-                      color: Colors.white,
+                    Text(
+                      String.fromCharCode(icon.codePoint),
+                      style: TextStyle(
+                          fontSize: 18.rpx, fontFamily: _iconFontFamily),
                     ),
                     SizedBox(width: 5.rpx),
                     Text(
@@ -710,23 +714,74 @@ class VideoPlayer extends StatelessWidget {
             isShow: controller.isShowVolumeControl.value,
             value: controller.volume.value,
           ),
-          Positioned.fill(
-            child: Center(
-              child: Obx(
-                () => AnimatedOpacity(
-                  duration: _animationDuration,
-                  opacity: controller.playerValue.isBuffering ||
-                          controller.playerValue.isUnknow ||
-                          controller.playerValue.isIdle ||
-                          controller.playerValue.isInitialized
-                      ? 1
-                      : 0,
-                  child: _buildBufferingIndicator(),
-                ),
-              ),
+          _buildCenterIndicator(
+            isShow: controller.playerValue.isBuffering ||
+                controller.playerValue.isUnknow ||
+                controller.playerValue.isIdle ||
+                controller.playerValue.isInitialized,
+            child: _buildBufferingIndicator(),
+          ),
+          _buildErrorIndicator(),
+          _buildCompletedIndicator(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorIndicator() {
+    return _buildCenterIndicator(
+      isShow: controller.playerValue.isError,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            String.fromCharCode(Icons.error_outline_sharp.codePoint),
+            style:
+                TextStyle(fontSize: indicatorSize, fontFamily: _iconFontFamily),
+          ),
+          SizedBox(
+            height: gap,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40.rpx),
+            child: Text(
+              controller.playerValue.errorDescription,
+              style: TextStyle(fontSize: secondaryFontSize),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCompletedIndicator() {
+    return _buildCenterIndicator(
+      isShow: controller.playerValue.isCompletion,
+      child: _buildClickableIcon(
+          icon: Icons.refresh,
+          onTap: () => {},
+          size: indicatorSize),
+    );
+  }
+
+  Widget _buildCenterIndicator({
+    required bool isShow,
+    required Widget child,
+  }) {
+    return Positioned.fill(
+      child: Center(
+        child: AnimatedOpacity(
+          duration: _animationDuration,
+          opacity: isShow ? 1 : 0,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [overlayShadow],
+            ),
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -735,36 +790,32 @@ class VideoPlayer extends StatelessWidget {
     return DefaultTextStyle(
       style: TextStyle(fontSize: secondaryFontSize),
       child: Container(
-        height: 70.rpx,
-        width: 70.rpx,
+        height: 80.rpx,
+        width: 80.rpx,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(70.rpx),
+          borderRadius: BorderRadius.circular(80.rpx),
           boxShadow: [overlayShadow],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              height: 30.rpx,
-              width: 30.rpx,
-              child: Stack(
-                children: [
-                  CircularProgressIndicator(
-                    strokeWidth: (1.5).rpx,
-                    color: Colors.white,
-                  ),
-                  Positioned(
-                    child: Center(
-                      child: Obx(
-                        () => Text('${controller.playerValue.bufferingPercentage}%'),
-                      ),
-                    ),
-                  ),
-                ],
+              height: indicatorSize,
+              width: indicatorSize,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.rpx,
+                color: Colors.white,
+                backgroundColor: Colors.white.withOpacity(0.3),
+                value: controller.playerValue.bufferingPercentage / 100,
               ),
             ),
-              SizedBox(height: gap),
-              Obx(() => Text('${VideoPlayerUtil.formatBytes(controller.playerValue.bufferingSpeed)}/s', style: TextStyle(fontSize: secondaryFontSize),)),
+            SizedBox(height: gap),
+            Obx(
+              () => Text(
+                '${VideoPlayerUtil.formatBytes(controller.playerValue.bufferingSpeed)}/s',
+                style: TextStyle(fontSize: secondaryFontSize),
+              ),
+            ),
           ],
         ),
       ),
