@@ -803,34 +803,37 @@ class VideoPlayer extends StatelessWidget {
             SizedBox(
               height: indicatorSize,
               width: indicatorSize,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.rpx,
-                      color: Colors.white,
-                      backgroundColor: Colors.white.withOpacity(0.3),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Obx(
-                            () => Text(
-                                '${controller.playerValue.bufferingPercentage}'),
-                          ),
-                          Text(
-                            '%',
-                            style: TextStyle(fontSize: percentSize),
-                          )
-                        ],
+              child: Obx(
+                () => Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.rpx,
+                        color: Colors.white,
+                        backgroundColor: Colors.white.withOpacity(0.3),
                       ),
                     ),
-                  ),
-                ],
+                    if (controller.playerValue.isBuffering)
+                      Positioned.fill(
+                        child: Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Obx(
+                                () => Text(
+                                    '${controller.playerValue.bufferingPercentage}'),
+                              ),
+                              Text(
+                                '%',
+                                style: TextStyle(fontSize: percentSize),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             SizedBox(height: gap),
