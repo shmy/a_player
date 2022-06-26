@@ -24,11 +24,12 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
         super.init()
         self.player?.renderDelegate = self
         self._textureId = self.textureRegistry?.register(self)
-        self.eventChannel = FlutterEventChannel.init(name: "a_player:event" + String(self._textureId), binaryMessenger: registrar.messenger())
-        self.methodChannel = FlutterMethodChannel.init(name: "a_player:method" + String(self._textureId), binaryMessenger: registrar.messenger())
+        
+        self.eventChannel = FlutterEventChannel.init(name: PLAYER_EVENT_CHANNEL_NAME + String(self._textureId), binaryMessenger: registrar.messenger())
+        self.methodChannel = FlutterMethodChannel.init(name: PLAYER_METHOD_CHANNEL_NAME + String(self._textureId), binaryMessenger: registrar.messenger())
         
         self.methodChannel?.setMethodCallHandler {[weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
-            print("Method called: " + call.method)
+           
             switch call.method {
               case "play":
                 self?.play()

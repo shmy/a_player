@@ -4,7 +4,7 @@ import UIKit
 public class SwiftAPlayerPlugin: NSObject, FlutterPlugin {
   private var registrar: FlutterPluginRegistrar!
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "a_player", binaryMessenger: registrar.messenger())
+    let channel = FlutterMethodChannel(name: METHOD_CHANNEL_NAME, binaryMessenger: registrar.messenger())
     let instance = SwiftAPlayerPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
     instance.registrar = registrar
