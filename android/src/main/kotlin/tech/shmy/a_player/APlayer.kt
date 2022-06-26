@@ -46,7 +46,7 @@ class APlayer(
                 "stop" -> stop()
                 "prepare" -> prepare(call.arguments as Boolean)
                 "setNetworkDataSource" -> {
-                    setNetworkDataSource(call.arguments as String)
+                    setNetworkDataSource(call.arguments as Map<String, Any>)
                 }
                 "seekTo" -> {
                     seekTo((call.arguments as Int).toLong())
@@ -63,9 +63,6 @@ class APlayer(
                 "setHardwareDecoderEnable" -> {
                     setHardwareDecoderEnable(call.arguments as Boolean)
                 }
-                "setConfig" -> {
-                    setConfig(call.arguments as Map<String, Any>)
-                }
                 "release" -> release()
             }
             result.success(null)
@@ -77,6 +74,7 @@ class APlayer(
         val config = player!!.config
         config.mMaxBufferDuration = 1000 * 60 * 10
         player!!.config = config
+        player!!.volume = 1.0f
         setupPlayer()
     }
 
@@ -169,7 +167,9 @@ class APlayer(
         })
     }
 
-    private fun setConfig(config: Map<String, Any>): Unit {
+    private fun setNetworkDataSource(config: Map<String, Any>): Unit {
+        val urlSource = UrlSource()
+        urlSource.uri = config["url"] as String
         if (player != null) {
             val playerConfig: PlayerConfig = player!!.config;
             val userAgent: String? = config["userAgent"] as String?
@@ -180,14 +180,10 @@ class APlayer(
             if (referer != null) {
                 playerConfig.mReferrer = referer
             }
+            playerConfig.customHeaders = (config["customHeaders"] as List<String>).toTypedArray()
             player!!.config = playerConfig
+            player!!.setDataSource(urlSource)
         }
-    }
-
-    private fun setNetworkDataSource(url: String): Unit {
-        val urlSource = UrlSource()
-        urlSource.uri = url
-        player?.setDataSource(urlSource)
     }
 
     private fun prepare(isAutoPlay: Boolean): Unit {

@@ -5,8 +5,8 @@
 [ ] 小窗播放
 [ ] 暂停广告
 [ ] 片头广告
-[ ] 设置headers[userAgent|referer]
 [ ] 下载
+[x] 设置headers[userAgent|referer|customHeaders]
 [x] buffered显示
 [x] 显示网速
 [x] 选集

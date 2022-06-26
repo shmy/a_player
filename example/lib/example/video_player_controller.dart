@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_network_controller.dart';
 import 'package:a_player/a_player_value.dart';
@@ -370,7 +371,11 @@ class VideoPlayerController
 
   void playByIndex(int index) {
     currentPlayIndex.value = index;
-    playerController.setDataSouce(playlist[index].source);
+    (playerController as APlayerNetworkController).setDataSouce(playlist[index].source, headers: [
+      APlayerConfigHeader('user-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36 Edg/103.0.1264.37'),
+      // APlayerConfigHeader('referer', 'https://help.aliyun.com/document_detail/124714.htm'),
+      // APlayerConfigHeader('Host', 'help.aliyun.com'),
+    ]);
     playerController.prepare();
   }
   void setPlayMode(VideoPlayerPlayMode mode) {
