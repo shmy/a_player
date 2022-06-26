@@ -350,7 +350,7 @@ class VideoPlayerController
   APlayerValue get playerValue => value.value;
 
   VideoPlayerController() {
-    playerController = APlayerNetworkController()..addListener(_listener);
+    playerController = APlayerNetworkController()..stream.listen(_listener);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -479,11 +479,11 @@ class VideoPlayerController
     }
   }
 
-  void _listener() {
-    if (_appPaused && !playerValue.isPaused) {
+  void _listener(APlayerValue value) {
+    if (_appPaused && !value.isPaused) {
       playerController.pause();
     }
-    value.value = playerController.value;
+    this.value.value = value;
   }
 
   @override

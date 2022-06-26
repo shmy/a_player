@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'a_player_constant.dart';
@@ -5,18 +7,22 @@ import 'a_player_value.dart';
 
 const _methodChannel = MethodChannel(APlayerConstant.methodChannelName);
 
-abstract class APlayerControllerInterface extends ValueNotifier<APlayerValue> {
+abstract class APlayerControllerInterface extends ChangeNotifier {
   EventChannel? eventChannel;
   MethodChannel? methodChannel;
   int textureId = -1;
   APlayerFit _fit = APlayerFit.contain;
-
-  APlayerControllerInterface() : super(APlayerValue.uninitialized());
+  int _videoHeight = 0;
+  int _videoWidth = 0;
+  final StreamController<APlayerValue> _streamController = StreamController<APlayerValue>();
 
   bool get hasTextureId => textureId != -1;
 
   APlayerFit get fit => _fit;
+  int get videoHeight => _videoHeight;
+  int get videoWidth => _videoWidth;
 
+  Stream<APlayerValue> get stream => _streamController.stream;
   @mustCallSuper
   Future<void> initialize() async {
     final textureId =
@@ -84,8 +90,13 @@ abstract class APlayerControllerInterface extends ValueNotifier<APlayerValue> {
 
   void _listen() {
     eventChannel?.receiveBroadcastStream().listen((event) {
-      value = APlayerValue.fromJSON(event);
-      notifyListeners();
+      final APlayerValue value = APlayerValue.fromJSON(event);
+      if (value.height != _videoHeight || value.width != _videoWidth) {
+        _videoHeight = value.height;
+        _videoWidth = value.width;
+        notifyListeners();
+      }
+      _streamController.add(value);
     });
   }
 
@@ -93,6 +104,7 @@ abstract class APlayerControllerInterface extends ValueNotifier<APlayerValue> {
   @override
   void dispose() {
     super.dispose();
+    _streamController.close();
     release();
   }
 }

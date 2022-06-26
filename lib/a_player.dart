@@ -28,6 +28,7 @@ class _APlayerState extends State<APlayer> {
   }
 
   void _listenter() {
+    print('[ON CHANGED]');
     setState(() {});
   }
 
@@ -42,8 +43,8 @@ class _APlayerState extends State<APlayer> {
           return const SizedBox();
         }
         final Widget texture = Texture(textureId: widget.controller.textureId);
-        _videoHeight = widget.controller.value.height;
-        _videoWidth = widget.controller.value.width;
+        _videoHeight = widget.controller.videoHeight;
+        _videoWidth = widget.controller.videoWidth;
         return LayoutBuilder(
           builder: (context, constraints) {
             final APlayerFit fit = widget.controller.fit;
