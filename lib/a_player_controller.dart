@@ -96,7 +96,9 @@ abstract class APlayerControllerInterface extends ChangeNotifier {
         _videoWidth = value.width;
         notifyListeners();
       }
-      _streamController.add(value);
+      if (!_streamController.isClosed) {
+        _streamController.add(value);
+      }
     });
   }
 

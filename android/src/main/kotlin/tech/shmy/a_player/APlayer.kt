@@ -168,6 +168,21 @@ class APlayer(
         })
     }
 
+    private fun resetValue(): Unit {
+        videoEvent = videoEvent.copy(
+            state = IPlayer.idle,
+            position =  0,
+            duration = 0,
+            isBuffering = false,
+            buffered = 0,
+            bufferingSpeed = 0,
+            bufferingPercentage = 0,
+            errorDescription = "",
+        )
+        player?.stop()
+        player?.clearScreen()
+        sendEvent()
+    }
     private fun setNetworkDataSource(config: Map<String, Any>): Unit {
         val urlSource = UrlSource()
         urlSource.uri = config["url"] as String
@@ -182,6 +197,7 @@ class APlayer(
                 playerConfig.mReferrer = referer
             }
             playerConfig.customHeaders = (config["customHeaders"] as List<String>).toTypedArray()
+            resetValue();
             player!!.config = playerConfig
             player!!.setDataSource(urlSource)
         }

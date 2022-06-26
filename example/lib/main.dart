@@ -36,7 +36,7 @@ class MainPage extends StatelessWidget {
         children: [
           MaterialButton(onPressed: () {
             Get.to(() => const NetworkPlayerPage());
-          }, child: const Text('NetworkPlayerPage'),)
+          }, child: const Text('点击进入'),)
         ],
       ),
     );

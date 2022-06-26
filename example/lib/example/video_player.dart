@@ -386,7 +386,7 @@ class VideoPlayer extends StatelessWidget {
                 _buildTitle('播放方式'),
                 _buildRadius(
                   options: controller.playModeList,
-                  value: controller.playMode,
+                  value: controller.playMode.value,
                   onTap: controller.setPlayMode,
                 ),
                 _buildTitle('镜像翻转'),

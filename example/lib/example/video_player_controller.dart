@@ -16,6 +16,12 @@ import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
+typedef VideoSourceResolver = Future<VideoSourceResolve> Function(VideoPlayerItem playerItem);
+class VideoSourceResolve {
+  final String url;
+  final List<APlayerConfigHeader> headers;
+  VideoSourceResolve(this.url, this.headers);
+}
 enum VideoPlayerPlayMode {
   loop,
   listLoop,
@@ -28,13 +34,15 @@ class LableValue<T> {
 
   LableValue(this.label, this.value);
 }
-class VideoPlayerItem<T> {
+
+class VideoPlayerItem {
   final String source;
   final String title;
-  final T extra;
+  final dynamic extra;
 
   VideoPlayerItem(this.source, this.title, this.extra);
 }
+
 mixin _VideoPlayerOptions {
   final List<LableValue<double>> speedList = [
     LableValue<double>('0.5', 0.5),
@@ -60,7 +68,8 @@ mixin _VideoPlayerOptions {
   final List<LableValue<VideoPlayerPlayMode>> playModeList = [
     LableValue<VideoPlayerPlayMode>('列表循环', VideoPlayerPlayMode.listLoop),
     LableValue<VideoPlayerPlayMode>('单集循环', VideoPlayerPlayMode.loop),
-    LableValue<VideoPlayerPlayMode>('播完暂停', VideoPlayerPlayMode.pauseAfterCompleted),
+    LableValue<VideoPlayerPlayMode>(
+        '播完暂停', VideoPlayerPlayMode.pauseAfterCompleted),
   ];
 
   final List<LableValue<int>> mirrorModeList = [
@@ -190,8 +199,11 @@ mixin _VideoPlayerGestureDetector {
   APlayerControllerInterface get playerController;
 
   APlayerValue get playerValue;
+
   double get _currentVolume;
+
   double get _currentBrightness;
+
   final RxBool isShowBar = false.obs;
   final RxBool isQuickPlaying = false.obs;
   final RxBool isShowSettings = false.obs;
@@ -220,10 +232,12 @@ mixin _VideoPlayerGestureDetector {
     }
     isShowBar.value = !isShowBar.value;
   }
+
   void _rePlay() {
     playerController.seekTo(0);
     playerController.play();
   }
+
   void onDoubleTap() {
     if (playerValue.isPaused) {
       playerController.play();
@@ -253,7 +267,8 @@ mixin _VideoPlayerGestureDetector {
     final moveDistX = details.localPosition.dx - _startDx;
     final dist = 5.rpx;
     double seekValue = _startDyValue + moveDistX ~/ dist;
-    tempSeekPosition.value = _startDxValue + Duration(milliseconds: (seekValue * 1000).toInt());
+    tempSeekPosition.value =
+        _startDxValue + Duration(milliseconds: (seekValue * 1000).toInt());
     if (tempSeekPosition.value < Duration.zero) {
       tempSeekPosition.value = Duration.zero;
     }
@@ -318,8 +333,14 @@ mixin _VideoPlayerGestureDetector {
     isShowBar.value = false;
     isShowSelections.value = !isShowSelections.value;
   }
+
   void setVolume(double value);
+
   void setBrightness(double value);
+}
+
+mixin _VideoPlayerResolver {
+  VideoSourceResolver? _videoPlayerResolver;
 }
 
 class VideoPlayerController
@@ -329,15 +350,18 @@ class VideoPlayerController
         _VideoPlayerVolumeBrightnessPlugin,
         _VideoPlayerBatteryConnectivityPlugin,
         _VideoPlayerGestureDetector,
+        _VideoPlayerResolver,
         WidgetsBindingObserver {
   @override
   late final APlayerControllerInterface playerController;
   final Rx<APlayerValue> value = Rx<APlayerValue>(APlayerValue.uninitialized());
   final RxList<VideoPlayerItem> playlist = RxList<VideoPlayerItem>([]);
   final RxInt currentPlayIndex = (-1).obs;
-  VideoPlayerPlayMode playMode = VideoPlayerPlayMode.listLoop;
+  final Rx<VideoPlayerPlayMode> playMode =
+      Rx<VideoPlayerPlayMode>(VideoPlayerPlayMode.listLoop);
   bool _appPaused = false;
   bool _willPlayResumed = false;
+
   String get title {
     final int index = currentPlayIndex.value;
     if (index == -1) {
@@ -354,8 +378,9 @@ class VideoPlayerController
     WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<void> initialize() {
+  Future<void> initialize(VideoSourceResolver resolver) {
     Wakelock.enable();
+    _videoPlayerResolver = resolver;
     _initOrientationPlugin();
     _initVolumeBrightnessPlugin();
     _initBatteryConnectivityPlugin();
@@ -375,17 +400,25 @@ class VideoPlayerController
     this.playlist.assignAll(playlist);
   }
 
-  void playByIndex(int index) {
+  void playByIndex(int index) async {
     currentPlayIndex.value = index;
-    (playerController as APlayerNetworkController).setDataSouce(playlist[index].source, headers: [
-      APlayerConfigHeader('user-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36 Edg/103.0.1264.37'),
-      // APlayerConfigHeader('referer', 'https://help.aliyun.com/document_detail/124714.htm'),
-      // APlayerConfigHeader('Host', 'help.aliyun.com'),
-    ]);
+    final resolve = await _videoPlayerResolver!.call(playlist[index]);
+    (playerController as APlayerNetworkController)
+        .setDataSouce(resolve.url, headers: resolve.headers);
     playerController.prepare();
   }
+
   void setPlayMode(VideoPlayerPlayMode mode) {
-    playMode = mode;
+    playMode.value = mode;
+    switch (playMode.value) {
+      case VideoPlayerPlayMode.loop:
+        playerController.setLoop(true);
+        break;
+      case VideoPlayerPlayMode.listLoop:
+      case VideoPlayerPlayMode.pauseAfterCompleted:
+        playerController.setLoop(false);
+        break;
+    }
   }
 
   void toggleFullscreen(Widget widget) {
@@ -436,6 +469,8 @@ class VideoPlayerController
       }(),
     ]);
     isFullscreen.value = !isFullscreen.value;
+    isShowSettings.value = false;
+    isShowSelections.value = false;
   }
 
   void back() {
@@ -448,6 +483,7 @@ class VideoPlayerController
 
   void dispose() {
     Wakelock.disable();
+    _videoPlayerResolver = null;
     WidgetsBinding.instance.removeObserver(this);
     _deinitOrientationPlugin();
     _deinitVolumeBrightnessPlugin();
@@ -484,6 +520,13 @@ class VideoPlayerController
       playerController.pause();
     }
     this.value.value = value;
+    if (this.value.value.isCompletion) {
+      if (playMode.value == VideoPlayerPlayMode.listLoop) {
+        if (currentPlayIndex.value < playlist.length - 1) {
+          playByIndex(currentPlayIndex.value + 1);
+        }
+      }
+    }
   }
 
   @override
@@ -498,6 +541,7 @@ class VideoPlayerController
 
   @override
   double get _currentVolume => volume.value;
+
   @override
   double get _currentBrightness => brightness.value;
 }
