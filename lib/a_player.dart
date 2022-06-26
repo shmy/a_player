@@ -28,7 +28,6 @@ class _APlayerState extends State<APlayer> {
   }
 
   void _listenter() {
-    print('[ON CHANGED]');
     setState(() {});
   }
 

@@ -73,6 +73,7 @@ class APlayer(
         player = AliPlayerFactory.createAliPlayer(context)
         val config = player!!.config
         config.mMaxBufferDuration = 1000 * 60 * 10
+        config.mMaxBackwardBufferDurationMs = 1 * 60 * 10
         player!!.config = config
         player!!.volume = 1.0f
         setupPlayer()
