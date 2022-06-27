@@ -70,10 +70,6 @@ class APlayerController extends ChangeNotifier {
     await methodChannel?.invokeMethod('prepare', isAutoPlay);
   }
 
-  Future<void> reload() async {
-    await methodChannel?.invokeMethod('reload');
-  }
-
   Future<void> stop() async {
     await methodChannel?.invokeMethod('stop');
   }

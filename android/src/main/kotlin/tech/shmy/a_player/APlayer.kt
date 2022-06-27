@@ -41,7 +41,6 @@ class APlayer(
             when (call.method) {
                 "play" -> play()
                 "pause" -> pause()
-                "reload" -> reload()
                 "stop" -> stop()
                 "prepare" -> prepare(call.arguments as Boolean)
                 "setDataSource" -> {
@@ -211,10 +210,6 @@ class APlayer(
 
     private fun pause(): Unit {
         player?.pause()
-    }
-
-    private fun reload(): Unit {
-        player?.reload()
     }
 
     private fun stop(): Unit {
