@@ -1,8 +1,13 @@
 import Flutter
 import UIKit
+import AliyunPlayer
 
 public class SwiftAPlayerPlugin: NSObject, FlutterPlugin {
   private var registrar: FlutterPluginRegistrar!
+  override init() {
+    AliPlayerGlobalSettings.setUseHttp2(true)
+    super.init()
+  }
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: METHOD_CHANNEL_NAME, binaryMessenger: registrar.messenger())
     let instance = SwiftAPlayerPlugin()
