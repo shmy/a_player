@@ -93,8 +93,8 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
     }
     
     private func setupPlayer() -> Void {
-        self.player?.renderDelegate = self
         self.player?.delegate = self
+        self.player?.renderDelegate = self
     }
     
     private func resetValue() -> Void {
@@ -197,6 +197,8 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
     }
     private func release() -> Void {
         self.player?.stop()
+        self.player?.delegate = nil
+        self.player?.renderDelegate = nil
         self.player = nil
         self.queuingEventSink.endOfStream()
         self.textureRegistry = nil
@@ -250,6 +252,12 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
             break
         default:
             break
+        }
+    }
+    func onPlayerEvent(_ player: AliPlayer!, eventWithString: AVPEventWithString, description: String!) {
+        if (eventWithString == EVENT_SWITCH_TO_SOFTWARE_DECODER) {
+            self.videoEvent.enableHardwareDecoder = false
+            self.sendEvent()
         }
     }
     func onVideoSizeChanged(_ player: AliPlayer!, width: Int32, height: Int32, rotation: Int32) {

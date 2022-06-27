@@ -32,7 +32,7 @@ class VideoEvent: NSObject {
        playSpeed: Float = 0.0,
        mirrorMode: Int = 0,
        loop: Bool = false,
-       enableHardwareDecoder: Bool = false,
+       enableHardwareDecoder: Bool = true,
        isBuffering: Bool = false,
        bufferingPercentage: Int = 0,
        bufferingSpeed: Int64 = 0,
