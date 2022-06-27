@@ -16,7 +16,6 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
   @override
   void initState() {
     controller = VideoPlayerController()..setResolver((item) async {
-      await Future.delayed(const Duration(seconds: 3));
       return VideoSourceResolve(true, item.source, [
         APlayerConfigHeader('user-Agent',
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36 Edg/103.0.1264.37'),
@@ -25,14 +24,10 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
       ..initialize().then((value) {
         controller
           ..setPlaylist([
-            VideoPlayerItem(
-                'https://vip.wappt.top/video_cache/8028069e04c28d73284faf390a80f4fb.m3u8',
-                'wappt [m3u8]',
-                ''),
-            VideoPlayerItem(
-                'http://150.158.130.238:4434/m3u8/b.m3u8',
-                'b [m3u8]',
-                ''),
+            // VideoPlayerItem(
+            //     'http://150.158.130.238:4434/m3u8/b.m3u8',
+            //     'b [m3u8]',
+            //     ''),
             VideoPlayerItem(
                 'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
                 '惊奇队长 预告片[mp4]',
@@ -80,12 +75,10 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            VideoPlayer(controller: controller),
-          ],
-        ),
+      body: Column(
+        children: [
+          VideoPlayer(controller: controller),
+        ],
       ),
     );
   }

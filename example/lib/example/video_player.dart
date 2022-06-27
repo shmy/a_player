@@ -16,7 +16,8 @@ class VideoPlayer extends StatelessWidget {
 
   const VideoPlayer({Key? key, required this.controller}) : super(key: key);
 
-  double get barHeight => controller.isFullscreen.value ? 48.rpx : 28.rpx;
+  double get topBarHeight => controller.isFullscreen.value ? 44.rpx : 32.rpx;
+  double get bottomBarHeight => controller.isFullscreen.value ? 64.rpx : 32.rpx;
 
   double get barPadding => controller.isFullscreen.value ? 30.rpx : 10.rpx;
 
@@ -82,10 +83,10 @@ class VideoPlayer extends StatelessWidget {
     );
   }
 
-  Widget _buildBar({required Widget child, required Alignment alignment}) {
+  Widget _buildBar({required Widget child, required Alignment alignment, required double height}) {
     return Container(
       width: double.infinity,
-      height: barHeight,
+      height: height,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: alignment == Alignment.topCenter
@@ -101,10 +102,8 @@ class VideoPlayer extends StatelessWidget {
         ),
       ),
       padding: EdgeInsets.symmetric(horizontal: barPadding),
-      child: Align(
-        alignment: alignment,
-        child: child,
-      ),
+      alignment: alignment,
+      child: child,
     );
   }
 
@@ -114,12 +113,14 @@ class VideoPlayer extends StatelessWidget {
         duration: _animationDuration,
         top: controller.isShowBar.value && !controller.isLocked.value
             ? 0
-            : -barHeight,
+            : -topBarHeight,
         left: 0,
         right: 0,
         child: _buildBar(
+          height: topBarHeight,
           alignment: Alignment.bottomCenter,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               if (controller.isFullscreen.value) _buildStatusBar(),
               Row(
@@ -216,12 +217,14 @@ class VideoPlayer extends StatelessWidget {
           duration: _animationDuration,
           bottom: controller.isShowBar.value && !controller.isLocked.value
               ? 0
-              : -barHeight,
+              : -bottomBarHeight,
           left: 0,
           right: 0,
           child: _buildBar(
+            height: bottomBarHeight,
             alignment: Alignment.topCenter,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Obx(() {
@@ -252,7 +255,7 @@ class VideoPlayer extends StatelessWidget {
                 ),
                 Expanded(
                   child: SizedBox(
-                    height: 20.rpx,
+                    height: topBarHeight / 2,
                     child: Obx(
                           () {
                         return VideoPlayerProgress(
@@ -465,9 +468,12 @@ class VideoPlayer extends StatelessWidget {
             child: SizedBox(
               height: 2.rpx,
               child: Obx(() {
-                final widthFactor =
-                    controller.playerValue.position.inMilliseconds /
-                        controller.playerValue.duration.inMilliseconds;
+                int duration = controller.playerValue.duration.inMilliseconds;
+                if (duration == 0) {
+                  duration = 1;
+                }
+                double? widthFactor =
+                    controller.playerValue.position.inMilliseconds / duration;
                 return FractionallySizedBox(
                   widthFactor: widthFactor,
                   heightFactor: 1,
@@ -584,7 +590,7 @@ class VideoPlayer extends StatelessWidget {
     required double value,
   }) {
     return Positioned(
-      top: barHeight,
+      top: topBarHeight,
       left: 0,
       right: 0,
       child: Center(
@@ -646,7 +652,7 @@ class VideoPlayer extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            top: barHeight,
+            top: topBarHeight,
             left: 0,
             right: 0,
             child: Center(
@@ -676,7 +682,7 @@ class VideoPlayer extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: barHeight,
+            top: topBarHeight,
             left: 0,
             right: 0,
             child: Center(

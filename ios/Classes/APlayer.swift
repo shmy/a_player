@@ -94,6 +94,7 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
     
     private func setupPlayer() -> Void {
         self.player?.renderDelegate = self
+        self.player?.delegate = self
     }
     
     private func resetValue() -> Void {
@@ -110,13 +111,15 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
             let playerConfig = self.player!.getConfig()
             let userAgent: String? = config["userAgent"] as? String
             let referer: String? = config["referer"] as? String
+            playerConfig?.clearShowWhenStop = true
             if (userAgent != nil) {
                 playerConfig?.userAgent = userAgent
             }
             if (referer != nil) {
                 playerConfig?.referer = referer
             }
-            playerConfig?.httpHeaders = config["customHeaders"] as? NSMutableArray
+            
+//            playerConfig?.httpHeaders = NSMutableArray.init(array: config["customHeaders"] as! Array<String>)
             self.player!.setConfig(playerConfig)
             self.player!.setUrlSource(urlSource)
         }

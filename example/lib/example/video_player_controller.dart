@@ -456,7 +456,6 @@ class VideoPlayerController
     isResolveing.value = false;
     if (index == currentPlayIndex.value && isResolveFailed.value) {
       playerController.setDataSouce(resolve.url, headers: resolve.headers);
-      playerController.prepare();
     }
   }
 
