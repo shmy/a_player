@@ -38,6 +38,7 @@ dependencies:
   volume_controller: ^2.0.3
   screen_brightness: ^0.2.1
   debounce_throttle: ^2.0.0
+  dlna_dart: ^0.0.5
 
 dev_dependencies:
   flutter_test:

@@ -224,6 +224,7 @@ mixin _VideoPlayerGestureDetector {
   double _startDy = 0.0;
   Duration _startDxValue = Duration.zero;
   double _startDyValue = 0.0;
+  double _lastPlaySpeed = 1.0;
 
   void onTap() {
     if (isShowSettings.value) {
@@ -254,13 +255,14 @@ mixin _VideoPlayerGestureDetector {
   }
 
   void onLongPressStart() {
+    _lastPlaySpeed = playerValue.playSpeed;
     playerController.setSpeed(5.0);
     playerController.play();
     isQuickPlaying.value = true;
   }
 
   void onLongPressEnd() {
-    playerController.setSpeed(1.0);
+    playerController.setSpeed(_lastPlaySpeed);
     isQuickPlaying.value = false;
   }
 
@@ -396,7 +398,6 @@ class VideoPlayerController
       Rx<VideoPlayerPlayMode>(VideoPlayerPlayMode.listLoop);
   bool _appPaused = false;
   bool _willPlayResumed = false;
-
   VideoPlayerItem? get currentPlayItem {
     if (currentPlayIndex.value == -1) {
       return null;
