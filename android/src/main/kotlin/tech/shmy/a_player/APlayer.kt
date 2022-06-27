@@ -288,24 +288,7 @@ class APlayer(
     }
 
     private fun sendEvent(): Unit {
-        queuingEventSink.success(
-            mapOf(
-                "state" to videoEvent.state,
-                "errorDescription" to videoEvent.errorDescription,
-                "width" to videoEvent.width,
-                "height" to videoEvent.height,
-                "duration" to videoEvent.duration,
-                "position" to videoEvent.position,
-                "playSpeed" to videoEvent.playSpeed,
-                "mirrorMode" to videoEvent.mirrorMode,
-                "loop" to videoEvent.loop,
-                "enableHardwareDecoder" to videoEvent.enableHardwareDecoder,
-                "isBuffering" to videoEvent.isBuffering,
-                "buffered" to videoEvent.buffered,
-                "bufferingPercentage" to videoEvent.bufferingPercentage,
-                "bufferingSpeed" to videoEvent.bufferingSpeed,
-            )
-        )
+        queuingEventSink.success(videoEvent.toMap())
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
