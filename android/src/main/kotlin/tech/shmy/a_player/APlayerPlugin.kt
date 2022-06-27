@@ -22,6 +22,7 @@ class APlayerPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var textureRegistry: TextureRegistry
   private lateinit var binaryMessenger: BinaryMessenger
   private lateinit var context: Context
+
   init {
     AliPlayerGlobalSettings.setUseHttp2(true);
   }
@@ -34,12 +35,13 @@ class APlayerPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "initialize") {
-      val textureEntry: TextureRegistry.SurfaceTextureEntry = textureRegistry.createSurfaceTexture()
-      APlayer(context = context, textureEntry = textureEntry, binaryMessenger = binaryMessenger)
-      result.success(textureEntry.id())
-    } else {
-      result.notImplemented()
+    when (call.method) {
+      "initialize" -> {
+        val textureEntry: TextureRegistry.SurfaceTextureEntry = textureRegistry.createSurfaceTexture()
+        APlayer(context = context, textureEntry = textureEntry, binaryMessenger = binaryMessenger)
+        result.success(textureEntry.id())
+      }
+      else -> result.notImplemented()
     }
   }
 

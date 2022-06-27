@@ -186,6 +186,7 @@ class APlayer(
         val urlSource = UrlSource()
         urlSource.uri = config["url"] as String
         if (player != null) {
+            resetValue();
             val playerConfig: PlayerConfig = player!!.config;
             val userAgent: String? = config["userAgent"] as String?
             val referer: String? = config["referer"] as String?
@@ -196,7 +197,6 @@ class APlayer(
                 playerConfig.mReferrer = referer
             }
             playerConfig.customHeaders = (config["customHeaders"] as List<String>).toTypedArray()
-            resetValue();
             player!!.config = playerConfig
             player!!.setDataSource(urlSource)
         }
