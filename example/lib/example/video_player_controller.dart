@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
-import 'package:a_player/a_player_network_controller.dart';
 import 'package:a_player/a_player_value.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -202,7 +201,7 @@ mixin _VideoPlayerBatteryConnectivityPlugin {
   }
 }
 mixin _VideoPlayerGestureDetector {
-  APlayerControllerInterface get playerController;
+  APlayerController get playerController;
 
   APlayerValue get playerValue;
 
@@ -390,7 +389,7 @@ class VideoPlayerController
         _VideoPlayerResolver,
         WidgetsBindingObserver {
   @override
-  late final APlayerControllerInterface playerController;
+  late final APlayerController playerController;
   final Rx<APlayerValue> value = Rx<APlayerValue>(APlayerValue.uninitialized());
   final RxList<VideoPlayerItem> playlist = RxList<VideoPlayerItem>([]);
   final RxInt currentPlayIndex = (-1).obs;
@@ -416,7 +415,7 @@ class VideoPlayerController
   APlayerValue get playerValue => value.value;
 
   VideoPlayerController() {
-    playerController = APlayerNetworkController()..stream.listen(_listener);
+    playerController = APlayerController()..stream.listen(_listener);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -456,8 +455,7 @@ class VideoPlayerController
     isResolveFailed.value = resolve.isSuccess;
     isResolveing.value = false;
     if (index == currentPlayIndex.value && isResolveFailed.value) {
-      (playerController as APlayerNetworkController)
-          .setDataSouce(resolve.url, headers: resolve.headers);
+      playerController.setDataSouce(resolve.url, headers: resolve.headers);
       playerController.prepare();
     }
   }

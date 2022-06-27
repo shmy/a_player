@@ -4,7 +4,7 @@ import 'a_player_controller.dart';
 import 'dart:math';
 
 class APlayer extends StatefulWidget {
-  final APlayerControllerInterface controller;
+  final APlayerController controller;
 
   const APlayer({Key? key, required this.controller}) : super(key: key);
 

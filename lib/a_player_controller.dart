@@ -7,7 +7,7 @@ import 'a_player_value.dart';
 
 const _methodChannel = MethodChannel(APlayerConstant.methodChannelName);
 
-abstract class APlayerControllerInterface extends ChangeNotifier {
+class APlayerController extends ChangeNotifier {
   EventChannel? eventChannel;
   MethodChannel? methodChannel;
   int textureId = -1;
@@ -35,8 +35,29 @@ abstract class APlayerControllerInterface extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  Future<void> setDataSouce(String source);
+  Future<void> setDataSouce(String source,
+      {List<APlayerConfigHeader> headers = const [], bool isAutoPlay = true}) async {
+    String? userAgent;
+    String? referer;
+    List<String> customHeaders = [];
+    for (APlayerConfigHeader header in headers) {
+      final String key = header.key.toUpperCase();
+      if (key == "USER-AGENT") {
+        userAgent = header.value;
+      } else if (key == "REFERER") {
+        referer = header.value;
+      } else {
+        customHeaders.add('${header.key}:${header.value}');
+      }
+    }
+    await methodChannel?.invokeMethod('setDataSource', {
+      "url": source,
+      "userAgent": userAgent,
+      "referer": referer,
+      "customHeaders": customHeaders
+    });
+    prepare(isAutoPlay: isAutoPlay);
+  }
   Future<void> play() async {
     await methodChannel?.invokeMethod('play');
   }

@@ -2,7 +2,6 @@ package tech.shmy.a_player
 
 import android.content.Context
 import android.graphics.SurfaceTexture
-import android.util.Log
 import android.view.Surface
 import com.aliyun.player.AliPlayer
 import com.aliyun.player.AliPlayerFactory
@@ -45,8 +44,8 @@ class APlayer(
                 "reload" -> reload()
                 "stop" -> stop()
                 "prepare" -> prepare(call.arguments as Boolean)
-                "setNetworkDataSource" -> {
-                    setNetworkDataSource(call.arguments as Map<String, Any>)
+                "setDataSource" -> {
+                    setDataSource(call.arguments as Map<String, Any>)
                 }
                 "seekTo" -> {
                     seekTo((call.arguments as Int).toLong())
@@ -182,7 +181,7 @@ class APlayer(
         stop();
         sendEvent()
     }
-    private fun setNetworkDataSource(config: Map<String, Any>): Unit {
+    private fun setDataSource(config: Map<String, Any>): Unit {
         val urlSource = UrlSource()
         urlSource.uri = config["url"] as String
         if (player != null) {
