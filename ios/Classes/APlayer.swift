@@ -10,6 +10,7 @@ import Flutter
 import AliyunPlayer
 
 class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHandler {
+    private let queuingEventSink: QueuingEventSink = QueuingEventSink.init()
     private var player: AliPlayer? = AliPlayer.init()
     private var eventChannel: FlutterEventChannel?
     private var methodChannel: FlutterMethodChannel?
@@ -71,12 +72,12 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
         return Unmanaged<CVPixelBuffer>.passRetained(latestBuffer)
     }
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        //
+        self.queuingEventSink.setDelegate(delegate: events)
         return nil
     }
     
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        //
+        self.queuingEventSink.setDelegate(delegate: nil)
         return nil
     }
     
