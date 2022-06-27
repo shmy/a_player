@@ -9,7 +9,7 @@ import Foundation
 import Flutter
 import AliyunPlayer
 
-class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHandler {
+class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHandler, AVPDelegate {
     private let queuingEventSink: QueuingEventSink = QueuingEventSink.init()
     private var videoEvent: VideoEvent = VideoEvent.init()
     private var player: AliPlayer?
@@ -228,5 +228,85 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
         self.queuingEventSink.setDelegate(delegate: nil)
         return nil
+    }
+    func onPlayerEvent(_ player: AliPlayer!, eventType: AVPEventType) {
+        switch(eventType) {
+        case AVPEventPrepareDone:
+            self.videoEvent.duration = player.duration
+            self.videoEvent.playSpeed = player.rate
+            self.sendEvent()
+            break
+        case AVPEventLoadingStart:
+            self.videoEvent.isBuffering = true
+            self.videoEvent.bufferingPercentage = 0
+            self.sendEvent()
+            break
+        case AVPEventLoadingEnd:
+            self.videoEvent.isBuffering = false
+            self.sendEvent()
+            break
+        default:
+            break
+        }
+    }
+    func onVideoSizeChanged(_ player: AliPlayer!, width: Int32, height: Int32, rotation: Int32) {
+        self.videoEvent.height = height
+        self.videoEvent.width = width
+        self.sendEvent()
+    }
+    func onError(_ player: AliPlayer!, errorModel: AVPErrorModel!) {
+        self.videoEvent.errorDescription = "\(errorModel.code): \(String(describing: errorModel.message))"
+        self.sendEvent()
+        
+    }
+    func onCurrentDownloadSpeed(_ player: AliPlayer!, speed: Int64) {
+        self.videoEvent.bufferingSpeed = speed
+        self.sendEvent()
+    }
+    func onCurrentPositionUpdate(_ player: AliPlayer!, position: Int64) {
+        self.videoEvent.position = position
+        self.sendEvent()
+    }
+    func onLoadingProgress(_ player: AliPlayer!, progress: Float) {
+        self.videoEvent.bufferingPercentage = Int(progress)
+        self.sendEvent()
+    }
+    func onBufferedPositionUpdate(_ player: AliPlayer!, position: Int64) {
+        self.videoEvent.buffered = position
+        self.sendEvent()
+    }
+    
+    func onPlayerStatusChanged(_ player: AliPlayer!, oldStatus: AVPStatus, newStatus: AVPStatus) {
+        var state = -1
+        switch(newStatus) {
+        case AVPStatusIdle:
+            state = 0
+            break
+        case AVPStatusInitialzed:
+            state = 1
+            break
+        case AVPStatusPrepared:
+            state = 2
+            break
+        case AVPStatusStarted:
+            state = 3
+            break
+        case AVPStatusPaused:
+            state = 4
+            break
+        case AVPStatusStopped:
+            state = 5
+            break
+        case AVPStatusCompletion:
+            state = 6
+            break
+        case AVPStatusError:
+            state = 7
+            break
+        default:
+            break
+        }
+        self.videoEvent.state = state
+        self.sendEvent()
     }
 }

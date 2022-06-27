@@ -11,8 +11,8 @@ class VideoEvent: NSObject {
     public var errorDescription: String
     public var duration: Int64
     public var position: Int64
-    public var height: Int
-    public var width: Int
+    public var height: Int32
+    public var width: Int32
     public var playSpeed: Float
     public var mirrorMode: Int
     public var loop: Bool
@@ -27,8 +27,8 @@ class VideoEvent: NSObject {
        errorDescription: String = "",
        duration: Int64 = 0,
        position: Int64 = 0,
-       height: Int = 0,
-       width: Int = 0,
+       height: Int32 = 0,
+       width: Int32 = 0,
        playSpeed: Float = 0.0,
        mirrorMode: Int = 0,
        loop: Bool = false,
