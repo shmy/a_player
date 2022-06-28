@@ -14,6 +14,7 @@ data class VideoEvent(
     val bufferingPercentage: Int = 0,
     val bufferingSpeed: Long = 0,
     val buffered: Long = 0,
+    val featurePictureInPicture: Boolean = false
 ) {
     fun toMap(): Map<String, Any> {
         return mapOf(
@@ -30,6 +31,7 @@ data class VideoEvent(
             "buffered" to buffered,
             "bufferingPercentage" to bufferingPercentage,
             "bufferingSpeed" to bufferingSpeed,
+            "featurePictureInPicture" to featurePictureInPicture,
         )
     }
 }

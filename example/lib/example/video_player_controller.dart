@@ -372,7 +372,6 @@ mixin _VideoPlayerGestureDetector {
     _showBarTimer = null;
   }
 }
-
 mixin _VideoPlayerResolver {
   VideoSourceResolver? _videoPlayerResolver;
   RxBool isResolveing = false.obs;
@@ -458,7 +457,6 @@ class VideoPlayerController
       playerController.setDataSouce(resolve.url, headers: resolve.headers);
     }
   }
-
   void setPlayMode(VideoPlayerPlayMode mode) {
     playMode.value = mode;
     switch (playMode.value) {
@@ -599,6 +597,9 @@ class VideoPlayerController
     playerController.seekTo(value.toInt());
     playerController.play();
     _showBar();
+  }
+  void enterPip() {
+    playerController.enterPip(Get.context!);
   }
 
   @override

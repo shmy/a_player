@@ -7,7 +7,7 @@ import 'a_player_value.dart';
 
 const _methodChannel = MethodChannel(APlayerConstant.methodChannelName);
 
-class APlayerController extends ChangeNotifier {
+class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   EventChannel? eventChannel;
   MethodChannel? methodChannel;
   int textureId = -1;
@@ -15,30 +15,40 @@ class APlayerController extends ChangeNotifier {
   APlayerMirrorMode _mirrorMode = APlayerMirrorMode.none;
   int _videoHeight = 0;
   int _videoWidth = 0;
-  final StreamController<APlayerValue> _streamController = StreamController<APlayerValue>();
+  final StreamController<APlayerValue> _streamController =
+      StreamController<APlayerValue>();
 
   bool get hasTextureId => textureId != -1;
 
   APlayerFit get fit => _fit;
-  APlayerMirrorMode get mirrorMode => _mirrorMode;
-  int get videoHeight => _videoHeight;
-  int get videoWidth => _videoWidth;
 
+  APlayerMirrorMode get mirrorMode => _mirrorMode;
+
+  int get videoHeight => _videoHeight;
+
+  int get videoWidth => _videoWidth;
+  bool isPipMode = false;
+  BuildContext? context;
   Stream<APlayerValue> get stream => _streamController.stream;
+
   @mustCallSuper
   Future<void> initialize() async {
-    final textureId =
-        await _methodChannel.invokeMethod<int>('initialize');
+    final textureId = await _methodChannel.invokeMethod<int>('initialize');
     if (textureId != null) {
+      WidgetsBinding.instance.addObserver(this);
       this.textureId = textureId;
-      eventChannel = EventChannel('${APlayerConstant.playerEventChanneName}$textureId');
-      methodChannel = MethodChannel('${APlayerConstant.playerMethodChannelName}$textureId');
+      eventChannel =
+          EventChannel('${APlayerConstant.playerEventChanneName}$textureId');
+      methodChannel =
+          MethodChannel('${APlayerConstant.playerMethodChannelName}$textureId');
       _listen();
       notifyListeners();
     }
   }
+
   Future<void> setDataSouce(String source,
-      {List<APlayerConfigHeader> headers = const [], bool isAutoPlay = true}) async {
+      {List<APlayerConfigHeader> headers = const [],
+      bool isAutoPlay = true}) async {
     String? userAgent;
     String? referer;
     List<String> customHeaders = [];
@@ -60,6 +70,7 @@ class APlayerController extends ChangeNotifier {
     });
     prepare(isAutoPlay: isAutoPlay);
   }
+
   Future<void> play() async {
     await methodChannel?.invokeMethod('play');
   }
@@ -98,6 +109,39 @@ class APlayerController extends ChangeNotifier {
     await methodChannel?.invokeMethod('setHardwareDecoderEnable', loop);
   }
 
+  void enterPip(BuildContext context) {
+    if (isPipMode) {
+      return;
+    }
+    methodChannel?.invokeMethod('enterPip').then((isOpened) {
+      isPipMode = isOpened;
+      if (isOpened) {
+        this.context = context;
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+          return Material(
+            color: Colors.black,
+            child: Align(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Texture(
+                  textureId: textureId,
+                ),
+              ),
+            ),
+          );
+        }));
+      } else {
+        methodChannel?.invokeMethod('openSettings');
+      }
+    });
+
+  }
+  void exitPip() {
+    isPipMode = false;
+    if (context != null) {
+      Navigator.of(context!).pop();
+    }
+  }
   void setFit(APlayerFit fit) async {
     _fit = fit;
     notifyListeners();
@@ -107,6 +151,7 @@ class APlayerController extends ChangeNotifier {
     _mirrorMode = mode;
     notifyListeners();
   }
+
   void _listen() {
     eventChannel?.receiveBroadcastStream().listen((event) {
       final APlayerValue value = APlayerValue.fromJSON(event);
@@ -126,6 +171,17 @@ class APlayerController extends ChangeNotifier {
   void dispose() {
     super.dispose();
     _streamController.close();
+    WidgetsBinding.instance.removeObserver(this);
     release();
+  }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+        break;
+      case AppLifecycleState.resumed:
+        exitPip();
+        break;
+    }
   }
 }

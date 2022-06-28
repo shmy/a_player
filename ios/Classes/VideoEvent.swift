@@ -20,6 +20,7 @@ class VideoEvent: NSObject {
     public var bufferingPercentage: Int
     public var bufferingSpeed: Int64
     public var buffered: Int64
+    public var featurePictureInPicture: Bool
    
     init(
        state: Int = -1,
@@ -34,7 +35,8 @@ class VideoEvent: NSObject {
        isBuffering: Bool = false,
        bufferingPercentage: Int = 0,
        bufferingSpeed: Int64 = 0,
-       buffered: Int64 = 0
+       buffered: Int64 = 0,
+       featurePictureInPicture: Bool = false
     
     ) {
         self.state = state
@@ -50,6 +52,7 @@ class VideoEvent: NSObject {
         self.bufferingPercentage = bufferingPercentage
         self.bufferingSpeed = bufferingSpeed
         self.buffered = buffered
+        self.featurePictureInPicture = featurePictureInPicture
     }
     
     func toMap() -> Dictionary<String, Any> {
@@ -66,7 +69,8 @@ class VideoEvent: NSObject {
             "isBuffering": isBuffering,
             "bufferingPercentage": bufferingPercentage,
             "bufferingSpeed": bufferingSpeed,
-            "buffered": buffered
+            "buffered": buffered,
+            "featurePictureInPicture": featurePictureInPicture
         ]
     }
     

@@ -1,8 +1,17 @@
 package tech.shmy.a_player
 
+import android.app.Activity
+import android.app.PictureInPictureParams
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.graphics.SurfaceTexture
+import android.os.Build
+import android.provider.Settings
+import android.util.Rational
 import android.view.Surface
+import android.widget.Toast
 import com.aliyun.player.AliPlayer
 import com.aliyun.player.AliPlayerFactory
 import com.aliyun.player.IPlayer
@@ -17,6 +26,7 @@ import io.flutter.view.TextureRegistry
 
 class APlayer(
     private val context: Context,
+    private val activity: Activity,
     private val textureEntry: TextureRegistry.SurfaceTextureEntry,
     private val binaryMessenger: BinaryMessenger
 ) : EventChannel.StreamHandler {
@@ -39,29 +49,59 @@ class APlayer(
         eventChannel.setStreamHandler(this)
         methodChannel.setMethodCallHandler { call, result ->
             when (call.method) {
-                "play" -> play()
-                "pause" -> pause()
-                "stop" -> stop()
-                "prepare" -> prepare(call.arguments as Boolean)
+                "play" -> {
+                    play()
+                    result.success(null)
+                }
+                "pause" -> {
+                    pause()
+                    result.success(null)
+                }
+                "stop" -> {
+                    stop()
+                    result.success(null)
+                }
+                "prepare" -> {
+                    prepare(call.arguments as Boolean)
+                    result.success(null)
+                }
                 "setDataSource" -> {
                     setDataSource(call.arguments as Map<String, Any>)
+                    result.success(null)
                 }
                 "seekTo" -> {
                     seekTo((call.arguments as Int).toLong())
+                    result.success(null)
                 }
                 "setSpeed" -> {
                     setSpeed((call.arguments as Double).toFloat())
+                    result.success(null)
                 }
                 "setLoop" -> {
                     setLoop(call.arguments as Boolean)
+                    result.success(null)
                 }
                 "setHardwareDecoderEnable" -> {
                     setHardwareDecoderEnable(call.arguments as Boolean)
+                    result.success(null)
                 }
-                "release" -> release()
+                "enterPip" -> {
+                    result.success(enterPip())
+                }
+                "openSettings" -> {
+                    openSettings()
+                    result.success(null)
+                }
+                "release" -> {
+                    release()
+                    result.success(null)
+                }
+                else -> {
+                    result.notImplemented()
+                }
             }
-            result.success(null)
         }
+
     }
 
     private fun createPlayer(): Unit {
@@ -71,6 +111,10 @@ class APlayer(
         config.mMaxBackwardBufferDurationMs = 1 * 60 * 10
         player!!.config = config
         player!!.volume = 1.0f
+        videoEvent = videoEvent.copy(
+            featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+        )
+        sendEvent()
         setupPlayer()
     }
 
@@ -166,7 +210,7 @@ class APlayer(
     private fun resetValue(): Unit {
         videoEvent = videoEvent.copy(
             state = IPlayer.idle,
-            position =  0,
+            position = 0,
             duration = 0,
             isBuffering = false,
             buffered = 0,
@@ -177,6 +221,7 @@ class APlayer(
         stop();
         sendEvent()
     }
+
     private fun setDataSource(config: Map<String, Any>): Unit {
         val urlSource = UrlSource()
         urlSource.uri = config["url"] as String
@@ -196,6 +241,7 @@ class APlayer(
             player!!.setDataSource(urlSource)
         }
     }
+
     private fun prepare(isAutoPlay: Boolean): Unit {
         player?.isAutoPlay = isAutoPlay
         player?.prepare()
@@ -249,7 +295,7 @@ class APlayer(
         player?.enableHardwareDecoder(enable)
         if (player != null) {
             prepare(player!!.isAutoPlay)
-            videoEvent = VideoEvent().copy(
+            videoEvent = videoEvent.copy(
                 enableHardwareDecoder = enable
             )
             sendEvent()
@@ -270,6 +316,36 @@ class APlayer(
 
     private fun sendEvent(): Unit {
         queuingEventSink.success(videoEvent.toMap())
+    }
+
+    private fun enterPip(): Boolean {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                var builder: PictureInPictureParams.Builder =
+                    PictureInPictureParams.Builder()
+                        .setAspectRatio(Rational(16, 9))
+                        .setSourceRectHint(Rect(0, 0, 0, 0))
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    builder = builder.setSeamlessResizeEnabled(true)
+                }
+                return activity.enterPictureInPictureMode(
+                    builder.build()
+                )
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
+                activity.enterPictureInPictureMode();
+                return true;
+            }
+            else -> {
+                return false;
+            }
+        }
+    }
+    private fun openSettings(): Unit {
+        Toast.makeText(
+            context, "请在设置-画中画, 选择本App, 允许进入画中画模式", Toast.LENGTH_SHORT
+        ).show()
+        activity.startActivity(Intent(Settings.ACTION_SETTINGS))
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {

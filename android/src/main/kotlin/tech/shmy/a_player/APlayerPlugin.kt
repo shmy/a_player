@@ -1,10 +1,13 @@
 package tech.shmy.a_player
 
+import android.app.Activity
 import android.content.Context
 import androidx.annotation.NonNull
 import com.aliyun.player.AliPlayerGlobalSettings
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -13,7 +16,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.view.TextureRegistry
 
 /** APlayerPlugin */
-class APlayerPlugin: FlutterPlugin, MethodCallHandler {
+class APlayerPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -21,10 +24,11 @@ class APlayerPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private lateinit var textureRegistry: TextureRegistry
   private lateinit var binaryMessenger: BinaryMessenger
+  private lateinit var activity: Activity
   private lateinit var context: Context
 
   init {
-    AliPlayerGlobalSettings.setUseHttp2(true);
+    AliPlayerGlobalSettings.setUseHttp2(true)
   }
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, METHOD_CHANNEL_NAME)
@@ -38,7 +42,7 @@ class APlayerPlugin: FlutterPlugin, MethodCallHandler {
     when (call.method) {
       "initialize" -> {
         val textureEntry: TextureRegistry.SurfaceTextureEntry = textureRegistry.createSurfaceTexture()
-        APlayer(context = context, textureEntry = textureEntry, binaryMessenger = binaryMessenger)
+        APlayer(activity = activity, context = context, textureEntry = textureEntry, binaryMessenger = binaryMessenger)
         result.success(textureEntry.id())
       }
       else -> result.notImplemented()
@@ -47,5 +51,19 @@ class APlayerPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+  }
+
+  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    activity = binding.activity
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
+  }
+
+  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    onAttachedToActivity(binding)
+  }
+
+  override fun onDetachedFromActivity() {
   }
 }
