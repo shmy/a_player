@@ -12,6 +12,7 @@ class APlayerController extends ChangeNotifier {
   MethodChannel? methodChannel;
   int textureId = -1;
   APlayerFit _fit = APlayerFit.contain;
+  APlayerMirrorMode _mirrorMode = APlayerMirrorMode.none;
   int _videoHeight = 0;
   int _videoWidth = 0;
   final StreamController<APlayerValue> _streamController = StreamController<APlayerValue>();
@@ -19,6 +20,7 @@ class APlayerController extends ChangeNotifier {
   bool get hasTextureId => textureId != -1;
 
   APlayerFit get fit => _fit;
+  APlayerMirrorMode get mirrorMode => _mirrorMode;
   int get videoHeight => _videoHeight;
   int get videoWidth => _videoWidth;
 
@@ -92,10 +94,6 @@ class APlayerController extends ChangeNotifier {
     await methodChannel?.invokeMethod('seekTo', position);
   }
 
-  Future<void> setMirrorMode(int mode) async {
-    await methodChannel?.invokeMethod('setMirrorMode', mode);
-  }
-
   Future<void> setHardwareDecoderEnable(bool loop) async {
     await methodChannel?.invokeMethod('setHardwareDecoderEnable', loop);
   }
@@ -105,6 +103,10 @@ class APlayerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setMirrorMode(APlayerMirrorMode mode) async {
+    _mirrorMode = mode;
+    notifyListeners();
+  }
   void _listen() {
     eventChannel?.receiveBroadcastStream().listen((event) {
       final APlayerValue value = APlayerValue.fromJSON(event);

@@ -52,9 +52,6 @@ class APlayer(
                 "setSpeed" -> {
                     setSpeed((call.arguments as Double).toFloat())
                 }
-                "setMirrorMode" -> {
-                    setMirrorMode(call.arguments as Int)
-                }
                 "setLoop" -> {
                     setLoop(call.arguments as Boolean)
                 }
@@ -237,22 +234,6 @@ class APlayer(
         }
     }
 
-    private fun setMirrorMode(mode: Int): Unit {
-        when (mode) {
-            IPlayer.MirrorMode.MIRROR_MODE_HORIZONTAL.value -> player?.mirrorMode =
-                IPlayer.MirrorMode.MIRROR_MODE_HORIZONTAL
-            IPlayer.MirrorMode.MIRROR_MODE_VERTICAL.value -> player?.mirrorMode =
-                IPlayer.MirrorMode.MIRROR_MODE_VERTICAL
-            else -> player?.mirrorMode = IPlayer.MirrorMode.MIRROR_MODE_NONE
-        }
-        if (player != null) {
-            videoEvent = videoEvent.copy(
-                mirrorMode = player!!.mirrorMode.value
-            )
-            sendEvent()
-        }
-    }
-
     private fun setLoop(loop: Boolean): Unit {
         player?.isLoop = loop
         if (player != null) {
@@ -264,7 +245,7 @@ class APlayer(
     }
 
     private fun setHardwareDecoderEnable(enable: Boolean): Unit {
-        player?.reload()
+        resetValue()
         player?.enableHardwareDecoder(enable)
         if (player != null) {
             prepare(player!!.isAutoPlay)

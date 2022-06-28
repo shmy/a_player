@@ -63,9 +63,6 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
               case "setSpeed":
                 self?.setSpeed(speed: call.arguments as! Float)
                 break
-              case "setMirrorMode":
-                self?.setMirrorMode(mode: call.arguments as! Int)
-                break
               case "setLoop":
                 self?.setLoop(loop: call.arguments as! Bool)
                 break
@@ -156,29 +153,7 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
             self.sendEvent()
         }
     }
-    private func setMirrorMode(mode: Int) -> Void {
-        var avpMirrorMode: AVPMirrorMode
-        var newMirrorMode: Int
-        switch (mode) {
-        case 1:
-            avpMirrorMode = AVP_MIRRORMODE_HORIZONTAL
-            newMirrorMode = 1
-            break
-        case 2:
-            avpMirrorMode = AVP_MIRRORMODE_VERTICAL
-            newMirrorMode = 2
-            break
-        default:
-            avpMirrorMode = AVP_MIRRORMODE_NONE
-            newMirrorMode = 0
-            break
-        }
-        self.player?.mirrorMode = avpMirrorMode
-        if (self.player != nil) {
-            self.videoEvent.mirrorMode = newMirrorMode
-            self.sendEvent()
-        }
-    }
+    
     private func setLoop(loop: Bool) -> Void {
         self.player?.isLoop = loop
         if (self.player != nil) {
@@ -187,7 +162,7 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
         }
     }
     private func setHardwareDecoderEnable(enable: Bool) -> Void {
-        self.player?.reload()
+        self.resetValue()
         self.player?.enableHardwareDecoder = enable
         if (self.player != nil) {
             self.prepare(isAutoPlay: self.player!.isAutoPlay)

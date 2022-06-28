@@ -77,10 +77,10 @@ mixin _VideoPlayerOptions {
         '播完暂停', VideoPlayerPlayMode.pauseAfterCompleted),
   ];
 
-  final List<LableValue<int>> mirrorModeList = [
-    LableValue<int>('默认', 0),
-    LableValue<int>('水平镜像', 1),
-    LableValue<int>('垂直镜像', 2),
+  final List<LableValue<APlayerMirrorMode>> mirrorModeList = [
+    LableValue<APlayerMirrorMode>('默认', APlayerMirrorMode.none),
+    LableValue<APlayerMirrorMode>('水平镜像', APlayerMirrorMode.horizontal),
+    LableValue<APlayerMirrorMode>('垂直镜像', APlayerMirrorMode.vertical),
   ];
 
   final List<LableValue<bool>> decoderList = [

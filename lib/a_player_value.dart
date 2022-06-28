@@ -39,6 +39,11 @@ class APlayerFit {
   static const APlayerFit ar4_3 = APlayerFit(aspectRatio: 4.0 / 3.0);
   static const APlayerFit ar1_1 = APlayerFit(aspectRatio: 1.0 / 1.0);
 }
+enum APlayerMirrorMode {
+  none,
+  horizontal,
+  vertical
+}
 
 class _APlayerState {
   static const int unknow = -1;
@@ -60,7 +65,6 @@ class APlayerValue {
   final int height;
   final int width;
   final double playSpeed;
-  final int mirrorMode;
   final bool loop;
   final bool enableHardwareDecoder;
   final bool isBuffering;
@@ -94,7 +98,6 @@ class APlayerValue {
       required this.height,
       required this.width,
       required this.playSpeed,
-      required this.mirrorMode,
       required this.loop,
       required this.enableHardwareDecoder,
       required this.isBuffering,
@@ -104,7 +107,7 @@ class APlayerValue {
 
   @override
   String toString() {
-    return 'APlayerValue(state: $state, errorDescription: $errorDescription, duration: $duration, position: $position, height: $height, width: $width, playSpeed: $playSpeed, mirrorMode: $mirrorMode, loop: $loop, enableHardwareDecoder: $enableHardwareDecoder, isBuffering: $isBuffering, bufferingPercentage: $bufferingPercentage, bufferingSpeed: $bufferingSpeed, buffered: $buffered)';
+    return 'APlayerValue(state: $state, errorDescription: $errorDescription, duration: $duration, position: $position, height: $height, width: $width, playSpeed: $playSpeed, loop: $loop, enableHardwareDecoder: $enableHardwareDecoder, isBuffering: $isBuffering, bufferingPercentage: $bufferingPercentage, bufferingSpeed: $bufferingSpeed, buffered: $buffered)';
   }
 
   factory APlayerValue.uninitialized() => APlayerValue(
@@ -115,7 +118,6 @@ class APlayerValue {
         height: 9,
         width: 16,
         playSpeed: 1.0,
-        mirrorMode: 0,
         loop: false,
         enableHardwareDecoder: true,
         isBuffering: false,
@@ -132,7 +134,6 @@ class APlayerValue {
         height: json['height'],
         width: json['width'],
         playSpeed: json['playSpeed'],
-        mirrorMode: json['mirrorMode'],
         loop: json['loop'],
         enableHardwareDecoder: json['enableHardwareDecoder'],
         isBuffering: json['isBuffering'],

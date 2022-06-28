@@ -15,6 +15,7 @@ class APlayer extends StatefulWidget {
 class _APlayerState extends State<APlayer> {
   int _videoHeight = 0;
   int _videoWidth = 0;
+
   @override
   void initState() {
     widget.controller.addListener(_listenter);
@@ -47,8 +48,9 @@ class _APlayerState extends State<APlayer> {
         return LayoutBuilder(
           builder: (context, constraints) {
             final APlayerFit fit = widget.controller.fit;
-            final Size childSize = getTxSize(constraints, fit);
-            final Offset offset = getTxOffset(constraints, childSize, fit);
+            final APlayerMirrorMode mirrorMode = widget.controller.mirrorMode;
+            final Size childSize = _getTxSize(constraints, fit);
+            final Offset offset = _getTxOffset(constraints, childSize, fit);
             final Rect pos = Rect.fromLTWH(
                 offset.dx, offset.dy, childSize.width, childSize.height);
 
@@ -56,7 +58,11 @@ class _APlayerState extends State<APlayer> {
               children: [
                 Positioned.fromRect(
                   rect: pos,
-                  child: texture,
+                  child: Transform(
+                    transform: _getMatrix4(mirrorMode),
+                    alignment: Alignment.center,
+                    child: texture,
+                  ),
                 ),
               ],
             );
@@ -65,9 +71,20 @@ class _APlayerState extends State<APlayer> {
       }),
     );
   }
-  Size getTxSize(BoxConstraints constraints, APlayerFit fit) {
-    Size childSize = applyAspectRatio(
-        constraints, getAspectRatio(constraints, fit.aspectRatio));
+  Matrix4 _getMatrix4(APlayerMirrorMode mirrorMode) {
+    Matrix4 matrix4 = Matrix4.identity();
+    switch (mirrorMode) {
+      case APlayerMirrorMode.none:
+        return matrix4;
+      case APlayerMirrorMode.horizontal:
+        return matrix4..rotateY(pi);
+      case APlayerMirrorMode.vertical:
+        return matrix4..rotateX(pi);
+    }
+  }
+  Size _getTxSize(BoxConstraints constraints, APlayerFit fit) {
+    Size childSize = _applyAspectRatio(
+        constraints, _getAspectRatio(constraints, fit.aspectRatio));
     double sizeFactor = fit.sizeFactor;
     if (-1.0 < sizeFactor && sizeFactor < -0.0) {
       sizeFactor = max(constraints.maxWidth / childSize.width,
@@ -82,7 +99,8 @@ class _APlayerState extends State<APlayer> {
     childSize = childSize * sizeFactor;
     return childSize;
   }
-  Size applyAspectRatio(BoxConstraints constraints, double aspectRatio) {
+
+  Size _applyAspectRatio(BoxConstraints constraints, double aspectRatio) {
     assert(constraints.hasBoundedHeight && constraints.hasBoundedWidth);
 
     constraints = constraints.loosen();
@@ -119,7 +137,8 @@ class _APlayerState extends State<APlayer> {
 
     return constraints.constrain(Size(width, height));
   }
-  double getAspectRatio(BoxConstraints constraints, double ar) {
+
+  double _getAspectRatio(BoxConstraints constraints, double ar) {
     if (ar < 0) {
       ar = _videoWidth / _videoHeight;
     } else if (ar.isInfinite) {
@@ -127,7 +146,9 @@ class _APlayerState extends State<APlayer> {
     }
     return ar;
   }
-  Offset getTxOffset(BoxConstraints constraints, Size childSize, APlayerFit fit) {
+
+  Offset _getTxOffset(
+      BoxConstraints constraints, Size childSize, APlayerFit fit) {
     final Alignment resolvedAlignment = fit.alignment;
     final Offset diff = (constraints.biggest - childSize) as Offset;
     return resolvedAlignment.alongOffset(diff);

@@ -385,7 +385,7 @@ class VideoPlayer extends StatelessWidget {
                 _buildTitle('镜像翻转'),
                 _buildRadius(
                   options: controller.mirrorModeList,
-                  value: controller.playerValue.mirrorMode,
+                  value: controller.playerController.mirrorMode,
                   onTap: controller.playerController.setMirrorMode,
                 ),
                 _buildTitle('解码方式', subtitle: '如遇播放异常，可尝试切换'),
