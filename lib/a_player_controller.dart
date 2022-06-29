@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'a_player_constant.dart';
@@ -29,7 +30,9 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   int get videoWidth => _videoWidth;
   bool isPipMode = false;
   BuildContext? context;
+
   Stream<APlayerValue> get stream => _streamController.stream;
+  Throttle<APlayerValue>? _streamThrottle;
 
   @mustCallSuper
   Future<void> initialize() async {
@@ -41,6 +44,11 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
           EventChannel('${APlayerConstant.playerEventChanneName}$textureId');
       methodChannel =
           MethodChannel('${APlayerConstant.playerMethodChannelName}$textureId');
+      _streamThrottle = Throttle<APlayerValue>(
+          const Duration(milliseconds: 100),
+          initialValue: APlayerValue.uninitialized(), onChanged: (value) {
+        _streamController.add(value);
+      });
       _listen();
       notifyListeners();
     }
@@ -134,14 +142,15 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
         methodChannel?.invokeMethod('openSettings');
       }
     });
-
   }
+
   void exitPip() {
     isPipMode = false;
     if (context != null) {
       Navigator.of(context!).pop();
     }
   }
+
   void setFit(APlayerFit fit) async {
     _fit = fit;
     notifyListeners();
@@ -161,7 +170,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
         notifyListeners();
       }
       if (!_streamController.isClosed) {
-        _streamController.add(value);
+        _streamThrottle?.setValue(value);
       }
     });
   }
@@ -171,9 +180,12 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   void dispose() {
     super.dispose();
     _streamController.close();
+    _streamThrottle?.cancel();
+    _streamThrottle = null;
     WidgetsBinding.instance.removeObserver(this);
     release();
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
@@ -181,6 +193,8 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         exitPip();
+        break;
+      default:
         break;
     }
   }
