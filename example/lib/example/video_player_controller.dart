@@ -397,6 +397,15 @@ mixin _VideoDlnaPlugin {
     );
   }
 
+  Future<bool> _playToDLAN(device d, String url) async {
+    try {
+      await d.setUrl(url);
+      await d.play();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
   Future<void> _initDlnaPlugin() async {
     _searcher = search();
     final manager m = await _searcher!.start();
@@ -405,7 +414,6 @@ mixin _VideoDlnaPlugin {
       _getDeviceList(m);
     });
   }
-
   void _deinitDlnaPlugin() {
     _searcher?.stop();
     _searcher = null;
@@ -449,7 +457,7 @@ class VideoPlayerController
     }
     return playlist[currentPlayIndex.value];
   }
-
+  String _realPlayUrl = '';
   String get currentPlayUrl => currentPlayItem?.source ?? '';
 
   String get title => currentPlayItem?.title ?? '';
@@ -491,6 +499,7 @@ class VideoPlayerController
 
   void playByIndex(int index) async {
     _showBar();
+    _realPlayUrl = '';
     isResolveFailed.value = true;
     isResolveing.value = true;
     currentPlayIndex.value = index;
@@ -499,6 +508,7 @@ class VideoPlayerController
     isResolveFailed.value = resolve.isSuccess;
     isResolveing.value = false;
     if (index == currentPlayIndex.value && isResolveFailed.value) {
+      _realPlayUrl = resolve.url;
       playerController.setDataSouce(resolve.url, headers: resolve.headers);
     }
   }
@@ -583,7 +593,7 @@ class VideoPlayerController
     playerController.play();
   }
   Future<void> playToDLAN(device d) async {
-
+    await _playToDLAN(d, _realPlayUrl);
   }
   void dispose() {
     Wakelock.disable();
@@ -594,6 +604,7 @@ class VideoPlayerController
     _deinitBatteryConnectivityPlugin();
     _deinitDlnaPlugin();
     currentPlayIndex.value = -1;
+    _realPlayUrl = '';
     _clearShowBarTimer();
     playerController.dispose();
   }

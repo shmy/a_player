@@ -1,4 +1,3 @@
-[ ] 投屏 - flutter 实现
 [ ] 暂停广告 - flutter 实现
 [ ] 片头广告 - flutter 实现
 [ ] 历史记录,解析失败选择线路 - flutter 实现
@@ -7,6 +6,7 @@
 [-] 封面 - flutter 实现
 [-] 重新设置dataSource后，原来的下载没有取消
 [-] 下载
+[x] 投屏 - flutter 实现
 [x] PIP
 [x] 自动隐藏控制条
 [x] 长按倍速后恢复长按之前的倍数
