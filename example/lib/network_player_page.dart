@@ -75,6 +75,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Player Page'),),
       body: Column(
         children: [
           VideoPlayer(controller: controller),

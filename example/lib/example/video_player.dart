@@ -158,6 +158,13 @@ class VideoPlayer extends StatelessWidget {
                     width: gap,
                   ),
                   _buildClickableIcon(
+                    icon: Icons.connected_tv_rounded,
+                    onTap: () => controller.showDlnaSheet(),
+                  ),
+                  SizedBox(
+                    width: gap,
+                  ),
+                  _buildClickableIcon(
                     icon: Icons.more_vert_outlined,
                     onTap: () => controller.toggleSettings(),
                   )

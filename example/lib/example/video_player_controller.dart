@@ -4,9 +4,11 @@ import 'dart:io';
 import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_value.dart';
+import 'package:a_player_example/example/dlna_page.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
+import 'package:dlna_dart/dlna.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -377,6 +379,46 @@ mixin _VideoPlayerResolver {
   RxBool isResolveing = false.obs;
   RxBool isResolveFailed = false.obs;
 }
+mixin _VideoDlnaPlugin {
+  final RxMap<String, device> _cacheDevice = RxMap<String, device>();
+
+  List<device> get deviceList => _cacheDevice.values.toList();
+  late final StreamSubscription<DeviceOrientation> subscription;
+  Timer? _searcherTimer;
+  search? _searcher;
+
+  Future<void> _showDlnaSheet(VideoPlayerController controller) async {
+   await Get.bottomSheet(
+      DlnaPage(controller: controller,),
+      backgroundColor: Colors.black,
+      isScrollControlled: true,
+      elevation: 0,
+      barrierColor: Colors.transparent,
+    );
+  }
+
+  Future<void> _initDlnaPlugin() async {
+    _searcher = search();
+    final manager m = await _searcher!.start();
+    Timer.periodic(const Duration(seconds: 3), (timer) {
+      _searcherTimer = timer;
+      _getDeviceList(m);
+    });
+  }
+
+  void _deinitDlnaPlugin() {
+    _searcher?.stop();
+    _searcher = null;
+    _searcherTimer?.cancel();
+    _searcherTimer = null;
+  }
+
+  void _getDeviceList(manager m) {
+    m.deviceList.forEach((key, value) {
+      _cacheDevice[key] = value;
+    });
+  }
+}
 
 class VideoPlayerController
     with
@@ -386,6 +428,7 @@ class VideoPlayerController
         _VideoPlayerBatteryConnectivityPlugin,
         _VideoPlayerGestureDetector,
         _VideoPlayerResolver,
+        _VideoDlnaPlugin,
         WidgetsBindingObserver {
   @override
   late final APlayerController playerController;
@@ -396,6 +439,7 @@ class VideoPlayerController
       Rx<VideoPlayerPlayMode>(VideoPlayerPlayMode.listLoop);
   bool _appPaused = false;
   bool _willPlayResumed = false;
+
   VideoPlayerItem? get currentPlayItem {
     if (currentPlayIndex.value == -1) {
       return null;
@@ -423,6 +467,7 @@ class VideoPlayerController
     _initOrientationPlugin();
     _initVolumeBrightnessPlugin();
     _initBatteryConnectivityPlugin();
+    _initDlnaPlugin();
     _showBar();
     return playerController.initialize();
   }
@@ -457,6 +502,7 @@ class VideoPlayerController
       playerController.setDataSouce(resolve.url, headers: resolve.headers);
     }
   }
+
   void setPlayMode(VideoPlayerPlayMode mode) {
     playMode.value = mode;
     switch (playMode.value) {
@@ -531,7 +577,14 @@ class VideoPlayerController
       Get.back();
     }
   }
+  Future<void> showDlnaSheet() async {
+    playerController.pause();
+    await _showDlnaSheet(this);
+    playerController.play();
+  }
+  Future<void> playToDLAN(device d) async {
 
+  }
   void dispose() {
     Wakelock.disable();
     _videoPlayerResolver = null;
@@ -539,6 +592,7 @@ class VideoPlayerController
     _deinitOrientationPlugin();
     _deinitVolumeBrightnessPlugin();
     _deinitBatteryConnectivityPlugin();
+    _deinitDlnaPlugin();
     currentPlayIndex.value = -1;
     _clearShowBarTimer();
     playerController.dispose();
@@ -583,10 +637,10 @@ class VideoPlayerController
 
   void onSeekChangeStart(double value) {
     isTempSeekEnable.value = true;
-    tempSeekPosition.value =
-        Duration(milliseconds: value.toInt());
+    tempSeekPosition.value = Duration(milliseconds: value.toInt());
     _clearShowBarTimer();
   }
+
   void onSeekChanged(double value) {
     tempSeekPosition.value = Duration(milliseconds: value.toInt());
   }
@@ -598,6 +652,7 @@ class VideoPlayerController
     playerController.play();
     _showBar();
   }
+
   void enterPip() {
     playerController.enterPip(Get.context!);
   }
