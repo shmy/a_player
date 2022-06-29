@@ -132,6 +132,7 @@ class APlayer(
             videoEvent = videoEvent.copy(
                 duration = player!!.duration,
                 playSpeed = player!!.speed,
+                ready = true,
             )
             sendEvent()
         }
@@ -219,6 +220,9 @@ class APlayer(
             errorDescription = "",
         )
         stop();
+        videoEvent = VideoEvent().copy(
+            featurePictureInPicture = videoEvent.featurePictureInPicture,
+        )
         sendEvent()
     }
 

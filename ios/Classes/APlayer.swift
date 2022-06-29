@@ -97,11 +97,11 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
     private func resetValue() -> Void {
         videoEvent = VideoEvent.init()
         self.stop();
+        self.videoEvent = VideoEvent.init()
         self.sendEvent()
     }
     
     private func setDataSource(config: Dictionary<String, Any>) -> Void {
-        
         let urlSource = AVPUrlSource.init().url(with: config["url"] as? String)
         if (self.player != nil) {
             self.resetValue()
@@ -214,6 +214,7 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
         case AVPEventPrepareDone:
             self.videoEvent.duration = player.duration
             self.videoEvent.playSpeed = player.rate
+            self.videoEvent.ready = true
             self.sendEvent()
             break
         case AVPEventLoadingStart:

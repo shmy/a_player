@@ -72,6 +72,7 @@ class APlayerValue {
   final int bufferingSpeed;
   final Duration buffered;
   final bool featurePictureInPicture;
+  final bool ready;
 
   bool get isUnknow => state == _APlayerState.unknow;
 
@@ -105,12 +106,8 @@ class APlayerValue {
       required this.bufferingPercentage,
       required this.bufferingSpeed,
       required this.buffered,
-      required this.featurePictureInPicture});
-
-  @override
-  String toString() {
-    return 'APlayerValue(state: $state, errorDescription: $errorDescription, duration: $duration, position: $position, height: $height, width: $width, playSpeed: $playSpeed, loop: $loop, enableHardwareDecoder: $enableHardwareDecoder, isBuffering: $isBuffering, bufferingPercentage: $bufferingPercentage, bufferingSpeed: $bufferingSpeed, buffered: $buffered)';
-  }
+      required this.featurePictureInPicture,
+      required this.ready});
 
   factory APlayerValue.uninitialized() => APlayerValue(
         state: -1,
@@ -127,6 +124,7 @@ class APlayerValue {
         bufferingSpeed: 0,
         buffered: Duration.zero,
         featurePictureInPicture: false,
+        ready: false,
       );
 
   factory APlayerValue.fromJSON(dynamic json) => APlayerValue(
@@ -144,5 +142,6 @@ class APlayerValue {
         bufferingSpeed: json['bufferingSpeed'],
         buffered: Duration(milliseconds: json['buffered']),
         featurePictureInPicture: json['featurePictureInPicture'],
+        ready: json['ready'],
       );
 }
