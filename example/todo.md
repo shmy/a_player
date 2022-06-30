@@ -1,7 +1,8 @@
 [ ] 暂停广告 - flutter 实现
 [ ] 片头广告 - flutter 实现
-[ ] 历史记录,解析失败选择线路 - flutter 实现
-[ ] 指定位置播放 - flutter 实现
+[ ] 解析失败选择线路 - flutter 实现
+[x] 历史记录 - flutter 实现
+[x] 指定位置播放 - flutter 实现
 [-] 截图 - flutter 实现
 [-] 封面 - flutter 实现
 [-] 重新设置dataSource后，原来的下载没有取消
