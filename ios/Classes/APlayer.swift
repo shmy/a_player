@@ -170,7 +170,7 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
        }
     }
     private func release() -> Void {
-        self.player?.stop()
+        self.player?.destroy()
         self.player?.delegate = nil
         self.player?.renderDelegate = nil
         self.player = nil
