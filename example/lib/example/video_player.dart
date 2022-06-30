@@ -10,11 +10,15 @@ import 'video_player_util.dart';
 
 const _iconFontFamily = 'MaterialIcons';
 const _animationDuration = Duration(milliseconds: 300);
+final double videoPlayerHeight = 220.rpx;
 
 class VideoPlayer extends StatelessWidget {
   final VideoPlayerController controller;
+  final bool featureDLNA;
 
-  const VideoPlayer({Key? key, required this.controller}) : super(key: key);
+  const VideoPlayer(
+      {Key? key, required this.controller, this.featureDLNA = true})
+      : super(key: key);
 
   double get topBarHeight => controller.isFullscreen.value ? 44.rpx : 32.rpx;
 
@@ -48,7 +52,7 @@ class VideoPlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: SizedBox(
-        height: 240.rpx,
+        height: videoPlayerHeight,
         width: double.infinity,
         child: Obx(
           () => DefaultTextStyle(
@@ -145,29 +149,30 @@ class VideoPlayer extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (controller.playerValue.featurePictureInPicture)
-                  SizedBox(
-                    width: gap,
+                  if (controller.playerValue.featurePictureInPicture &&
+                      controller.ready)
+                    Padding(
+                      padding: EdgeInsets.only(left: gap),
+                      child: _buildClickableIcon(
+                        icon: Icons.picture_in_picture_alt,
+                        onTap: () => controller.enterPip(),
+                      ),
+                    ),
+                  if (featureDLNA && controller.ready)
+                    Padding(
+                      padding: EdgeInsets.only(left: gap * 2),
+                      child: _buildClickableIcon(
+                        icon: Icons.connected_tv_rounded,
+                        onTap: () => controller.showDlnaSheet(),
+                      ),
+                    ),
+                  Padding(
+                    padding: EdgeInsets.only(left: gap),
+                    child: _buildClickableIcon(
+                      icon: Icons.more_vert_outlined,
+                      onTap: () => controller.toggleSettings(),
+                    ),
                   ),
-                  if (controller.playerValue.featurePictureInPicture)
-                    _buildClickableIcon(
-                    icon: Icons.picture_in_picture_alt,
-                    onTap: () => controller.enterPip(),
-                  ),
-                  SizedBox(
-                    width: gap,
-                  ),
-                  _buildClickableIcon(
-                    icon: Icons.connected_tv_rounded,
-                    onTap: () => controller.showDlnaSheet(),
-                  ),
-                  SizedBox(
-                    width: gap,
-                  ),
-                  _buildClickableIcon(
-                    icon: Icons.more_vert_outlined,
-                    onTap: () => controller.toggleSettings(),
-                  )
                 ],
               ),
             ],
@@ -243,95 +248,106 @@ class VideoPlayer extends StatelessWidget {
           child: _buildBar(
             height: bottomBarHeight,
             alignment: Alignment.topCenter,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Obx(() {
-                  IconData icon = Icons.block;
-                  if (controller.playerValue.isStarted) {
-                    icon = Icons.pause;
-                  }
-                  if (controller.playerValue.isPaused ||
-                      controller.playerValue.isError ||
-                      controller.playerValue.isCompletion) {
-                    icon = Icons.play_arrow;
-                  }
-                  return _buildClickableIcon(
-                      icon: icon, onTap: () => controller.onDoubleTap());
-                }),
-                SizedBox(
-                  width: gap,
-                ),
-                Text(
-                  VideoPlayerUtil.formatDuration(
-                      controller.isTempSeekEnable.value
-                          ? controller.tempSeekPosition.value
-                          : controller.playerValue.position),
-                  style: TextStyle(fontSize: primaryFontSize),
-                ),
-                SizedBox(
-                  width: gap * 2,
-                ),
-                Expanded(
-                  child: SizedBox(
-                    height: topBarHeight / 2,
-                    child: Obx(
-                      () {
-                        return VideoPlayerProgress(
-                          onChanged: (double value) =>
-                              controller.onSeekChanged(value),
-                          onChangeStart: (double value) =>
-                              controller.onSeekChangeStart(value),
-                          onChangeEnd: (double value) =>
-                              controller.onSeekChangeEnd(value),
-                          position: controller.isTempSeekEnable.value
-                              ? controller.tempSeekPosition.value
-                              : controller.playerValue.position,
-                          duration: controller.playerValue.duration,
-                          barHeight: 3.rpx,
-                          handleHeight:
-                              controller.isFullscreen.value ? 18.rpx : 14.rpx,
-                          buffered: controller.playerValue.buffered,
-                          colors: VideoPlayerProgressColors(
-                            backgroundColor: Colors.white.withOpacity(0.3),
-                            playedColor: Colors.white,
-                            handleColor: Colors.white,
-                            bufferedColor: Colors.white.withOpacity(0.7),
-                          ),
-                        );
-                      },
+            child: Obx(
+              () {
+                if (!controller.ready) {
+                  return const SizedBox();
+                }
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Obx(() {
+                      IconData icon = Icons.block;
+                      if (controller.playerValue.isStarted) {
+                        icon = Icons.pause;
+                      }
+                      if (controller.playerValue.isPaused ||
+                          controller.playerValue.isError ||
+                          controller.playerValue.isCompletion) {
+                        icon = Icons.play_arrow;
+                      }
+                      return _buildClickableIcon(
+                          icon: icon, onTap: () => controller.onDoubleTap());
+                    }),
+                    SizedBox(
+                      width: gap,
                     ),
-                  ),
-                ),
-                SizedBox(
-                  width: gap * 2,
-                ),
-                Text(
-                  VideoPlayerUtil.formatDuration(
-                      controller.playerValue.duration),
-                  style: TextStyle(fontSize: primaryFontSize),
-                ),
-                SizedBox(
-                  width: gap,
-                ),
-                if (controller.isFullscreen.value)
-                  GestureDetector(
-                    onTap: () => controller.toggleSelections(),
-                    child: const Text('选集'),
-                  ),
-                SizedBox(
-                  width: gap,
-                ),
-                Obx(
-                  () => _buildClickableIcon(
-                    icon: controller.isFullscreen.value
-                        ? Icons.fullscreen_exit
-                        : Icons.fullscreen,
-                    onTap: () => controller.toggleFullscreen(this),
-                  ),
-                ),
-              ],
+                    Text(
+                      VideoPlayerUtil.formatDuration(
+                          controller.isTempSeekEnable.value
+                              ? controller.tempSeekPosition.value
+                              : controller.playerValue.position),
+                      style: TextStyle(fontSize: primaryFontSize),
+                    ),
+                    SizedBox(
+                      width: gap * 2,
+                    ),
+                    Expanded(
+                      child: SizedBox(
+                        height: topBarHeight / 2,
+                        child: Obx(
+                          () {
+                            if (!controller.ready) {
+                              return const SizedBox();
+                            }
+                            return VideoPlayerProgress(
+                              onChanged: (double value) =>
+                                  controller.onSeekChanged(value),
+                              onChangeStart: (double value) =>
+                                  controller.onSeekChangeStart(value),
+                              onChangeEnd: (double value) =>
+                                  controller.onSeekChangeEnd(value),
+                              position: controller.isTempSeekEnable.value
+                                  ? controller.tempSeekPosition.value
+                                  : controller.playerValue.position,
+                              duration: controller.playerValue.duration,
+                              barHeight: 3.rpx,
+                              handleHeight: controller.isFullscreen.value
+                                  ? 18.rpx
+                                  : 14.rpx,
+                              buffered: controller.playerValue.buffered,
+                              colors: VideoPlayerProgressColors(
+                                backgroundColor: Colors.white.withOpacity(0.3),
+                                playedColor: Colors.white,
+                                handleColor: Colors.white,
+                                bufferedColor: Colors.white.withOpacity(0.7),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: gap * 2,
+                    ),
+                    Text(
+                      VideoPlayerUtil.formatDuration(
+                          controller.playerValue.duration),
+                      style: TextStyle(fontSize: primaryFontSize),
+                    ),
+                    SizedBox(
+                      width: gap,
+                    ),
+                    if (controller.isFullscreen.value)
+                      GestureDetector(
+                        onTap: () => controller.toggleSelections(),
+                        child: const Text('选集'),
+                      ),
+                    SizedBox(
+                      width: gap,
+                    ),
+                    Obx(
+                      () => _buildClickableIcon(
+                        icon: controller.isFullscreen.value
+                            ? Icons.fullscreen_exit
+                            : Icons.fullscreen,
+                        onTap: () => controller.toggleFullscreen(this),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         );
@@ -387,25 +403,33 @@ class VideoPlayer extends StatelessWidget {
               padding:
                   EdgeInsets.only(bottom: 10.rpx, left: 10.rpx, right: 10.rpx),
               children: [
+                if (controller.ready)
                 _buildTitle('播放速度'),
+                if (controller.ready)
                 _buildRadius(
                   options: controller.speedList,
                   value: controller.playerValue.playSpeed,
                   onTap: controller.playerController.setSpeed,
                 ),
+                if (controller.ready)
                 _buildTitle('画面尺寸'),
+                if (controller.ready)
                 _buildRadius(
                   options: controller.fitList,
                   value: controller.playerController.fit,
                   onTap: controller.playerController.setFit,
                 ),
+                if (controller.ready)
                 _buildTitle('播放方式'),
+                if (controller.ready)
                 _buildRadius(
                   options: controller.playModeList,
                   value: controller.playMode.value,
                   onTap: controller.setPlayMode,
                 ),
+                if (controller.ready)
                 _buildTitle('镜像翻转'),
+                if (controller.ready)
                 _buildRadius(
                   options: controller.mirrorModeList,
                   value: controller.playerController.mirrorMode,
@@ -537,7 +561,7 @@ class VideoPlayer extends StatelessWidget {
   }
 
   Widget _buildRadius<T>(
-      {required List<LableValue<T>> options,
+      {required List<LabelValue<T>> options,
       required T value,
       required ValueChanged<T> onTap}) {
     return Wrap(

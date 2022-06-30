@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_value.dart';
-import 'package:a_player_example/example/dlna_page.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
@@ -12,15 +11,16 @@ import 'package:dlna_dart/dlna.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:orientation/orientation.dart';
 import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
+import 'dlna_page.dart';
 
 typedef VideoSourceResolver = Future<VideoSourceResolve> Function(
     VideoPlayerItem playerItem);
-
 class VideoSourceResolve {
   final bool isSuccess;
   final String url;
@@ -35,11 +35,11 @@ enum VideoPlayerPlayMode {
   pauseAfterCompleted,
 }
 
-class LableValue<T> {
+class LabelValue<T> {
   final String label;
   final T value;
 
-  LableValue(this.label, this.value);
+  LabelValue(this.label, this.value);
 }
 
 class VideoPlayerItem {
@@ -51,43 +51,43 @@ class VideoPlayerItem {
 }
 
 mixin _VideoPlayerOptions {
-  final List<LableValue<double>> speedList = [
-    LableValue<double>('0.5', 0.5),
-    LableValue<double>('1.0', 1.0),
-    LableValue<double>('1.5', 1.5),
-    LableValue<double>('2.0', 2.0),
-    LableValue<double>('2.5', 2.5),
-    LableValue<double>('3.0', 3.0),
-    LableValue<double>('3.5', 3.5),
-    LableValue<double>('4.0', 4.0),
-    LableValue<double>('4.5', 4.5),
-    LableValue<double>('5.0', 5.0),
+  final List<LabelValue<double>> speedList = [
+    LabelValue<double>('0.5', 0.5),
+    LabelValue<double>('1.0', 1.0),
+    LabelValue<double>('1.5', 1.5),
+    LabelValue<double>('2.0', 2.0),
+    LabelValue<double>('2.5', 2.5),
+    LabelValue<double>('3.0', 3.0),
+    LabelValue<double>('3.5', 3.5),
+    LabelValue<double>('4.0', 4.0),
+    LabelValue<double>('4.5', 4.5),
+    LabelValue<double>('5.0', 5.0),
   ];
-  final List<LableValue<APlayerFit>> fitList = [
-    LableValue<APlayerFit>('适应', APlayerFit.contain),
-    LableValue<APlayerFit>('拉伸', APlayerFit.fill),
-    LableValue<APlayerFit>('填充', APlayerFit.cover),
-    LableValue<APlayerFit>('16:9', APlayerFit.ar16_9),
-    LableValue<APlayerFit>('4:3', APlayerFit.ar4_3),
-    LableValue<APlayerFit>('1:1', APlayerFit.ar1_1),
+  final List<LabelValue<APlayerFit>> fitList = [
+    LabelValue<APlayerFit>('适应', APlayerFit.contain),
+    LabelValue<APlayerFit>('拉伸', APlayerFit.fill),
+    LabelValue<APlayerFit>('填充', APlayerFit.cover),
+    LabelValue<APlayerFit>('16:9', APlayerFit.ar16_9),
+    LabelValue<APlayerFit>('4:3', APlayerFit.ar4_3),
+    LabelValue<APlayerFit>('1:1', APlayerFit.ar1_1),
   ];
 
-  final List<LableValue<VideoPlayerPlayMode>> playModeList = [
-    LableValue<VideoPlayerPlayMode>('列表循环', VideoPlayerPlayMode.listLoop),
-    LableValue<VideoPlayerPlayMode>('单集循环', VideoPlayerPlayMode.loop),
-    LableValue<VideoPlayerPlayMode>(
+  final List<LabelValue<VideoPlayerPlayMode>> playModeList = [
+    LabelValue<VideoPlayerPlayMode>('列表循环', VideoPlayerPlayMode.listLoop),
+    LabelValue<VideoPlayerPlayMode>('单集循环', VideoPlayerPlayMode.loop),
+    LabelValue<VideoPlayerPlayMode>(
         '播完暂停', VideoPlayerPlayMode.pauseAfterCompleted),
   ];
 
-  final List<LableValue<APlayerMirrorMode>> mirrorModeList = [
-    LableValue<APlayerMirrorMode>('默认', APlayerMirrorMode.none),
-    LableValue<APlayerMirrorMode>('水平镜像', APlayerMirrorMode.horizontal),
-    LableValue<APlayerMirrorMode>('垂直镜像', APlayerMirrorMode.vertical),
+  final List<LabelValue<APlayerMirrorMode>> mirrorModeList = [
+    LabelValue<APlayerMirrorMode>('默认', APlayerMirrorMode.none),
+    LabelValue<APlayerMirrorMode>('水平镜像', APlayerMirrorMode.horizontal),
+    LabelValue<APlayerMirrorMode>('垂直镜像', APlayerMirrorMode.vertical),
   ];
 
-  final List<LableValue<bool>> decoderList = [
-    LableValue<bool>('硬件解码', true),
-    LableValue<bool>('软件解码', false),
+  final List<LabelValue<bool>> decoderList = [
+    LabelValue<bool>('硬件解码', true),
+    LabelValue<bool>('软件解码', false),
   ];
 }
 mixin _VideoPlayerOrientationPlugin {
@@ -388,10 +388,11 @@ mixin _VideoDlnaPlugin {
   search? _searcher;
 
   Future<void> _showDlnaSheet(VideoPlayerController controller) async {
-   await Get.bottomSheet(
-      DlnaPage(controller: controller,),
-      backgroundColor: Colors.black,
-      isScrollControlled: true,
+   await showMaterialModalBottomSheet(
+     context: Get.context!,
+      builder: (BuildContext context) {
+       return DlnaPage(controller: controller,);
+      },
       elevation: 0,
       barrierColor: Colors.transparent,
     );
@@ -447,7 +448,7 @@ class VideoPlayerController
       Rx<VideoPlayerPlayMode>(VideoPlayerPlayMode.listLoop);
   bool _appPaused = false;
   bool _willPlayResumed = false;
-
+  ValueChanged<APlayerValue>? onEventCallback;
   VideoPlayerItem? get currentPlayItem {
     if (currentPlayIndex.value == -1) {
       return null;
@@ -462,6 +463,7 @@ class VideoPlayerController
 
   String get title => currentPlayItem?.title ?? '';
 
+  bool get ready => playerValue.ready && !isResolveing.value;
   @override
   APlayerValue get playerValue => value.value;
 
@@ -497,7 +499,7 @@ class VideoPlayerController
     this.playlist.assignAll(playlist);
   }
 
-  void playByIndex(int index) async {
+  void playByIndex(int index, [int position = 0]) async {
     _showBar();
     _realPlayUrl = '';
     isResolveFailed.value = true;
@@ -510,6 +512,7 @@ class VideoPlayerController
     if (index == currentPlayIndex.value && isResolveFailed.value) {
       _realPlayUrl = resolve.url;
       playerController.setDataSouce(resolve.url, headers: resolve.headers);
+      playerController.seekTo(position);
     }
   }
 
@@ -631,8 +634,11 @@ class VideoPlayerController
         break;
     }
   }
-
+  void onEvent(ValueChanged<APlayerValue> callback) {
+    onEventCallback = callback;
+  }
   void _listener(APlayerValue value) {
+    onEventCallback?.call(value);
     if (_appPaused && !value.isPaused) {
       playerController.pause();
     }
