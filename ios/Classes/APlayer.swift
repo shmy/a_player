@@ -95,9 +95,8 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
     }
     
     private func resetValue() -> Void {
-        videoEvent = VideoEvent.init()
-        self.stop();
         self.videoEvent = VideoEvent.init()
+        self.stop();
         self.sendEvent()
     }
     
@@ -214,7 +213,6 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
         case AVPEventPrepareDone:
             self.videoEvent.duration = player.duration
             self.videoEvent.playSpeed = player.rate
-            self.videoEvent.ready = true
             self.sendEvent()
             break
         case AVPEventLoadingStart:
@@ -224,6 +222,10 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
             break
         case AVPEventLoadingEnd:
             self.videoEvent.isBuffering = false
+            self.sendEvent()
+            break
+        case AVPEventFirstRenderedStart:
+            self.videoEvent.ready = true
             self.sendEvent()
             break
         default:
@@ -264,6 +266,7 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
     }
     
     func onPlayerStatusChanged(_ player: AliPlayer!, oldStatus: AVPStatus, newStatus: AVPStatus) {
+        var ready = self.videoEvent.ready
         var state = -1
         switch(newStatus) {
         case AVPStatusIdle:
@@ -283,6 +286,7 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
             break
         case AVPStatusStopped:
             state = 5
+            ready = false
             break
         case AVPStatusCompletion:
             state = 6
@@ -294,6 +298,8 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
             break
         }
         self.videoEvent.state = state
+        self.videoEvent.ready = ready
         self.sendEvent()
     }
+    
 }

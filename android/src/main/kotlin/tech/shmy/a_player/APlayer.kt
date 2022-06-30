@@ -132,14 +132,25 @@ class APlayer(
             videoEvent = videoEvent.copy(
                 duration = player!!.duration,
                 playSpeed = player!!.speed,
+            )
+            sendEvent()
+        }
+        player?.setOnRenderingStartListener {
+            videoEvent = videoEvent.copy(
                 ready = true,
             )
             sendEvent()
         }
+
         player?.setOnStateChangedListener {
             videoEvent = videoEvent.copy(
                 state = it,
             )
+            if (it == IPlayer.stopped) {
+                videoEvent = videoEvent.copy(
+                    ready = false
+                )
+            }
             sendEvent()
         }
         player?.setOnErrorListener {
@@ -147,10 +158,9 @@ class APlayer(
                 errorDescription = "${it.code}: ${it.msg}"
             )
             sendEvent()
-//            stop()
         }
         player?.setOnCompletionListener {
-//            stop()
+
         }
         player?.setOnInfoListener {
             when (it.code) {
@@ -220,9 +230,6 @@ class APlayer(
             errorDescription = "",
         )
         stop();
-        videoEvent = VideoEvent().copy(
-            featurePictureInPicture = videoEvent.featurePictureInPicture,
-        )
         sendEvent()
     }
 
