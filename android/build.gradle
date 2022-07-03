@@ -42,15 +42,22 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
     }
 }
 
 dependencies {
     def aliyun_version = '5.4.6.0-full'
+    def ijk_version = '0.8.8'
     def exo_version = '2.18.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "com.aliyun.sdk.android:AliyunPlayer:$aliyun_version"
+    implementation "tv.danmaku.ijk.media:ijkplayer-java:$ijk_version"
+//    implementation "tv.danmaku.ijk.media:ijkplayer-armv7a:$ijk_version"
+//    implementation "tv.danmaku.ijk.media:ijkplayer-armv5:$ijk_version"
+//    implementation "tv.danmaku.ijk.media:ijkplayer-arm64:$ijk_version"
+//    implementation "tv.danmaku.ijk.media:ijkplayer-x86:$ijk_version"
+//    implementation "tv.danmaku.ijk.media:ijkplayer-x86_64:$ijk_version"
     implementation "com.google.android.exoplayer:exoplayer-core:$exo_version"
     implementation "com.google.android.exoplayer:exoplayer-hls:$exo_version"
     implementation "com.google.android.exoplayer:exoplayer-dash:$exo_version"

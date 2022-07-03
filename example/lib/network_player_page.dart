@@ -36,10 +36,10 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             //     'https://m3u8.taopianplay.com/taopian/54fdb532-e89b-4567-bc07-aa93a0c6a79b/a891bf2e-a823-4ae0-ac07-107cdf1703d8/45148/6d3af2a3-090b-486b-ac82-2c3fc6d21603/SD/playlist.m3u8',
             //     'taopianplay',
             //     ''),
-            VideoPlayerItem(
-                'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
-                '惊奇队长 预告片[mp4]',
-                ''),
+            // VideoPlayerItem(
+            //     'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
+            //     '惊奇队长 预告片[mp4]',
+            //     ''),
             VideoPlayerItem(
                 'https://video.pddugc.com/backbone-video/2022-06-21/9d29d0f5668c0f5c1256748b3386313d.mp4',
                 '奇艺博士2 高清[mp4]',

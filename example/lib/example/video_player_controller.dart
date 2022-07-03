@@ -54,8 +54,9 @@ class VideoPlayerItem {
 
 mixin _VideoPlayerOptions {
   final List<LabelValue<APlayerKernel>> kernelList = [
-    LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyunPlayer),
-    LabelValue<APlayerKernel>('EXO', APlayerKernel.exoPlayer),
+    LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyun),
+    LabelValue<APlayerKernel>('IJK', APlayerKernel.ijk),
+    LabelValue<APlayerKernel>('EXO', APlayerKernel.exo),
   ];
   final List<LabelValue<double>> speedList = [
     LabelValue<double>('0.5', 0.5),

@@ -1,7 +1,7 @@
 package tech.shmy.a_player.player
 
-const val KERNEL_ALIYUN = 0
-const val KERNEL_EXO = 1
+import tech.shmy.a_player.KERNEL_ALIYUN
+
 data class APlayerEvent(
     val isInitialized: Boolean = false,
     val isPlaying: Boolean = false,

@@ -19,6 +19,7 @@ import io.flutter.view.TextureRegistry
 import tech.shmy.a_player.player.*
 import tech.shmy.a_player.player.impl.AliyunPlayerImpl
 import tech.shmy.a_player.player.impl.ExoPlayerImpl
+import tech.shmy.a_player.player.impl.IJKPlayerImpl
 
 
 class APlayer(
@@ -114,6 +115,9 @@ class APlayer(
         when(kernel) {
             KERNEL_ALIYUN -> {
                 player = AliyunPlayerImpl.createPlayer(context)
+            }
+            KERNEL_IJK -> {
+                player = IJKPlayerImpl.createPlayer(context)
             }
             KERNEL_EXO -> {
                 player = ExoPlayerImpl.createPlayer(context)

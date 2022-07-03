@@ -45,7 +45,7 @@ class APlayerFit {
 
 enum APlayerMirrorMode { none, horizontal, vertical }
 
-enum APlayerKernel { aliyunPlayer, exoPlayer }
+enum APlayerKernel { aliyun, ijk, exo }
 
 class APlayerValue {
   final bool isInitialized;
@@ -109,7 +109,7 @@ class APlayerValue {
         bufferingSpeed: 0,
         buffered: Duration.zero,
         featurePictureInPicture: false,
-        kernel: APlayerKernel.aliyunPlayer,
+        kernel: APlayerKernel.aliyun,
       );
 
   factory APlayerValue.fromJSON(dynamic json) => APlayerValue(
