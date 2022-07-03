@@ -12,7 +12,6 @@ interface APlayerInterface {
     fun play(): Unit
     fun pause(): Unit
     fun stop(): Unit
-    fun clearScreen(): Unit
     fun setUrlDataSource(url: String): Unit
     fun setFileDataSource(path: String): Unit
     fun enableHardwareDecoder(enabled: Boolean): Unit

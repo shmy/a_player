@@ -10,7 +10,7 @@ import tech.shmy.a_player.player.APlayerListener
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 
-class IJKPlayerImpl (
+class IJKPlayerImpl(
     private val context: Context
 ) : Player.Listener, APlayerInterface, Runnable {
 
@@ -19,6 +19,8 @@ class IJKPlayerImpl (
     private var _isAutoPlay: Boolean = false
     private var listener: APlayerListener? = null
     private var handler: Handler? = null
+    private lateinit var surface: Surface
+
     init {
         ijkMediaPlayer.setOnVideoSizeChangedListener { iMediaPlayer, i, i2, i3, i4 ->
             listener?.setOnVideoSizeChangedListener(i, i2)
@@ -27,7 +29,7 @@ class IJKPlayerImpl (
             listener?.setOnInitializedListener()
         }
         ijkMediaPlayer.setOnInfoListener { iMediaPlayer, i, i2 ->
-            when(i) {
+            when (i) {
                 IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
                     listener?.setOnReadyToPlayListener()
                 }
@@ -37,15 +39,18 @@ class IJKPlayerImpl (
                 IMediaPlayer.MEDIA_INFO_BUFFERING_END -> {
                     listener?.setOnLoadingEndListener()
                 }
+                IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH -> {
+                    listener?.setOnCurrentDownloadSpeedChangedListener(i2.toLong())
+                }
             }
-            false
+            true
         }
         ijkMediaPlayer.setOnBufferingUpdateListener { iMediaPlayer, i ->
-            listener?.setOnBufferedPositionChangedListener(i.toLong())
+            listener?.setOnLoadingProgressListener(if (i > 100) 100 else i)
         }
         ijkMediaPlayer.setOnErrorListener { iMediaPlayer, i, i2 ->
             listener?.setOnErrorListener(i.toString(), i2.toString())
-            false
+            true
         }
         ijkMediaPlayer.setOnCompletionListener {
             listener?.setOnCompletionListener()
@@ -74,7 +79,7 @@ class IJKPlayerImpl (
     }
 
     override fun setSurface(surface: Surface) {
-        ijkMediaPlayer.setSurface(surface)
+        this.surface = surface
     }
 
     override fun play() {
@@ -89,21 +94,28 @@ class IJKPlayerImpl (
         ijkMediaPlayer.stop()
     }
 
-    override fun clearScreen() {
-        // can't clear
-    }
-
     override fun setUrlDataSource(url: String) {
+        ijkMediaPlayer.reset()
+        ijkMediaPlayer.setSurface(surface)
         // TODO: headers, userAgent, referer
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "user_agent", "headers.get(key)");
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "seek-at-start", 0);
+        ijkMediaPlayer.setOption(
+            IjkMediaPlayer.OPT_CATEGORY_FORMAT,
+            "user_agent",
+            "headers.get(key)"
+        );
+        ijkMediaPlayer.setOption(
+            IjkMediaPlayer.OPT_CATEGORY_PLAYER,
+            "seek-at-start",
+            10000
+        );
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "reconnect", 5);
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 5);
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max_cached_duration", 5 * 60 * 1000);
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "infbuf", 1);
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER,"max-fps",30);
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1);
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", 1);
+        ijkMediaPlayer.setOption(
+            IjkMediaPlayer.OPT_CATEGORY_PLAYER,
+            "max_cached_duration",
+            10 * 60 * 1000
+        );
+        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30);
         ijkMediaPlayer.setDataSource(url, mapOf());
     }
 
@@ -116,7 +128,10 @@ class IJKPlayerImpl (
     }
 
     override fun release() {
+        ijkMediaPlayer.setSurface(null)
+        ijkMediaPlayer.stop()
         ijkMediaPlayer.release()
+        handler = null
     }
 
     override fun prepare(isAutoPlay: Boolean) {
@@ -143,6 +158,8 @@ class IJKPlayerImpl (
     override fun run() {
         if (ijkMediaPlayer.isPlaying) {
             listener?.setOnCurrentPositionChangedListener(ijkMediaPlayer.currentPosition)
+            listener?.setOnCurrentDownloadSpeedChangedListener(ijkMediaPlayer.tcpSpeed)
+
         }
         handler?.postDelayed(this, 500);
     }

@@ -31,7 +31,6 @@ class APlayer(
 ) : EventChannel.StreamHandler {
     private var player: APlayerInterface? = null
     private val surfaceTexture: SurfaceTexture = textureEntry.surfaceTexture()
-    private val surface: Surface = Surface(surfaceTexture)
     private val queuingEventSink: QueuingEventSink = QueuingEventSink()
     private var eventChannel: EventChannel? = null
     private var methodChannel: MethodChannel? = null
@@ -135,7 +134,7 @@ class APlayer(
     }
 
     private fun setupPlayer(): Unit {
-        player?.setSurface(surface)
+        player?.setSurface(Surface(surfaceTexture))
         player?.addListener(object: APlayerListener {
             override fun setOnVideoSizeChangedListener(width: Int, height: Int) {
                 surfaceTexture.setDefaultBufferSize(width, height)
@@ -297,7 +296,6 @@ class APlayer(
 
     private fun stop(): Unit {
         player?.stop()
-        player?.clearScreen()
     }
     private fun setKernel(kernel: Int): Unit {
         if (kernel == this.kernel) {
@@ -358,7 +356,7 @@ class APlayer(
 
     private fun release(): Unit {
         player?.release()
-        surface.release()
+//        surface.release()
         player = null
         queuingEventSink.endOfStream()
         eventChannel?.setStreamHandler(null)

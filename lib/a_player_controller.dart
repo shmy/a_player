@@ -36,7 +36,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
 
   @mustCallSuper
   Future<void> initialize({
-  APlayerKernel kernel = APlayerKernel.aliyun
+  APlayerKernel kernel = APlayerKernel.ijk
 }) async {
     final textureId = await _methodChannel.invokeMethod<int>('initialize', kernel.index);
     if (textureId != null) {

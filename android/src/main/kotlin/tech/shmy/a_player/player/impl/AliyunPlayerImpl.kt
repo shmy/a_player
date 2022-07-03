@@ -113,10 +113,6 @@ class AliyunPlayerImpl(private val context: Context) : APlayerInterface {
         aliPlayer.stop()
     }
 
-    override fun clearScreen() {
-        aliPlayer.clearScreen()
-    }
-
     override fun setUrlDataSource(url: String): Unit {
         val urlSource = UrlSource()
         urlSource.uri = url
@@ -132,6 +128,8 @@ class AliyunPlayerImpl(private val context: Context) : APlayerInterface {
     }
 
     override fun release(): Unit {
+        aliPlayer.setSurface(null)
+        aliPlayer.stop()
         aliPlayer.release()
     }
 

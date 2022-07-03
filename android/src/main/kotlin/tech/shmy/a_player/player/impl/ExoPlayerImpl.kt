@@ -71,11 +71,9 @@ class ExoPlayerImpl(
         exoPlayer.stop()
     }
 
-    override fun clearScreen() {
-        // can't clear
-    }
-
     override fun setUrlDataSource(url: String) {
+        exoPlayer.stop()
+        exoPlayer.clearMediaItems()
         val uri = Uri.parse(url)
         val dataSourceFactory: DataSource.Factory = if (isHTTP(uri)) {
             // TODO: 设置header userAgent
@@ -102,6 +100,7 @@ class ExoPlayerImpl(
     }
 
     override fun release(): Unit {
+        exoPlayer.setVideoSurface(null)
         exoPlayer.stop()
         exoPlayer.release()
         handler = null
@@ -171,7 +170,7 @@ class ExoPlayerImpl(
     }
 
     override fun run() {
-        if (exoPlayer.playbackState == PlaybackState.STATE_PLAYING) {
+        if (exoPlayer.isPlaying) {
             listener?.setOnCurrentPositionChangedListener(exoPlayer.currentPosition)
         }
         handler?.postDelayed(this, 500);
