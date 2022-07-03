@@ -17,7 +17,7 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.TextureRegistry
 import tech.shmy.a_player.player.*
-import tech.shmy.a_player.player.impl.AliPlayerImpl
+import tech.shmy.a_player.player.impl.AliyunPlayerImpl
 import tech.shmy.a_player.player.impl.ExoPlayerImpl
 
 
@@ -113,7 +113,7 @@ class APlayer(
         player = null
         when(kernel) {
             KERNEL_ALIYUN -> {
-                player = AliPlayerImpl.createPlayer(context)
+                player = AliyunPlayerImpl.createPlayer(context)
             }
             KERNEL_EXO -> {
                 player = ExoPlayerImpl.createPlayer(context)

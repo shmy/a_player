@@ -10,7 +10,7 @@ import com.aliyun.player.source.UrlSource
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
 
-class AliPlayerImpl(private val context: Context) : APlayerInterface {
+class AliyunPlayerImpl(private val context: Context) : APlayerInterface {
     private val aliPlayer: AliPlayer = AliPlayerFactory.createAliPlayer(context)
     private var listener: APlayerListener? = null
 
@@ -80,7 +80,7 @@ class AliPlayerImpl(private val context: Context) : APlayerInterface {
 
     companion object {
         fun createPlayer(context: Context): APlayerInterface {
-            return AliPlayerImpl(context)
+            return AliyunPlayerImpl(context)
         }
     }
 
