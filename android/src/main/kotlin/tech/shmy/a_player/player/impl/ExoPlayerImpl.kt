@@ -1,7 +1,6 @@
 package tech.shmy.a_player.player.impl
 
 import android.content.Context
-import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Handler
 import android.view.Surface
