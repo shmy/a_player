@@ -126,6 +126,12 @@ class APlayer(
             return
         }
         aPlayerEvent = aPlayerEvent.copy(
+            isInitialized = false,
+            isBuffering = false,
+            isCompletion = false,
+            isReadyToPlay = false,
+            isError = false,
+            isPlaying = false,
             kernel = kernel,
             featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         )

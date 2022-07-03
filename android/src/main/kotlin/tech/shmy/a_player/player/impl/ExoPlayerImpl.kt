@@ -1,28 +1,16 @@
 package tech.shmy.a_player.player.impl
 
 import android.content.Context
-import android.net.Uri
 import android.os.Handler
 import android.view.Surface
 import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.source.dash.DashMediaSource
-import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource
-import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource
-import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.video.VideoSize
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
 
 
 class ExoPlayerImpl(
-    private val context: Context
+    context: Context
 ) : Player.Listener, APlayerInterface, Runnable {
     private val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build()
     private var listener: APlayerListener? = null
@@ -73,21 +61,7 @@ class ExoPlayerImpl(
     override fun setUrlDataSource(url: String) {
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
-        val uri = Uri.parse(url)
-        val dataSourceFactory: DataSource.Factory = if (isHTTP(uri)) {
-            // TODO: 设置header userAgent
-            val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-                .setUserAgent("ExoPlayer")
-                .setAllowCrossProtocolRedirects(true)
-//            if (httpHeaders != null && !httpHeaders.isEmpty()) {
-//                httpDataSourceFactory.setDefaultRequestProperties(httpHeaders)
-//            }
-            httpDataSourceFactory
-        } else {
-            DefaultDataSource.Factory(context)
-        }
-        val mediaSource = buildMediaSource(Uri.parse(url), dataSourceFactory, context)
-        exoPlayer.setMediaSource(mediaSource)
+        exoPlayer.setMediaItem(MediaItem.fromUri(url))
     }
 
     override fun setFileDataSource(path: String) {
@@ -128,14 +102,6 @@ class ExoPlayerImpl(
         listener?.setOnPlayingListener(isPlaying)
     }
 
-//    override fun onIsLoadingChanged(isLoading: Boolean) {
-//        if (isLoading) {
-//            listener?.setOnLoadingBeginListener()
-//        } else {
-//            listener?.setOnLoadingEndListener()
-//        }
-//    }
-
     override fun onPlaybackStateChanged(playbackState: Int) {
         when (playbackState) {
             Player.STATE_IDLE -> {}
@@ -173,38 +139,5 @@ class ExoPlayerImpl(
             listener?.setOnCurrentPositionChangedListener(exoPlayer.currentPosition)
         }
         handler?.postDelayed(this, 500);
-    }
-
-    private fun buildMediaSource(
-        uri: Uri, mediaDataSourceFactory: DataSource.Factory, context: Context
-    ): MediaSource {
-        return when (val type: Int =
-            Util.inferContentTypeForExtension(uri.lastPathSegment.toString())) {
-            C.CONTENT_TYPE_SS -> SsMediaSource.Factory(
-                DefaultSsChunkSource.Factory(mediaDataSourceFactory),
-                DefaultDataSource.Factory(context, mediaDataSourceFactory)
-            )
-                .createMediaSource(MediaItem.fromUri(uri))
-            C.CONTENT_TYPE_DASH -> DashMediaSource.Factory(
-                DefaultDashChunkSource.Factory(mediaDataSourceFactory),
-                DefaultDataSource.Factory(context, mediaDataSourceFactory)
-            )
-                .createMediaSource(MediaItem.fromUri(uri))
-            C.CONTENT_TYPE_HLS -> HlsMediaSource.Factory(mediaDataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(uri))
-            C.CONTENT_TYPE_OTHER -> ProgressiveMediaSource.Factory(mediaDataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(uri))
-            else -> {
-                throw IllegalStateException("Unsupported type: $type")
-            }
-        }
-    }
-
-    private fun isHTTP(uri: Uri?): Boolean {
-        if (uri == null || uri.scheme == null) {
-            return false
-        }
-        val scheme = uri.scheme
-        return scheme == "http" || scheme == "https"
     }
 }

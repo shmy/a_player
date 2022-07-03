@@ -21,42 +21,6 @@ class IJKPlayerImpl(
     private var handler: Handler? = null
     private lateinit var surface: Surface
 
-    init {
-        ijkMediaPlayer.setOnVideoSizeChangedListener { iMediaPlayer, i, i2, i3, i4 ->
-            listener?.setOnVideoSizeChangedListener(i, i2)
-        }
-        ijkMediaPlayer.setOnPreparedListener {
-            listener?.setOnInitializedListener()
-        }
-        ijkMediaPlayer.setOnInfoListener { iMediaPlayer, i, i2 ->
-            when (i) {
-                IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
-                    listener?.setOnReadyToPlayListener()
-                }
-                IMediaPlayer.MEDIA_INFO_BUFFERING_START -> {
-                    listener?.setOnLoadingBeginListener()
-                }
-                IMediaPlayer.MEDIA_INFO_BUFFERING_END -> {
-                    listener?.setOnLoadingEndListener()
-                }
-                IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH -> {
-                    listener?.setOnCurrentDownloadSpeedChangedListener(i2.toLong())
-                }
-            }
-            true
-        }
-        ijkMediaPlayer.setOnBufferingUpdateListener { iMediaPlayer, i ->
-            listener?.setOnLoadingProgressListener(if (i > 100) 100 else i)
-        }
-        ijkMediaPlayer.setOnErrorListener { iMediaPlayer, i, i2 ->
-            listener?.setOnErrorListener(i.toString(), i2.toString())
-            true
-        }
-        ijkMediaPlayer.setOnCompletionListener {
-            listener?.setOnCompletionListener()
-        }
-    }
-
     companion object {
         fun createPlayer(context: Context): APlayerInterface {
             return IJKPlayerImpl(context)
@@ -97,6 +61,7 @@ class IJKPlayerImpl(
     override fun setUrlDataSource(url: String) {
         ijkMediaPlayer.reset()
         ijkMediaPlayer.setSurface(surface)
+        bindEvent()
         // TODO: headers, userAgent, referer
         ijkMediaPlayer.setOption(
             IjkMediaPlayer.OPT_CATEGORY_FORMAT,
@@ -162,5 +127,41 @@ class IJKPlayerImpl(
 
         }
         handler?.postDelayed(this, 500);
+    }
+    private fun bindEvent(): Unit {
+
+        ijkMediaPlayer.setOnVideoSizeChangedListener { iMediaPlayer, i, i2, i3, i4 ->
+            listener?.setOnVideoSizeChangedListener(i, i2)
+        }
+        ijkMediaPlayer.setOnPreparedListener {
+            listener?.setOnInitializedListener()
+        }
+        ijkMediaPlayer.setOnInfoListener { iMediaPlayer, i, i2 ->
+            when (i) {
+                IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
+                    listener?.setOnReadyToPlayListener()
+                }
+                IMediaPlayer.MEDIA_INFO_BUFFERING_START -> {
+                    listener?.setOnLoadingBeginListener()
+                }
+                IMediaPlayer.MEDIA_INFO_BUFFERING_END -> {
+                    listener?.setOnLoadingEndListener()
+                }
+                IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH -> {
+                    listener?.setOnCurrentDownloadSpeedChangedListener(i2.toLong())
+                }
+            }
+            true
+        }
+        ijkMediaPlayer.setOnBufferingUpdateListener { iMediaPlayer, i ->
+            listener?.setOnLoadingProgressListener(if (i > 100) 100 else i)
+        }
+        ijkMediaPlayer.setOnErrorListener { iMediaPlayer, i, i2 ->
+            listener?.setOnErrorListener(i.toString(), i2.toString())
+            true
+        }
+        ijkMediaPlayer.setOnCompletionListener {
+            listener?.setOnCompletionListener()
+        }
     }
 }
