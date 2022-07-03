@@ -42,7 +42,7 @@ class APlayerPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     when (call.method) {
       "initialize" -> {
         val textureEntry: TextureRegistry.SurfaceTextureEntry = textureRegistry.createSurfaceTexture()
-        APlayer(activity = activity, context = context, textureEntry = textureEntry, binaryMessenger = binaryMessenger)
+        APlayer(activity = activity, context = context, textureEntry = textureEntry, binaryMessenger = binaryMessenger, kernel = call.arguments as Int)
         result.success(textureEntry.id())
       }
       else -> result.notImplemented()

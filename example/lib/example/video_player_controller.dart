@@ -21,6 +21,8 @@ import 'dlna_page.dart';
 
 typedef VideoSourceResolver = Future<VideoSourceResolve> Function(
     VideoPlayerItem playerItem);
+typedef VideoResolverFailed = void Function(
+    VideoPlayerItem playerItem);
 class VideoSourceResolve {
   final bool isSuccess;
   final String url;
@@ -51,6 +53,10 @@ class VideoPlayerItem {
 }
 
 mixin _VideoPlayerOptions {
+  final List<LabelValue<APlayerKernel>> kernelList = [
+    LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyunPlayer),
+    LabelValue<APlayerKernel>('EXO', APlayerKernel.exoPlayer),
+  ];
   final List<LabelValue<double>> speedList = [
     LabelValue<double>('0.5', 0.5),
     LabelValue<double>('1.0', 1.0),
@@ -248,7 +254,7 @@ mixin _VideoPlayerGestureDetector {
   }
 
   void onDoubleTap() {
-    if (playerValue.isPaused) {
+    if (!playerValue.isPlaying) {
       playerController.play();
     } else {
       playerController.pause();
@@ -376,8 +382,14 @@ mixin _VideoPlayerGestureDetector {
 }
 mixin _VideoPlayerResolver {
   VideoSourceResolver? _videoPlayerResolver;
+  VideoResolverFailed? _videoResolverFailed;
   RxBool isResolveing = false.obs;
   RxBool isResolveFailed = false.obs;
+
+
+  void onResolveFailed(VideoResolverFailed callback) {
+    _videoResolverFailed = callback;
+  }
 }
 mixin _VideoDlnaPlugin {
   final RxMap<String, device> _cacheDevice = RxMap<String, device>();
@@ -463,7 +475,7 @@ class VideoPlayerController
 
   String get title => currentPlayItem?.title ?? '';
 
-  bool get ready => playerValue.ready && !isResolveing.value;
+  bool get ready => playerValue.isReadyToPlay && !isResolveing.value;
   @override
   APlayerValue get playerValue => value.value;
 
@@ -502,20 +514,30 @@ class VideoPlayerController
   void playByIndex(int index, [int position = 0]) async {
     _showBar();
     _realPlayUrl = '';
-    isResolveFailed.value = true;
+    isResolveFailed.value = false;
     isResolveing.value = true;
     currentPlayIndex.value = index;
     playerController.stop();
-    final resolve = await _videoPlayerResolver!.call(playlist[index]);
-    isResolveFailed.value = resolve.isSuccess;
+    final item = playlist[index];
+    final resolve = await _videoPlayerResolver!.call(item);
+    isResolveFailed.value = !resolve.isSuccess;
     isResolveing.value = false;
-    if (index == currentPlayIndex.value && isResolveFailed.value) {
-      _realPlayUrl = resolve.url;
-      playerController.setDataSouce(resolve.url, headers: resolve.headers);
-      playerController.seekTo(position);
+    if (index == currentPlayIndex.value && !isResolveFailed.value) {
+      setExpectedDataSource(resolve, position);
     }
   }
-
+  void setExpectedDataSource(VideoSourceResolve resolve, [int position = 0]) {
+    isResolveFailed.value = false;
+    _realPlayUrl = resolve.url;
+    playerController.setDataSouce(resolve.url, headers: resolve.headers);
+    playerController.seekTo(position);
+  }
+  void showResolverFailedSheet() {
+    _videoResolverFailed?.call(currentPlayItem!);
+  }
+  void onEvent(ValueChanged<APlayerValue> callback) {
+    onEventCallback = callback;
+  }
   void setPlayMode(VideoPlayerPlayMode mode) {
     playMode.value = mode;
     switch (playMode.value) {
@@ -538,6 +560,7 @@ class VideoPlayerController
   }
 
   void _enterFullscreen(Widget widget) async {
+    isFullscreen.value = !isFullscreen.value;
     await Future.wait([
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []),
       _rotateFullscreen(),
@@ -562,10 +585,12 @@ class VideoPlayerController
         );
       }(),
     ]);
-    isFullscreen.value = !isFullscreen.value;
   }
 
   void _exitFullscreen() async {
+    isFullscreen.value = !isFullscreen.value;
+    isShowSettings.value = false;
+    isShowSelections.value = false;
     await Future.wait([
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
           overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]),
@@ -578,9 +603,6 @@ class VideoPlayerController
         Get.back();
       }(),
     ]);
-    isFullscreen.value = !isFullscreen.value;
-    isShowSettings.value = false;
-    isShowSelections.value = false;
   }
 
   void back() {
@@ -618,7 +640,7 @@ class VideoPlayerController
       case AppLifecycleState.paused:
         {
           _appPaused = true;
-          _willPlayResumed = playerValue.isStarted;
+          _willPlayResumed = playerValue.isPlaying;
           playerController.pause();
           break;
         }
@@ -634,12 +656,9 @@ class VideoPlayerController
         break;
     }
   }
-  void onEvent(ValueChanged<APlayerValue> callback) {
-    onEventCallback = callback;
-  }
   void _listener(APlayerValue value) {
     onEventCallback?.call(value);
-    if (_appPaused && !value.isPaused) {
+    if (_appPaused && value.isPlaying) {
       playerController.pause();
     }
     this.value.value = value;

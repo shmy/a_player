@@ -45,20 +45,14 @@ class APlayerFit {
 
 enum APlayerMirrorMode { none, horizontal, vertical }
 
-class _APlayerState {
-  static const int unknow = -1;
-  static const int idle = 0;
-  static const int initalized = 1;
-  static const int prepared = 2;
-  static const int started = 3;
-  static const int paused = 4;
-  static const int stopped = 5;
-  static const int completion = 6;
-  static const int error = 7;
-}
+enum APlayerKernel { aliyunPlayer, exoPlayer }
 
 class APlayerValue {
-  final int state;
+  final bool isInitialized;
+  final bool isPlaying;
+  final bool isError;
+  final bool isCompletion;
+  final bool isReadyToPlay;
   final String errorDescription;
   final Duration duration;
   final Duration position;
@@ -72,45 +66,36 @@ class APlayerValue {
   final int bufferingSpeed;
   final Duration buffered;
   final bool featurePictureInPicture;
-  final bool ready;
+  final APlayerKernel kernel;
 
-  bool get isUnknow => state == _APlayerState.unknow;
-
-  bool get isIdle => state == _APlayerState.idle;
-
-  bool get isInitialized => state == _APlayerState.initalized;
-
-  bool get isPrepared => state == _APlayerState.prepared;
-
-  bool get isStarted => state == _APlayerState.started;
-
-  bool get isPaused => state == _APlayerState.paused;
-
-  bool get isStopped => state == _APlayerState.stopped;
-
-  bool get isCompletion => state == _APlayerState.completion;
-
-  bool get isError => state == _APlayerState.error;
-
-  APlayerValue(
-      {required this.state,
-      required this.errorDescription,
-      required this.duration,
-      required this.position,
-      required this.height,
-      required this.width,
-      required this.playSpeed,
-      required this.loop,
-      required this.enableHardwareDecoder,
-      required this.isBuffering,
-      required this.bufferingPercentage,
-      required this.bufferingSpeed,
-      required this.buffered,
-      required this.featurePictureInPicture,
-      required this.ready});
+  APlayerValue({
+    required this.isInitialized,
+    required this.isPlaying,
+    required this.isError,
+    required this.isCompletion,
+    required this.isReadyToPlay,
+    required this.errorDescription,
+    required this.duration,
+    required this.position,
+    required this.height,
+    required this.width,
+    required this.playSpeed,
+    required this.loop,
+    required this.enableHardwareDecoder,
+    required this.isBuffering,
+    required this.bufferingPercentage,
+    required this.bufferingSpeed,
+    required this.buffered,
+    required this.featurePictureInPicture,
+    required this.kernel,
+  });
 
   factory APlayerValue.uninitialized() => APlayerValue(
-        state: -1,
+        isInitialized: false,
+        isPlaying: false,
+        isError: false,
+        isCompletion: false,
+        isReadyToPlay: false,
         errorDescription: '',
         duration: Duration.zero,
         position: Duration.zero,
@@ -124,11 +109,15 @@ class APlayerValue {
         bufferingSpeed: 0,
         buffered: Duration.zero,
         featurePictureInPicture: false,
-        ready: false,
+        kernel: APlayerKernel.aliyunPlayer,
       );
 
   factory APlayerValue.fromJSON(dynamic json) => APlayerValue(
-        state: json['state'],
+        isInitialized: json['isInitialized'],
+        isPlaying: json['isPlaying'],
+        isError: json['isError'],
+        isCompletion: json['isCompletion'],
+        isReadyToPlay: json['isReadyToPlay'],
         errorDescription: json['errorDescription'],
         duration: Duration(milliseconds: json['duration']),
         position: Duration(milliseconds: json['position']),
@@ -142,6 +131,6 @@ class APlayerValue {
         bufferingSpeed: json['bufferingSpeed'],
         buffered: Duration(milliseconds: json['buffered']),
         featurePictureInPicture: json['featurePictureInPicture'],
-        ready: json['ready'],
+        kernel: APlayerKernel.values[json['kernel']],
       );
 }

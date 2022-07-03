@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:a_player/a_player.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -15,9 +16,15 @@ final double videoPlayerHeight = 220.rpx;
 class VideoPlayer extends StatelessWidget {
   final VideoPlayerController controller;
   final bool featureDLNA;
+  final VideoPlayerProgressColors? videoPlayerProgressColors;
+  final ui.Image? handleImage;
 
   const VideoPlayer(
-      {Key? key, required this.controller, this.featureDLNA = true})
+      {Key? key,
+      required this.controller,
+      this.featureDLNA = true,
+      this.videoPlayerProgressColors,
+      this.handleImage})
       : super(key: key);
 
   double get topBarHeight => controller.isFullscreen.value ? 44.rpx : 32.rpx;
@@ -80,6 +87,8 @@ class VideoPlayer extends StatelessWidget {
                 if (controller.isLocked.value && controller.isFullscreen.value)
                   _buildLockedView(),
                 if (controller.isFullscreen.value) _buildRight(),
+                if (controller.isResolveFailed.value)
+                  _buildResolveFailedIndicator(),
               ],
             ),
           ),
@@ -166,13 +175,15 @@ class VideoPlayer extends StatelessWidget {
                         onTap: () => controller.showDlnaSheet(),
                       ),
                     ),
-                  Padding(
-                    padding: EdgeInsets.only(left: gap),
-                    child: _buildClickableIcon(
-                      icon: Icons.more_vert_outlined,
-                      onTap: () => controller.toggleSettings(),
+                  if (!controller.isResolveing.value &&
+                      !controller.isResolveFailed.value)
+                    Padding(
+                      padding: EdgeInsets.only(left: gap),
+                      child: _buildClickableIcon(
+                        icon: Icons.more_vert_outlined,
+                        onTap: () => controller.toggleSettings(),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ],
@@ -259,12 +270,9 @@ class VideoPlayer extends StatelessWidget {
                   children: [
                     Obx(() {
                       IconData icon = Icons.block;
-                      if (controller.playerValue.isStarted) {
+                      if (controller.playerValue.isPlaying) {
                         icon = Icons.pause;
-                      }
-                      if (controller.playerValue.isPaused ||
-                          controller.playerValue.isError ||
-                          controller.playerValue.isCompletion) {
+                      } else {
                         icon = Icons.play_arrow;
                       }
                       return _buildClickableIcon(
@@ -306,13 +314,17 @@ class VideoPlayer extends StatelessWidget {
                               handleHeight: controller.isFullscreen.value
                                   ? 18.rpx
                                   : 14.rpx,
+                              handleImage: handleImage,
                               buffered: controller.playerValue.buffered,
-                              colors: VideoPlayerProgressColors(
-                                backgroundColor: Colors.white.withOpacity(0.3),
-                                playedColor: Colors.white,
-                                handleColor: Colors.white,
-                                bufferedColor: Colors.white.withOpacity(0.7),
-                              ),
+                              colors: videoPlayerProgressColors ??
+                                  VideoPlayerProgressColors(
+                                    backgroundColor:
+                                        Colors.white.withOpacity(0.3),
+                                    playedColor: Colors.white,
+                                    handleColor: Colors.white,
+                                    bufferedColor:
+                                        Colors.white.withOpacity(0.7),
+                                  ),
                             );
                           },
                         ),
@@ -403,38 +415,40 @@ class VideoPlayer extends StatelessWidget {
               padding:
                   EdgeInsets.only(bottom: 10.rpx, left: 10.rpx, right: 10.rpx),
               children: [
-                if (controller.ready)
-                _buildTitle('播放速度'),
-                if (controller.ready)
+                _buildTitle('播放内核'),
                 _buildRadius(
-                  options: controller.speedList,
-                  value: controller.playerValue.playSpeed,
-                  onTap: controller.playerController.setSpeed,
+                  options: controller.kernelList,
+                  value: controller.playerValue.kernel,
+                  onTap: controller.playerController.setKernel,
                 ),
+                if (controller.ready) _buildTitle('播放速度'),
                 if (controller.ready)
-                _buildTitle('画面尺寸'),
+                  _buildRadius(
+                    options: controller.speedList,
+                    value: controller.playerValue.playSpeed,
+                    onTap: controller.playerController.setSpeed,
+                  ),
+                if (controller.ready) _buildTitle('画面尺寸'),
                 if (controller.ready)
-                _buildRadius(
-                  options: controller.fitList,
-                  value: controller.playerController.fit,
-                  onTap: controller.playerController.setFit,
-                ),
+                  _buildRadius(
+                    options: controller.fitList,
+                    value: controller.playerController.fit,
+                    onTap: controller.playerController.setFit,
+                  ),
+                if (controller.ready) _buildTitle('播放方式'),
                 if (controller.ready)
-                _buildTitle('播放方式'),
+                  _buildRadius(
+                    options: controller.playModeList,
+                    value: controller.playMode.value,
+                    onTap: controller.setPlayMode,
+                  ),
+                if (controller.ready) _buildTitle('镜像翻转'),
                 if (controller.ready)
-                _buildRadius(
-                  options: controller.playModeList,
-                  value: controller.playMode.value,
-                  onTap: controller.setPlayMode,
-                ),
-                if (controller.ready)
-                _buildTitle('镜像翻转'),
-                if (controller.ready)
-                _buildRadius(
-                  options: controller.mirrorModeList,
-                  value: controller.playerController.mirrorMode,
-                  onTap: controller.playerController.setMirrorMode,
-                ),
+                  _buildRadius(
+                    options: controller.mirrorModeList,
+                    value: controller.playerController.mirrorMode,
+                    onTap: controller.playerController.setMirrorMode,
+                  ),
                 _buildTitle('解码方式', subtitle: '如遇播放异常，可尝试切换'),
                 _buildRadius(
                   options: controller.decoderList,
@@ -763,10 +777,9 @@ class VideoPlayer extends StatelessWidget {
           _buildCenterIndicator(
             isShow: (controller.isResolveing.value ||
                     controller.playerValue.isBuffering ||
-                    controller.playerValue.isUnknow ||
-                    controller.playerValue.isIdle ||
-                    controller.playerValue.isInitialized) &&
-                controller.currentPlayUrl != '',
+                    !controller.playerValue.isInitialized) &&
+                controller.currentPlayUrl != '' &&
+                !controller.playerValue.isError,
             child: _buildBufferingIndicator(),
           ),
           _buildErrorIndicator(),
@@ -798,6 +811,36 @@ class VideoPlayer extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResolveFailedIndicator() {
+    return _buildCenterIndicator(
+      isShow: controller.isResolveFailed.value,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            String.fromCharCode(Icons.bug_report_sharp.codePoint),
+            style:
+                TextStyle(fontSize: indicatorSize, fontFamily: _iconFontFamily),
+          ),
+          SizedBox(
+            height: gap,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40.rpx),
+            child: Text(
+              '解析失败',
+              style: TextStyle(fontSize: secondaryFontSize),
+            ),
+          ),
+          MaterialButton(
+            onPressed: () => controller.showResolverFailedSheet(),
+            child: const Text('选择线路'),
           ),
         ],
       ),

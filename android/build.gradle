@@ -47,6 +47,12 @@ android {
 }
 
 dependencies {
+    def aliyun_version = '5.4.6.0-full'
+    def exo_version = '2.18.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'com.aliyun.sdk.android:AliyunPlayer:5.4.6.0-full'
+    implementation "com.aliyun.sdk.android:AliyunPlayer:$aliyun_version"
+    implementation "com.google.android.exoplayer:exoplayer-core:$exo_version"
+    implementation "com.google.android.exoplayer:exoplayer-hls:$exo_version"
+    implementation "com.google.android.exoplayer:exoplayer-dash:$exo_version"
+    implementation "com.google.android.exoplayer:exoplayer-smoothstreaming:$exo_version"
 }

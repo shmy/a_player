@@ -36,7 +36,7 @@ class DlnaPage extends StatelessWidget {
             ],
           ),
           actions: [
-            IconButton(onPressed: () => Get.back(), icon: Icon(Icons.close))
+            IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close))
           ],
         ),
         body: CustomScrollView(

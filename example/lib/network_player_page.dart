@@ -24,14 +24,18 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
       ..initialize().then((value) {
         controller
           ..setPlaylist([
-            VideoPlayerItem(
-                'https://apd-vlive.apdcdn.tc.qq.com/vipzj.video.tc.qq.com/szg_3769_50001_0bc3cyadoaaajuadzu432nqvcfwdg4laan2a.f204110.mp4?vkey=DB8ABC520A73E40C846FE246411FF82B9F79D125A06C8CA39A192EA44798F98DB380D4B9EA4F3A1AEE70902295EA96FE2AAF955F8AF763096DAE89D5A80FAC16FB79B3601A11E73C225D5ED082839CF36D79B56BB5BA31965EC166CFA2ABF385EEDC0561C3F6F4553870E096023EF66594A1599D5485BB66',
-                '??',
-                ''),
-            VideoPlayerItem(
-                'https://upos-szbyjkm8g1.bilivideo.com//upgcxcode//76//67//757156776//757156776_nb3-1-112.flv?e=ig8euxZM2rNcNbTH7bdVhwdl7bejhwdVhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&uipk=5&nbs=1&deadline=1656575206&gen=playurlv2&os=hwbv&oi=2034112005&trid=7f1d25d9a9ef4d57bfea21a8383b8d63u&mid=1623204697&platform=pc&upsig=65407b8cb09f81c8ab03432b6f265a95&uparams=e,uipk,nbs,deadline,gen,os,oi,trid,mid,platform&bvc=vod&nettype=0&orderid=0,3&agrr=1&bw=696713&logo=80000000&_t=1656568006845&YIM&qq=452507220',
-                'b [m3u8]',
-                ''),
+            // VideoPlayerItem(
+            //     'https://apd-vlive.apdcdn.tc.qq.com/vipzj.video.tc.qq.com/szg_3769_50001_0bc3cyadoaaajuadzu432nqvcfwdg4laan2a.f204110.mp4?vkey=DB8ABC520A73E40C846FE246411FF82B9F79D125A06C8CA39A192EA44798F98DB380D4B9EA4F3A1AEE70902295EA96FE2AAF955F8AF763096DAE89D5A80FAC16FB79B3601A11E73C225D5ED082839CF36D79B56BB5BA31965EC166CFA2ABF385EEDC0561C3F6F4553870E096023EF66594A1599D5485BB66',
+            //     '??',
+            //     ''),
+            // VideoPlayerItem(
+            //     'https://upos-szbyjkm8g1.bilivideo.com//upgcxcode//76//67//757156776//757156776_nb3-1-112.flv?e=ig8euxZM2rNcNbTH7bdVhwdl7bejhwdVhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&uipk=5&nbs=1&deadline=1656575206&gen=playurlv2&os=hwbv&oi=2034112005&trid=7f1d25d9a9ef4d57bfea21a8383b8d63u&mid=1623204697&platform=pc&upsig=65407b8cb09f81c8ab03432b6f265a95&uparams=e,uipk,nbs,deadline,gen,os,oi,trid,mid,platform&bvc=vod&nettype=0&orderid=0,3&agrr=1&bw=696713&logo=80000000&_t=1656568006845&YIM&qq=452507220',
+            //     'b [m3u8]',
+            //     ''),
+            // VideoPlayerItem(
+            //     'https://m3u8.taopianplay.com/taopian/54fdb532-e89b-4567-bc07-aa93a0c6a79b/a891bf2e-a823-4ae0-ac07-107cdf1703d8/45148/6d3af2a3-090b-486b-ac82-2c3fc6d21603/SD/playlist.m3u8',
+            //     'taopianplay',
+            //     ''),
             VideoPlayerItem(
                 'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
                 '惊奇队长 预告片[mp4]',

@@ -35,8 +35,10 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   Throttle<APlayerValue>? _streamThrottle;
 
   @mustCallSuper
-  Future<void> initialize() async {
-    final textureId = await _methodChannel.invokeMethod<int>('initialize');
+  Future<void> initialize({
+  APlayerKernel kernel = APlayerKernel.exoPlayer
+}) async {
+    final textureId = await _methodChannel.invokeMethod<int>('initialize', kernel.index);
     if (textureId != null) {
       WidgetsBinding.instance.addObserver(this);
       this.textureId = textureId;
@@ -107,6 +109,9 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> setSpeed(double speed) async {
     await methodChannel?.invokeMethod('setSpeed', speed);
+  }
+  Future<void> setKernel(APlayerKernel kernel) async {
+    await methodChannel?.invokeMethod('setKernel', kernel.index);
   }
 
   Future<void> seekTo(int position) async {

@@ -12,31 +12,30 @@ import android.provider.Settings
 import android.util.Rational
 import android.view.Surface
 import android.widget.Toast
-import com.aliyun.player.AliPlayer
-import com.aliyun.player.AliPlayerFactory
-import com.aliyun.player.IPlayer
-import com.aliyun.player.bean.InfoCode
-import com.aliyun.player.nativeclass.PlayerConfig
-import com.aliyun.player.source.UrlSource
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.TextureRegistry
+import tech.shmy.a_player.player.*
+import tech.shmy.a_player.player.impl.AliPlayerImpl
+import tech.shmy.a_player.player.impl.ExoPlayerImpl
 
 
 class APlayer(
     private val context: Context,
     private val activity: Activity,
     private val textureEntry: TextureRegistry.SurfaceTextureEntry,
-    private val binaryMessenger: BinaryMessenger
+    private val binaryMessenger: BinaryMessenger,
+    private var kernel: Int
 ) : EventChannel.StreamHandler {
-    private var player: AliPlayer? = null
+    private var player: APlayerInterface? = null
     private val surfaceTexture: SurfaceTexture = textureEntry.surfaceTexture()
     private val surface: Surface = Surface(surfaceTexture)
     private val queuingEventSink: QueuingEventSink = QueuingEventSink()
     private var eventChannel: EventChannel? = null
     private var methodChannel: MethodChannel? = null
-    private var videoEvent: VideoEvent = VideoEvent()
+    private var aPlayerEvent: APlayerEvent = APlayerEvent()
+    private var lastDataSource: Map<String, Any>? = null
 
     init {
         bindFlutter()
@@ -61,12 +60,17 @@ class APlayer(
                     stop()
                     result.success(null)
                 }
+                "setKernel" -> {
+                    setKernel(call.arguments as Int)
+                    result.success(null)
+                }
                 "prepare" -> {
                     prepare(call.arguments as Boolean)
                     result.success(null)
                 }
                 "setDataSource" -> {
-                    setDataSource(call.arguments as Map<String, Any>)
+                    lastDataSource = call.arguments as Map<String, Any>
+                    setDataSource(lastDataSource!!)
                     result.success(null)
                 }
                 "seekTo" -> {
@@ -105,13 +109,21 @@ class APlayer(
     }
 
     private fun createPlayer(): Unit {
-        player = AliPlayerFactory.createAliPlayer(context)
-        val config = player!!.config
-        config.mMaxBufferDuration = 1000 * 60 * 10
-        config.mMaxBackwardBufferDurationMs = 1 * 60 * 10
-        player!!.config = config
-        player!!.volume = 1.0f
-        videoEvent = videoEvent.copy(
+        player?.release()
+        player = null
+        when(kernel) {
+            KERNEL_ALIYUN -> {
+                player = AliPlayerImpl.createPlayer(context)
+            }
+            KERNEL_EXO -> {
+                player = ExoPlayerImpl.createPlayer(context)
+            }
+        }
+        if (player == null) {
+            return
+        }
+        aPlayerEvent = aPlayerEvent.copy(
+            kernel = kernel,
             featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         )
         sendEvent()
@@ -120,107 +132,119 @@ class APlayer(
 
     private fun setupPlayer(): Unit {
         player?.setSurface(surface)
-        player?.setOnVideoSizeChangedListener { i, i2 ->
-            surfaceTexture.setDefaultBufferSize(i, i2)
-            videoEvent = videoEvent.copy(
-                width = i,
-                height = i2
-            )
-            sendEvent()
-        }
-        player?.setOnPreparedListener {
-            videoEvent = videoEvent.copy(
-                duration = player!!.duration,
-                playSpeed = player!!.speed,
-            )
-            sendEvent()
-        }
-        player?.setOnRenderingStartListener {
-            videoEvent = videoEvent.copy(
-                ready = true,
-            )
-            sendEvent()
-        }
-
-        player?.setOnStateChangedListener {
-            videoEvent = videoEvent.copy(
-                state = it,
-            )
-            if (it == IPlayer.stopped) {
-                videoEvent = videoEvent.copy(
-                    ready = false
+        player?.addListener(object: APlayerListener {
+            override fun setOnVideoSizeChangedListener(width: Int, height: Int) {
+                surfaceTexture.setDefaultBufferSize(width, height)
+                aPlayerEvent = aPlayerEvent.copy(
+                    width = width,
+                    height = height
                 )
+                sendEvent()
             }
-            sendEvent()
-        }
-        player?.setOnErrorListener {
-            videoEvent = videoEvent.copy(
-                errorDescription = "${it.code}: ${it.msg}"
-            )
-            sendEvent()
-        }
-        player?.setOnCompletionListener {
 
-        }
-        player?.setOnInfoListener {
-            when (it.code) {
-                InfoCode.CurrentPosition -> {
-                    videoEvent = videoEvent.copy(
-                        position = it.extraValue,
-                    )
-                    sendEvent()
-                }
-                InfoCode.CurrentDownloadSpeed -> {
-                    videoEvent = videoEvent.copy(
-                        bufferingSpeed = it.extraValue,
-                    )
-                    sendEvent()
-                }
-                InfoCode.BufferedPosition -> {
-                    videoEvent = videoEvent.copy(
-                        buffered = it.extraValue,
-                    )
-                    sendEvent()
-                }
-                InfoCode.SwitchToSoftwareVideoDecoder -> {
-                    videoEvent = videoEvent.copy(
-                        enableHardwareDecoder = false,
-                    )
-                    sendEvent()
-                }
-                else -> {}
+            override fun setOnInitializedListener() {
+                aPlayerEvent = aPlayerEvent.copy(
+                    isInitialized = true,
+                )
+                sendEvent()
             }
-        }
-        player?.setOnLoadingStatusListener(object : IPlayer.OnLoadingStatusListener {
-            override fun onLoadingBegin() {
-                videoEvent = videoEvent.copy(
+
+            override fun setOnPlayingListener(isPlaying: Boolean) {
+                aPlayerEvent = aPlayerEvent.copy(
+                    isPlaying = isPlaying
+                )
+                sendEvent()
+            }
+
+            override fun setOnReadyToPlayListener() {
+                aPlayerEvent = aPlayerEvent.copy(
+                    duration = player!!.duration,
+                    playSpeed = player!!.speed,
+                    isReadyToPlay = true,
+                    isPlaying = true,
+                    isError = false,
+                    isCompletion = false,
+                    isBuffering = false
+                )
+                sendEvent()
+            }
+
+            override fun setOnStateChangedListener() {
+            }
+
+            override fun setOnErrorListener(code: String, message: String) {
+                aPlayerEvent = aPlayerEvent.copy(
+                    isError = true,
+                    errorDescription = "$code: $message"
+                )
+                sendEvent()
+            }
+
+            override fun setOnCompletionListener() {
+                aPlayerEvent = aPlayerEvent.copy(
+                    isCompletion = true
+                )
+                sendEvent()
+            }
+
+            override fun setOnCurrentPositionChangedListener(position: Long) {
+                aPlayerEvent = aPlayerEvent.copy(
+                    position = position
+                )
+                sendEvent()
+            }
+
+            override fun setOnCurrentDownloadSpeedChangedListener(speed: Long) {
+                aPlayerEvent = aPlayerEvent.copy(
+                    bufferingSpeed = speed
+                )
+                sendEvent()
+            }
+
+            override fun setOnBufferedPositionChangedListener(buffered: Long) {
+                aPlayerEvent = aPlayerEvent.copy(
+                    buffered = buffered
+                )
+                sendEvent()
+            }
+            override fun setOnSwitchToSoftwareVideoDecoderListener() {
+                aPlayerEvent = aPlayerEvent.copy(
+                    enableHardwareDecoder = false,
+                )
+                sendEvent()
+            }
+
+            override fun setOnLoadingBeginListener() {
+                aPlayerEvent = aPlayerEvent.copy(
                     isBuffering = true,
                     bufferingPercentage = 0
                 )
                 sendEvent()
             }
 
-            override fun onLoadingProgress(p0: Int, p1: Float) {
-                videoEvent = videoEvent.copy(
-                    bufferingPercentage = p0,
+            override fun setOnLoadingProgressListener(percent: Int) {
+                aPlayerEvent = aPlayerEvent.copy(
+                    bufferingPercentage = percent,
                 )
                 sendEvent()
-
             }
 
-            override fun onLoadingEnd() {
-                videoEvent = videoEvent.copy(
+            override fun setOnLoadingEndListener() {
+                aPlayerEvent = aPlayerEvent.copy(
                     isBuffering = false
                 )
                 sendEvent()
             }
-
         })
     }
 
     private fun resetValue(): Unit {
-        videoEvent = videoEvent.copy(
-            state = IPlayer.idle,
+        aPlayerEvent = aPlayerEvent.copy(
+            isInitialized = false,
+            isPlaying = false,
+            isReadyToPlay = false,
+            isError = false,
+            isCompletion = false,
             position = 0,
             duration = 0,
             isBuffering = false,
@@ -234,32 +258,33 @@ class APlayer(
     }
 
     private fun setDataSource(config: Map<String, Any>): Unit {
-        val urlSource = UrlSource()
-        urlSource.uri = config["url"] as String
-        if (player != null) {
-            resetValue();
-            val playerConfig: PlayerConfig = player!!.config;
-            val userAgent: String? = config["userAgent"] as String?
-            val referer: String? = config["referer"] as String?
-            if (userAgent != null) {
-                playerConfig.mUserAgent = userAgent
-            }
-            if (referer != null) {
-                playerConfig.mReferrer = referer
-            }
-            playerConfig.customHeaders = (config["customHeaders"] as List<String>).toTypedArray()
-            player!!.config = playerConfig
-            player!!.setDataSource(urlSource)
-        }
+        resetValue();
+        player?.setUrlDataSource(config["url"] as String)
+//        val urlSource = UrlSource()
+//        urlSource.uri = config["url"] as String
+//        if (player != null) {
+//            resetValue();
+//            val playerConfig: PlayerConfig = player!!.config;
+//            val userAgent: String? = config["userAgent"] as String?
+//            val referer: String? = config["referer"] as String?
+//            if (userAgent != null) {
+//                playerConfig.mUserAgent = userAgent
+//            }
+//            if (referer != null) {
+//                playerConfig.mReferrer = referer
+//            }
+//            playerConfig.customHeaders = (config["customHeaders"] as List<String>).toTypedArray()
+//            player!!.config = playerConfig
+//            player!!.setDataSource(urlSource)
+//        }
     }
 
     private fun prepare(isAutoPlay: Boolean): Unit {
-        player?.isAutoPlay = isAutoPlay
-        player?.prepare()
+        player?.prepare(isAutoPlay)
     }
 
     private fun play(): Unit {
-        player?.start()
+        player?.play()
     }
 
     private fun pause(): Unit {
@@ -270,11 +295,25 @@ class APlayer(
         player?.stop()
         player?.clearScreen()
     }
+    private fun setKernel(kernel: Int): Unit {
+        if (kernel == this.kernel) {
+            return
+        }
+        this.kernel = kernel
+        val isAutoPlay = player?.isAutoPlay == true
+        val positionBefore = aPlayerEvent.position
+        createPlayer()
+        if (lastDataSource != null) {
+            setDataSource(lastDataSource!!)
+            seekTo(positionBefore)
+            prepare(isAutoPlay)
+        }
+    }
 
     private fun seekTo(position: Long): Unit {
-        player?.seekTo(position, IPlayer.SeekMode.Accurate)
+        player?.seekTo(position)
         if (player != null) {
-            videoEvent = videoEvent.copy(
+            aPlayerEvent = aPlayerEvent.copy(
                 position = position
             )
             sendEvent()
@@ -282,19 +321,19 @@ class APlayer(
     }
 
     private fun setSpeed(speed: Float): Unit {
-        player?.speed = speed
+        player?.setSpeed(speed)
         if (player != null) {
-            videoEvent = videoEvent.copy(
+            aPlayerEvent = aPlayerEvent.copy(
                 playSpeed = speed
             )
             sendEvent()
         }
     }
 
-    private fun setLoop(loop: Boolean): Unit {
-        player?.isLoop = loop
+    private fun setLoop(isLoop: Boolean): Unit {
+        player?.setLoop(isLoop)
         if (player != null) {
-            videoEvent = videoEvent.copy(
+            aPlayerEvent = aPlayerEvent.copy(
                 loop = player!!.isLoop
             )
             sendEvent()
@@ -305,8 +344,8 @@ class APlayer(
         resetValue()
         player?.enableHardwareDecoder(enable)
         if (player != null) {
-            prepare(player!!.isAutoPlay)
-            videoEvent = videoEvent.copy(
+//            prepare(player!!.isAutoPlay)
+            aPlayerEvent = aPlayerEvent.copy(
                 enableHardwareDecoder = enable
             )
             sendEvent()
@@ -314,7 +353,6 @@ class APlayer(
     }
 
     private fun release(): Unit {
-        player?.setSurface(null)
         player?.release()
         surface.release()
         player = null
@@ -326,7 +364,7 @@ class APlayer(
     }
 
     private fun sendEvent(): Unit {
-        queuingEventSink.success(videoEvent.toMap())
+        queuingEventSink.success(aPlayerEvent.toMap())
     }
 
     private fun enterPip(): Boolean {
