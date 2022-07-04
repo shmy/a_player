@@ -316,7 +316,7 @@ class APlayer(
         resetValue()
         player?.enableHardwareDecoder(enable)
         if (player != null) {
-//            prepare(player!!.isAutoPlay)
+            prepare(player!!.isAutoPlay)
             aPlayerEvent = aPlayerEvent.copy(
                 enableHardwareDecoder = enable
             )
