@@ -31,6 +31,7 @@ class APlayer(
 ) : EventChannel.StreamHandler {
     private var player: APlayerInterface? = null
     private val surfaceTexture: SurfaceTexture = textureEntry.surfaceTexture()
+    private val surface: Surface = Surface(surfaceTexture)
     private val queuingEventSink: QueuingEventSink = QueuingEventSink()
     private var eventChannel: EventChannel? = null
     private var methodChannel: MethodChannel? = null
@@ -111,6 +112,7 @@ class APlayer(
     private fun createPlayer(): Unit {
         player?.release()
         player = null
+        resetValue()
         when(kernel) {
             KERNEL_ALIYUN -> {
                 player = AliyunPlayerImpl.createPlayer(context)
@@ -125,22 +127,11 @@ class APlayer(
         if (player == null) {
             return
         }
-        aPlayerEvent = aPlayerEvent.copy(
-            isInitialized = false,
-            isBuffering = false,
-            isCompletion = false,
-            isReadyToPlay = false,
-            isError = false,
-            isPlaying = false,
-            kernel = kernel,
-            featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
-        )
-        sendEvent()
         setupPlayer()
     }
 
     private fun setupPlayer(): Unit {
-        player?.setSurface(Surface(surfaceTexture))
+        player?.setSurface(surface)
         player?.addListener(object: APlayerListener {
             override fun setOnVideoSizeChangedListener(width: Int, height: Int) {
                 surfaceTexture.setDefaultBufferSize(width, height)
@@ -248,19 +239,9 @@ class APlayer(
     }
 
     private fun resetValue(): Unit {
-        aPlayerEvent = aPlayerEvent.copy(
-            isInitialized = false,
-            isPlaying = false,
-            isReadyToPlay = false,
-            isError = false,
-            isCompletion = false,
-            position = 0,
-            duration = 0,
-            isBuffering = false,
-            buffered = 0,
-            bufferingSpeed = 0,
-            bufferingPercentage = 0,
-            errorDescription = "",
+        aPlayerEvent = APlayerEvent().copy(
+            kernel = kernel,
+            featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         )
         stop();
         sendEvent()
@@ -268,7 +249,8 @@ class APlayer(
 
     private fun setDataSource(config: Map<String, Any>): Unit {
         resetValue();
-        player?.setUrlDataSource(config["url"] as String)
+        player?.setUrlDataSource(config["url"] as String, config["position"] as Long)
+        // TODO: headers
 //        val urlSource = UrlSource()
 //        urlSource.uri = config["url"] as String
 //        if (player != null) {
@@ -362,7 +344,6 @@ class APlayer(
 
     private fun release(): Unit {
         player?.release()
-//        surface.release()
         player = null
         queuingEventSink.endOfStream()
         eventChannel?.setStreamHandler(null)

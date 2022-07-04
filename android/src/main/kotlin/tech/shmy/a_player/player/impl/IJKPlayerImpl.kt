@@ -1,7 +1,6 @@
 package tech.shmy.a_player.player.impl
 
 import android.content.Context
-import android.media.session.PlaybackState
 import android.os.Handler
 import android.view.Surface
 import com.google.android.exoplayer2.Player
@@ -20,6 +19,10 @@ class IJKPlayerImpl(
     private var listener: APlayerListener? = null
     private var handler: Handler? = null
     private lateinit var surface: Surface
+
+    init {
+        IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_SILENT)
+    }
 
     companion object {
         fun createPlayer(context: Context): APlayerInterface {
@@ -58,7 +61,7 @@ class IJKPlayerImpl(
         ijkMediaPlayer.stop()
     }
 
-    override fun setUrlDataSource(url: String) {
+    override fun setUrlDataSource(url: String, positionMs: Long) {
         ijkMediaPlayer.reset()
         ijkMediaPlayer.setSurface(surface)
         bindEvent()
@@ -71,7 +74,7 @@ class IJKPlayerImpl(
         ijkMediaPlayer.setOption(
             IjkMediaPlayer.OPT_CATEGORY_PLAYER,
             "seek-at-start",
-            10000
+            positionMs
         );
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "reconnect", 5);
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 5);
@@ -95,8 +98,13 @@ class IJKPlayerImpl(
     override fun release() {
         ijkMediaPlayer.setSurface(null)
         ijkMediaPlayer.stop()
-        ijkMediaPlayer.release()
         handler = null
+        object : Thread() {
+            override fun run() {
+                ijkMediaPlayer.release()
+
+            }
+        }.start()
     }
 
     override fun prepare(isAutoPlay: Boolean) {
@@ -128,16 +136,17 @@ class IJKPlayerImpl(
         }
         handler?.postDelayed(this, 500);
     }
+
     private fun bindEvent(): Unit {
 
-        ijkMediaPlayer.setOnVideoSizeChangedListener { iMediaPlayer, i, i2, i3, i4 ->
-            listener?.setOnVideoSizeChangedListener(i, i2)
+        ijkMediaPlayer.setOnVideoSizeChangedListener { _, width, height, _, _ ->
+            listener?.setOnVideoSizeChangedListener(width, height)
         }
         ijkMediaPlayer.setOnPreparedListener {
             listener?.setOnInitializedListener()
         }
-        ijkMediaPlayer.setOnInfoListener { iMediaPlayer, i, i2 ->
-            when (i) {
+        ijkMediaPlayer.setOnInfoListener { _, what, extraValue ->
+            when (what) {
                 IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
                     listener?.setOnReadyToPlayListener()
                 }
@@ -148,16 +157,16 @@ class IJKPlayerImpl(
                     listener?.setOnLoadingEndListener()
                 }
                 IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH -> {
-                    listener?.setOnCurrentDownloadSpeedChangedListener(i2.toLong())
+                    listener?.setOnCurrentDownloadSpeedChangedListener(extraValue.toLong())
                 }
             }
             true
         }
-        ijkMediaPlayer.setOnBufferingUpdateListener { iMediaPlayer, i ->
-            listener?.setOnLoadingProgressListener(if (i > 100) 100 else i)
+        ijkMediaPlayer.setOnBufferingUpdateListener { _, percent ->
+            listener?.setOnLoadingProgressListener(if (percent > 100) 100 else percent)
         }
-        ijkMediaPlayer.setOnErrorListener { iMediaPlayer, i, i2 ->
-            listener?.setOnErrorListener(i.toString(), i2.toString())
+        ijkMediaPlayer.setOnErrorListener { _, code, message ->
+            listener?.setOnErrorListener(code.toString(), message.toString())
             true
         }
         ijkMediaPlayer.setOnCompletionListener {

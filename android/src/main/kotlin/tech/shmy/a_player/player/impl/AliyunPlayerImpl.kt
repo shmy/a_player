@@ -113,10 +113,11 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         aliPlayer.stop()
     }
 
-    override fun setUrlDataSource(url: String): Unit {
+    override fun setUrlDataSource(url: String, positionMs: Long): Unit {
         val urlSource = UrlSource()
         urlSource.uri = url
         aliPlayer.setDataSource(urlSource)
+        aliPlayer.seekTo(positionMs)
     }
 
     override fun setFileDataSource(path: String): Unit {

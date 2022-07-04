@@ -12,7 +12,7 @@ interface APlayerInterface {
     fun play(): Unit
     fun pause(): Unit
     fun stop(): Unit
-    fun setUrlDataSource(url: String): Unit
+    fun setUrlDataSource(url: String, positionMs: Long): Unit
     fun setFileDataSource(path: String): Unit
     fun enableHardwareDecoder(enabled: Boolean): Unit
     fun release(): Unit

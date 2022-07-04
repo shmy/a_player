@@ -530,8 +530,7 @@ class VideoPlayerController
   void setExpectedDataSource(VideoSourceResolve resolve, [int position = 0]) {
     isResolveFailed.value = false;
     _realPlayUrl = resolve.url;
-    playerController.setDataSouce(resolve.url, headers: resolve.headers);
-    playerController.seekTo(position);
+    playerController.setDataSouce(resolve.url, headers: resolve.headers, position: position);
   }
   void showResolverFailedSheet() {
     _videoResolverFailed?.call(currentPlayItem!);

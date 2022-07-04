@@ -58,10 +58,11 @@ class ExoPlayerImpl(
         exoPlayer.stop()
     }
 
-    override fun setUrlDataSource(url: String) {
+    override fun setUrlDataSource(url: String, positionMs: Long) {
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         exoPlayer.setMediaItem(MediaItem.fromUri(url))
+        exoPlayer.seekTo(positionMs)
     }
 
     override fun setFileDataSource(path: String) {

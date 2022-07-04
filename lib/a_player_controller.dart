@@ -35,10 +35,9 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   Throttle<APlayerValue>? _streamThrottle;
 
   @mustCallSuper
-  Future<void> initialize({
-  APlayerKernel kernel = APlayerKernel.exo
-}) async {
-    final textureId = await _methodChannel.invokeMethod<int>('initialize', kernel.index);
+  Future<void> initialize({APlayerKernel kernel = APlayerKernel.exo}) async {
+    final textureId =
+        await _methodChannel.invokeMethod<int>('initialize', kernel.index);
     if (textureId != null) {
       WidgetsBinding.instance.addObserver(this);
       this.textureId = textureId;
@@ -58,6 +57,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> setDataSouce(String source,
       {List<APlayerConfigHeader> headers = const [],
+      int position = 0,
       bool isAutoPlay = true}) async {
     String? userAgent;
     String? referer;
@@ -76,7 +76,8 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
       "url": source,
       "userAgent": userAgent,
       "referer": referer,
-      "customHeaders": customHeaders
+      "customHeaders": customHeaders,
+      "position": position
     });
     prepare(isAutoPlay: isAutoPlay);
   }
@@ -110,6 +111,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> setSpeed(double speed) async {
     await methodChannel?.invokeMethod('setSpeed', speed);
   }
+
   Future<void> setKernel(APlayerKernel kernel) async {
     await methodChannel?.invokeMethod('setKernel', kernel.index);
   }
