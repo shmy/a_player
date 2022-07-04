@@ -70,15 +70,11 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
         ijkMediaPlayer.setSurface(surface)
         bindEvent()
         var userAgent: String? = null
-        var referer: String? = null
         val customHeaders: MutableMap<String, String> = mutableMapOf()
         headers.forEach { header ->
             when {
                 APlayerUtil.isUserAgentKey(header.key) -> {
                     userAgent = header.value
-                }
-                APlayerUtil.isRefererKey(header.key) -> {
-                    referer = header.value
                 }
                 else -> {
                     customHeaders[header.key] = header.value
@@ -90,13 +86,6 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
                 IjkMediaPlayer.OPT_CATEGORY_FORMAT,
                 "user_agent",
                 userAgent
-            )
-        }
-        if (referer != null) {
-            ijkMediaPlayer.setOption(
-                IjkMediaPlayer.OPT_CATEGORY_FORMAT,
-                "referer",
-                referer
             )
         }
         ijkMediaPlayer.setOption(
