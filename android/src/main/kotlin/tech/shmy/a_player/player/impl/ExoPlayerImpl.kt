@@ -5,6 +5,7 @@ import android.os.Handler
 import android.view.Surface
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.video.VideoSize
+import tech.shmy.a_player.player.APlayerHeader
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
 
@@ -58,14 +59,18 @@ class ExoPlayerImpl(
         exoPlayer.stop()
     }
 
-    override fun setUrlDataSource(url: String, positionMs: Long) {
+    override fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>) {
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         exoPlayer.setMediaItem(MediaItem.fromUri(url))
-        exoPlayer.seekTo(positionMs)
+        exoPlayer.seekTo(startAtPositionMs)
     }
 
-    override fun setFileDataSource(path: String) {
+    override fun setFileDataSource(path: String, startAtPositionMs: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override fun setAssetDataSource(path: String, startAtPositionMs: Long) {
         TODO("Not yet implemented")
     }
 

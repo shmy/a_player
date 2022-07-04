@@ -249,25 +249,7 @@ class APlayer(
 
     private fun setDataSource(config: Map<String, Any>): Unit {
         resetValue();
-        player?.setUrlDataSource(config["url"] as String, config["position"] as Long)
-        // TODO: headers
-//        val urlSource = UrlSource()
-//        urlSource.uri = config["url"] as String
-//        if (player != null) {
-//            resetValue();
-//            val playerConfig: PlayerConfig = player!!.config;
-//            val userAgent: String? = config["userAgent"] as String?
-//            val referer: String? = config["referer"] as String?
-//            if (userAgent != null) {
-//                playerConfig.mUserAgent = userAgent
-//            }
-//            if (referer != null) {
-//                playerConfig.mReferrer = referer
-//            }
-//            playerConfig.customHeaders = (config["customHeaders"] as List<String>).toTypedArray()
-//            player!!.config = playerConfig
-//            player!!.setDataSource(urlSource)
-//        }
+        player?.setHttpDataSource(config["url"] as String, config["position"] as Long, arrayOf<APlayerHeader>())
     }
 
     private fun prepare(isAutoPlay: Boolean): Unit {

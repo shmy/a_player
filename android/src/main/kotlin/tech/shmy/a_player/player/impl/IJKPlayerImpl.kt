@@ -4,8 +4,10 @@ import android.content.Context
 import android.os.Handler
 import android.view.Surface
 import com.google.android.exoplayer2.Player
+import tech.shmy.a_player.player.APlayerHeader
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
+import tech.shmy.a_player.player.APlayerUtil
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 
@@ -59,33 +61,65 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
         ijkMediaPlayer.stop()
     }
 
-    override fun setUrlDataSource(url: String, positionMs: Long) {
+    override fun setHttpDataSource(
+        url: String,
+        startAtPositionMs: Long,
+        headers: Array<APlayerHeader>
+    ) {
         ijkMediaPlayer.reset()
         ijkMediaPlayer.setSurface(surface)
         bindEvent()
-        // TODO: headers, userAgent, referer
-        ijkMediaPlayer.setOption(
-            IjkMediaPlayer.OPT_CATEGORY_FORMAT,
-            "user_agent",
-            "headers.get(key)"
-        );
+        var userAgent: String? = null
+        var referer: String? = null
+        val customHeaders: MutableMap<String, String> = mutableMapOf()
+        headers.forEach { header ->
+            when {
+                APlayerUtil.isUserAgentKey(header.key) -> {
+                    userAgent = header.value
+                }
+                APlayerUtil.isRefererKey(header.key) -> {
+                    referer = header.value
+                }
+                else -> {
+                    customHeaders[header.key] = header.value
+                }
+            }
+        }
+        if (userAgent != null) {
+            ijkMediaPlayer.setOption(
+                IjkMediaPlayer.OPT_CATEGORY_FORMAT,
+                "user_agent",
+                userAgent
+            )
+        }
+        if (referer != null) {
+            ijkMediaPlayer.setOption(
+                IjkMediaPlayer.OPT_CATEGORY_FORMAT,
+                "referer",
+                referer
+            )
+        }
         ijkMediaPlayer.setOption(
             IjkMediaPlayer.OPT_CATEGORY_PLAYER,
             "seek-at-start",
-            positionMs
-        );
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "reconnect", 5);
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 5);
+            startAtPositionMs
+        )
+        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "reconnect", 5)
+        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 5)
         ijkMediaPlayer.setOption(
             IjkMediaPlayer.OPT_CATEGORY_PLAYER,
             "max_cached_duration",
             10 * 60 * 1000
-        );
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30);
-        ijkMediaPlayer.setDataSource(url, mapOf());
+        )
+        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30)
+        ijkMediaPlayer.setDataSource(url, customHeaders)
     }
 
-    override fun setFileDataSource(path: String) {
+    override fun setFileDataSource(path: String, startAtPositionMs: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override fun setAssetDataSource(path: String, startAtPositionMs: Long) {
         TODO("Not yet implemented")
     }
 

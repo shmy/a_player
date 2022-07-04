@@ -2,6 +2,8 @@ package tech.shmy.a_player.player
 
 import android.view.Surface
 
+data class APlayerHeader(val key: String, val value: String)
+
 interface APlayerInterface {
     val duration: Long
     val speed: Float
@@ -12,8 +14,9 @@ interface APlayerInterface {
     fun play(): Unit
     fun pause(): Unit
     fun stop(): Unit
-    fun setUrlDataSource(url: String, positionMs: Long): Unit
-    fun setFileDataSource(path: String): Unit
+    fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>): Unit
+    fun setFileDataSource(path: String, startAtPositionMs: Long): Unit
+    fun setAssetDataSource(path: String, startAtPositionMs: Long): Unit
     fun enableHardwareDecoder(enabled: Boolean): Unit
     fun release(): Unit
     fun prepare(isAutoPlay: Boolean): Unit

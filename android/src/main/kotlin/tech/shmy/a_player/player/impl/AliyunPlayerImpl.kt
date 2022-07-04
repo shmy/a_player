@@ -7,20 +7,16 @@ import com.aliyun.player.AliPlayerFactory
 import com.aliyun.player.IPlayer
 import com.aliyun.player.bean.InfoCode
 import com.aliyun.player.source.UrlSource
+import tech.shmy.a_player.player.APlayerHeader
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
+import tech.shmy.a_player.player.APlayerUtil
 
 class AliyunPlayerImpl(context: Context) : APlayerInterface {
     private val aliPlayer: AliPlayer = AliPlayerFactory.createAliPlayer(context)
     private var listener: APlayerListener? = null
 
     init {
-        val config = aliPlayer.config
-        config.mMaxBufferDuration = 1000 * 60 * 10
-        config.mMaxBackwardBufferDurationMs = 1 * 60 * 10
-        aliPlayer.config = config
-        aliPlayer.volume = 1.0f
-
         aliPlayer.setOnVideoSizeChangedListener { width, height ->
             listener?.setOnVideoSizeChangedListener(width, height)
         }
@@ -113,14 +109,46 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         aliPlayer.stop()
     }
 
-    override fun setUrlDataSource(url: String, positionMs: Long): Unit {
+    override fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>): Unit {
+        val config = aliPlayer.config
+        config.mMaxBufferDuration = 1000 * 60 * 10
+        config.mMaxBackwardBufferDurationMs = 1 * 60 * 10
+        var userAgent: String? = null
+        var referer: String? = null
+        val customHeaders: Array<String> = arrayOf()
+        headers.forEach { header ->
+            when {
+                APlayerUtil.isUserAgentKey(header.key) -> {
+                    userAgent = header.value
+                }
+                APlayerUtil.isRefererKey(header.key) -> {
+                    referer = header.value
+                }
+                else -> {
+                    customHeaders.plus("${header.key}:${header.value}")
+                }
+            }
+        }
+        if (userAgent != null) {
+            config.mUserAgent = userAgent
+        }
+        if (referer != null) {
+            config.mReferrer = referer
+        }
+        config.customHeaders = customHeaders
+        aliPlayer.config = config
+        aliPlayer.volume = 1.0f
         val urlSource = UrlSource()
         urlSource.uri = url
         aliPlayer.setDataSource(urlSource)
-        aliPlayer.seekTo(positionMs)
+        aliPlayer.seekTo(startAtPositionMs)
     }
 
-    override fun setFileDataSource(path: String): Unit {
+    override fun setFileDataSource(path: String, startAtPositionMs: Long) {
+        TODO("Not yet implemented")
+    }
+
+    override fun setAssetDataSource(path: String, startAtPositionMs: Long) {
         TODO("Not yet implemented")
     }
 
