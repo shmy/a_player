@@ -79,11 +79,10 @@ class ExoPlayerImpl(
     }
 
     override fun release(): Unit {
-//        exoPlayer.clearVideoSurface()
+        handler = null
         exoPlayer.setVideoSurface(null)
         exoPlayer.stop()
         exoPlayer.release()
-        handler = null
     }
 
     override fun prepare(isAutoPlay: Boolean) {

@@ -21,7 +21,7 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
     private lateinit var surface: Surface
 
     init {
-        IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_SILENT)
+        bindEvent()
     }
 
     companion object {
@@ -68,7 +68,6 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
     ) {
         ijkMediaPlayer.reset()
         ijkMediaPlayer.setSurface(surface)
-        bindEvent()
         var userAgent: String? = null
         val customHeaders: MutableMap<String, String> = mutableMapOf()
         headers.forEach { header ->
@@ -117,15 +116,10 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
     }
 
     override fun release() {
+        handler = null
         ijkMediaPlayer.setSurface(null)
         ijkMediaPlayer.stop()
-        handler = null
-        object : Thread() {
-            override fun run() {
-                ijkMediaPlayer.release()
-
-            }
-        }.start()
+        ijkMediaPlayer.release()
     }
 
     override fun prepare(isAutoPlay: Boolean) {
@@ -159,7 +153,6 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
     }
 
     private fun bindEvent(): Unit {
-
         ijkMediaPlayer.setOnVideoSizeChangedListener { _, width, height, _, _ ->
             listener?.onVideoSizeChangedListener(width, height)
         }
