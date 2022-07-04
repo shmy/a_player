@@ -74,6 +74,7 @@ class ExoPlayerImpl(
     }
 
     override fun release(): Unit {
+//        exoPlayer.clearVideoSurface()
         exoPlayer.setVideoSurface(null)
         exoPlayer.stop()
         exoPlayer.release()

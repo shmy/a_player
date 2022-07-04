@@ -9,9 +9,7 @@ import tech.shmy.a_player.player.APlayerListener
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 
-class IJKPlayerImpl(
-    private val context: Context
-) : Player.Listener, APlayerInterface, Runnable {
+class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
 
     private val ijkMediaPlayer: IjkMediaPlayer = IjkMediaPlayer()
     private var _speed: Float = 1.0F
@@ -26,7 +24,7 @@ class IJKPlayerImpl(
 
     companion object {
         fun createPlayer(context: Context): APlayerInterface {
-            return IJKPlayerImpl(context)
+            return IJKPlayerImpl()
         }
     }
 
