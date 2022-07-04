@@ -151,8 +151,8 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
 
     override fun run() {
         if (ijkMediaPlayer.isPlaying) {
-            listener?.setOnCurrentPositionChangedListener(ijkMediaPlayer.currentPosition)
-            listener?.setOnCurrentDownloadSpeedChangedListener(ijkMediaPlayer.tcpSpeed)
+            listener?.onCurrentPositionChangedListener(ijkMediaPlayer.currentPosition)
+            listener?.onCurrentDownloadSpeedChangedListener(ijkMediaPlayer.tcpSpeed)
 
         }
         handler?.postDelayed(this, 500);
@@ -161,37 +161,37 @@ class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
     private fun bindEvent(): Unit {
 
         ijkMediaPlayer.setOnVideoSizeChangedListener { _, width, height, _, _ ->
-            listener?.setOnVideoSizeChangedListener(width, height)
+            listener?.onVideoSizeChangedListener(width, height)
         }
         ijkMediaPlayer.setOnPreparedListener {
-            listener?.setOnInitializedListener()
+            listener?.onInitializedListener()
         }
         ijkMediaPlayer.setOnInfoListener { _, what, extraValue ->
             when (what) {
                 IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
-                    listener?.setOnReadyToPlayListener()
+                    listener?.onReadyToPlayListener()
                 }
                 IMediaPlayer.MEDIA_INFO_BUFFERING_START -> {
-                    listener?.setOnLoadingBeginListener()
+                    listener?.onLoadingBeginListener()
                 }
                 IMediaPlayer.MEDIA_INFO_BUFFERING_END -> {
-                    listener?.setOnLoadingEndListener()
+                    listener?.onLoadingEndListener()
                 }
                 IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH -> {
-                    listener?.setOnCurrentDownloadSpeedChangedListener(extraValue.toLong())
+                    listener?.onCurrentDownloadSpeedChangedListener(extraValue.toLong())
                 }
             }
             true
         }
         ijkMediaPlayer.setOnBufferingUpdateListener { _, percent ->
-            listener?.setOnLoadingProgressListener(if (percent > 100) 100 else percent)
+            listener?.onLoadingProgressListener(if (percent > 100) 100 else percent)
         }
         ijkMediaPlayer.setOnErrorListener { _, code, message ->
-            listener?.setOnErrorListener(code.toString(), message.toString())
+            listener?.onErrorListener(code.toString(), message.toString())
             true
         }
         ijkMediaPlayer.setOnCompletionListener {
-            listener?.setOnCompletionListener()
+            listener?.onCompletionListener()
         }
     }
 }

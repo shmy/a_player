@@ -18,58 +18,58 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
 
     init {
         aliPlayer.setOnVideoSizeChangedListener { width, height ->
-            listener?.setOnVideoSizeChangedListener(width, height)
+            listener?.onVideoSizeChangedListener(width, height)
         }
         aliPlayer.setOnPreparedListener {
-            listener?.setOnInitializedListener()
+            listener?.onInitializedListener()
         }
         aliPlayer.setOnRenderingStartListener {
-            listener?.setOnReadyToPlayListener()
+            listener?.onReadyToPlayListener()
         }
         aliPlayer.setOnStateChangedListener {
             when (it) {
                 IPlayer.started -> {
-                    listener?.setOnPlayingListener(true)
+                    listener?.onPlayingListener(true)
                 }
                 else -> {
-                    listener?.setOnPlayingListener(false)
+                    listener?.onPlayingListener(false)
                 }
             }
         }
         aliPlayer.setOnErrorListener {
-            listener?.setOnErrorListener(it.code.name, it.msg)
+            listener?.onErrorListener(it.code.name, it.msg)
         }
         aliPlayer.setOnCompletionListener {
-            listener?.setOnCompletionListener()
+            listener?.onCompletionListener()
         }
         aliPlayer.setOnInfoListener { it ->
             when (it.code) {
                 InfoCode.CurrentPosition -> {
-                    listener?.setOnCurrentPositionChangedListener(it.extraValue)
+                    listener?.onCurrentPositionChangedListener(it.extraValue)
                 }
                 InfoCode.CurrentDownloadSpeed -> {
-                    listener?.setOnCurrentDownloadSpeedChangedListener(it.extraValue)
+                    listener?.onCurrentDownloadSpeedChangedListener(it.extraValue)
                 }
                 InfoCode.BufferedPosition -> {
-                    listener?.setOnBufferedPositionChangedListener(it.extraValue)
+                    listener?.onBufferedPositionChangedListener(it.extraValue)
                 }
                 InfoCode.SwitchToSoftwareVideoDecoder -> {
-                    listener?.setOnSwitchToSoftwareVideoDecoderListener()
+                    listener?.onSwitchToSoftwareVideoDecoderListener()
                 }
             }
 
         }
         aliPlayer.setOnLoadingStatusListener(object : IPlayer.OnLoadingStatusListener {
             override fun onLoadingBegin() {
-                listener?.setOnLoadingBeginListener()
+                listener?.onLoadingBeginListener()
             }
 
             override fun onLoadingProgress(p0: Int, p1: Float) {
-                listener?.setOnLoadingProgressListener(p0)
+                listener?.onLoadingProgressListener(p0)
             }
 
             override fun onLoadingEnd() {
-                listener?.setOnLoadingEndListener()
+                listener?.onLoadingEndListener()
             }
         })
     }

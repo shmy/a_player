@@ -106,44 +106,44 @@ class ExoPlayerImpl(
     }
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
-        listener?.setOnPlayingListener(isPlaying)
+        listener?.onPlayingListener(isPlaying)
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
         when (playbackState) {
             Player.STATE_IDLE -> {}
             Player.STATE_BUFFERING -> {
-                listener?.setOnLoadingBeginListener()
-                listener?.setOnLoadingProgressListener(exoPlayer.bufferedPercentage)
-                listener?.setOnBufferedPositionChangedListener(exoPlayer.bufferedPosition)
+                listener?.onLoadingBeginListener()
+                listener?.onLoadingProgressListener(exoPlayer.bufferedPercentage)
+                listener?.onBufferedPositionChangedListener(exoPlayer.bufferedPosition)
             }
             Player.STATE_READY -> {
-                listener?.setOnInitializedListener()
+                listener?.onInitializedListener()
             }
             Player.STATE_ENDED -> {
-                listener?.setOnCompletionListener()
+                listener?.onCompletionListener()
             }
         }
         if (playbackState != Player.STATE_BUFFERING) {
-            listener?.setOnLoadingEndListener()
+            listener?.onLoadingEndListener()
         }
     }
 
     override fun onPlayerError(error: PlaybackException) {
-        listener?.setOnErrorListener(error.errorCodeName, error.message.toString())
+        listener?.onErrorListener(error.errorCodeName, error.message.toString())
     }
 
     override fun onVideoSizeChanged(videoSize: VideoSize) {
-        listener?.setOnVideoSizeChangedListener(videoSize.width, videoSize.height)
+        listener?.onVideoSizeChangedListener(videoSize.width, videoSize.height)
     }
 
     override fun onRenderedFirstFrame() {
-        listener?.setOnReadyToPlayListener()
+        listener?.onReadyToPlayListener()
     }
 
     override fun run() {
         if (exoPlayer.isPlaying) {
-            listener?.setOnCurrentPositionChangedListener(exoPlayer.currentPosition)
+            listener?.onCurrentPositionChangedListener(exoPlayer.currentPosition)
         }
         handler?.postDelayed(this, 500);
     }

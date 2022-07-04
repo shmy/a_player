@@ -133,7 +133,7 @@ class APlayer(
     private fun setupPlayer(): Unit {
         player?.setSurface(surface)
         player?.addListener(object: APlayerListener {
-            override fun setOnVideoSizeChangedListener(width: Int, height: Int) {
+            override fun onVideoSizeChangedListener(width: Int, height: Int) {
                 surfaceTexture.setDefaultBufferSize(width, height)
                 aPlayerEvent = aPlayerEvent.copy(
                     width = width,
@@ -142,21 +142,21 @@ class APlayer(
                 sendEvent()
             }
 
-            override fun setOnInitializedListener() {
+            override fun onInitializedListener() {
                 aPlayerEvent = aPlayerEvent.copy(
                     isInitialized = true,
                 )
                 sendEvent()
             }
 
-            override fun setOnPlayingListener(isPlaying: Boolean) {
+            override fun onPlayingListener(isPlaying: Boolean) {
                 aPlayerEvent = aPlayerEvent.copy(
                     isPlaying = isPlaying
                 )
                 sendEvent()
             }
 
-            override fun setOnReadyToPlayListener() {
+            override fun onReadyToPlayListener() {
                 aPlayerEvent = aPlayerEvent.copy(
                     duration = player!!.duration,
                     playSpeed = player!!.speed,
@@ -169,10 +169,7 @@ class APlayer(
                 sendEvent()
             }
 
-            override fun setOnStateChangedListener() {
-            }
-
-            override fun setOnErrorListener(code: String, message: String) {
+            override fun onErrorListener(code: String, message: String) {
                 aPlayerEvent = aPlayerEvent.copy(
                     isError = true,
                     errorDescription = "$code: $message"
@@ -180,41 +177,41 @@ class APlayer(
                 sendEvent()
             }
 
-            override fun setOnCompletionListener() {
+            override fun onCompletionListener() {
                 aPlayerEvent = aPlayerEvent.copy(
                     isCompletion = true
                 )
                 sendEvent()
             }
 
-            override fun setOnCurrentPositionChangedListener(position: Long) {
+            override fun onCurrentPositionChangedListener(position: Long) {
                 aPlayerEvent = aPlayerEvent.copy(
                     position = position
                 )
                 sendEvent()
             }
 
-            override fun setOnCurrentDownloadSpeedChangedListener(speed: Long) {
+            override fun onCurrentDownloadSpeedChangedListener(speed: Long) {
                 aPlayerEvent = aPlayerEvent.copy(
                     bufferingSpeed = speed
                 )
                 sendEvent()
             }
 
-            override fun setOnBufferedPositionChangedListener(buffered: Long) {
+            override fun onBufferedPositionChangedListener(buffered: Long) {
                 aPlayerEvent = aPlayerEvent.copy(
                     buffered = buffered
                 )
                 sendEvent()
             }
-            override fun setOnSwitchToSoftwareVideoDecoderListener() {
+            override fun onSwitchToSoftwareVideoDecoderListener() {
                 aPlayerEvent = aPlayerEvent.copy(
                     enableHardwareDecoder = false,
                 )
                 sendEvent()
             }
 
-            override fun setOnLoadingBeginListener() {
+            override fun onLoadingBeginListener() {
                 aPlayerEvent = aPlayerEvent.copy(
                     isBuffering = true,
                     bufferingPercentage = 0
@@ -222,14 +219,14 @@ class APlayer(
                 sendEvent()
             }
 
-            override fun setOnLoadingProgressListener(percent: Int) {
+            override fun onLoadingProgressListener(percent: Int) {
                 aPlayerEvent = aPlayerEvent.copy(
                     bufferingPercentage = percent,
                 )
                 sendEvent()
             }
 
-            override fun setOnLoadingEndListener() {
+            override fun onLoadingEndListener() {
                 aPlayerEvent = aPlayerEvent.copy(
                     isBuffering = false
                 )
