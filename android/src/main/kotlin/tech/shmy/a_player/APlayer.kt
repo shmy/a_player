@@ -246,7 +246,8 @@ class APlayer(
 
     private fun setDataSource(config: Map<String, Any>): Unit {
         resetValue();
-        player?.setHttpDataSource(config["url"] as String, config["position"] as Long, arrayOf<APlayerHeader>())
+        player?.setHttpDataSource(config["url"] as String,
+            (config["position"] as Int).toLong(), arrayOf<APlayerHeader>())
     }
 
     private fun prepare(isAutoPlay: Boolean): Unit {
