@@ -3,7 +3,6 @@ package tech.shmy.a_player.player.impl
 import android.content.Context
 import android.os.Handler
 import android.view.Surface
-import com.google.android.exoplayer2.Player
 import tech.shmy.a_player.player.APlayerHeader
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
@@ -11,7 +10,7 @@ import tech.shmy.a_player.player.APlayerUtil
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 
-class IJKPlayerImpl : Player.Listener, APlayerInterface, Runnable {
+class IJKPlayerImpl : APlayerInterface, Runnable {
 
     private val ijkMediaPlayer: IjkMediaPlayer = IjkMediaPlayer()
     private var _speed: Float = 1.0F
