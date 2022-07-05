@@ -16,7 +16,6 @@ protocol APlayerInterface {
     func play() -> Void
     func pause() -> Void
     func stop() -> Void
-    func enableHardwareDecoder(enabled: Bool) -> Void
     func destroy() -> Void
     func prepare(isAutoPlay: Bool) -> Void
     func seekTo(positionMs: Int64) -> Void

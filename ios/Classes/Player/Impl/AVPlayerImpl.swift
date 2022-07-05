@@ -124,11 +124,7 @@ class AVPlayerImpl: NSObject, APlayerInterface {
     func stop() {
         avPlayer.pause()
     }
-    
-    func enableHardwareDecoder(enabled: Bool) {
-        //
-    }
-    
+        
     func destroy() {
         //
     }

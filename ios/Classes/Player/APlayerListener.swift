@@ -17,7 +17,6 @@ protocol APlayerListener {
     func onCurrentPositionChangedListener(position: Int64) -> Void
     func onCurrentDownloadSpeedChangedListener(speed: Int64) -> Void
     func onBufferedPositionChangedListener(buffered: Int64) -> Void
-    func onSwitchToSoftwareVideoDecoderListener() -> Void
     func onLoadingBeginListener() -> Void
     func onLoadingProgressListener(percent: Int) -> Void
     func onLoadingEndListener() -> Void

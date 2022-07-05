@@ -39,10 +39,6 @@ class AliyunPlayer: NSObject, APlayerInterface, AVPDelegate {
         aliPlayer.stop()
     }
     
-    func enableHardwareDecoder(enabled: Bool) {
-        aliPlayer.enableHardwareDecoder = enabled
-    }
-    
     func destroy() {
         aliPlayer.destroy()
     }

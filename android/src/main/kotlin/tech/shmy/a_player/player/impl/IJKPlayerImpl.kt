@@ -98,8 +98,8 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 5)
         ijkMediaPlayer.setOption(
             IjkMediaPlayer.OPT_CATEGORY_PLAYER,
-            "max_cached_duration",
-            10 * 60 * 1000
+            "max-buffer-size",
+            10 * 1024 * 1024
         )
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30)
 
