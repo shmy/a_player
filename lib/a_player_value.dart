@@ -60,7 +60,6 @@ class APlayerValue {
   final int width;
   final double playSpeed;
   final bool loop;
-  final bool enableHardwareDecoder;
   final bool isBuffering;
   final int bufferingPercentage;
   final int bufferingSpeed;
@@ -81,7 +80,6 @@ class APlayerValue {
     required this.width,
     required this.playSpeed,
     required this.loop,
-    required this.enableHardwareDecoder,
     required this.isBuffering,
     required this.bufferingPercentage,
     required this.bufferingSpeed,
@@ -103,7 +101,6 @@ class APlayerValue {
         width: 16,
         playSpeed: 1.0,
         loop: false,
-        enableHardwareDecoder: true,
         isBuffering: false,
         bufferingPercentage: 0,
         bufferingSpeed: 0,
@@ -125,7 +122,6 @@ class APlayerValue {
         width: json['width'],
         playSpeed: json['playSpeed'],
         loop: json['loop'],
-        enableHardwareDecoder: json['enableHardwareDecoder'],
         isBuffering: json['isBuffering'],
         bufferingPercentage: json['bufferingPercentage'],
         bufferingSpeed: json['bufferingSpeed'],

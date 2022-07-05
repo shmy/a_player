@@ -10,7 +10,6 @@ interface APlayerListener {
     fun onCurrentPositionChangedListener(position: Long)
     fun onCurrentDownloadSpeedChangedListener(speed: Long)
     fun onBufferedPositionChangedListener(buffered: Long)
-    fun onSwitchToSoftwareVideoDecoderListener()
     fun onLoadingBeginListener()
     fun onLoadingProgressListener(percent: Int)
     fun onLoadingEndListener()

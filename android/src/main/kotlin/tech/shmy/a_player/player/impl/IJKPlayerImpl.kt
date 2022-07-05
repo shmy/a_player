@@ -109,10 +109,6 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
         TODO("Not yet implemented")
     }
 
-    override fun enableHardwareDecoder(enabled: Boolean) {
-        TODO("Not yet implemented")
-    }
-
     override fun release() {
         handler = null
         listener = null

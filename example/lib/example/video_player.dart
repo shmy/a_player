@@ -449,12 +449,6 @@ class VideoPlayer extends StatelessWidget {
                     value: controller.playerController.mirrorMode,
                     onTap: controller.playerController.setMirrorMode,
                   ),
-                _buildTitle('解码方式', subtitle: '如遇播放异常，可尝试切换'),
-                _buildRadius(
-                  options: controller.decoderList,
-                  value: controller.playerValue.enableHardwareDecoder,
-                  onTap: controller.playerController.setHardwareDecoderEnable,
-                ),
               ],
             ),
           ),

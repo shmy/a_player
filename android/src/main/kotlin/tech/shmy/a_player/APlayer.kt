@@ -86,10 +86,6 @@ class APlayer(
                     setLoop(call.arguments as Boolean)
                     result.success(null)
                 }
-                "setHardwareDecoderEnable" -> {
-                    setHardwareDecoderEnable(call.arguments as Boolean)
-                    result.success(null)
-                }
                 "enterPip" -> {
                     result.success(enterPip())
                 }
@@ -204,13 +200,6 @@ class APlayer(
                 sendEvent()
             }
 
-            override fun onSwitchToSoftwareVideoDecoderListener() {
-                aPlayerEvent = aPlayerEvent.copy(
-                    enableHardwareDecoder = false,
-                )
-                sendEvent()
-            }
-
             override fun onLoadingBeginListener() {
                 aPlayerEvent = aPlayerEvent.copy(
                     isBuffering = true,
@@ -314,18 +303,6 @@ class APlayer(
         if (player != null) {
             aPlayerEvent = aPlayerEvent.copy(
                 loop = player!!.isLoop
-            )
-            sendEvent()
-        }
-    }
-
-    private fun setHardwareDecoderEnable(enable: Boolean) {
-        resetValue()
-        player?.enableHardwareDecoder(enable)
-        if (player != null) {
-            prepare(player!!.isAutoPlay)
-            aPlayerEvent = aPlayerEvent.copy(
-                enableHardwareDecoder = enable
             )
             sendEvent()
         }

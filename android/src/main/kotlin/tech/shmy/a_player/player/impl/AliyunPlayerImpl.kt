@@ -52,9 +52,6 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
                 InfoCode.BufferedPosition -> {
                     listener?.onBufferedPositionChangedListener(it.extraValue)
                 }
-                InfoCode.SwitchToSoftwareVideoDecoder -> {
-                    listener?.onSwitchToSoftwareVideoDecoderListener()
-                }
                 else -> {}
             }
 
@@ -150,10 +147,6 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
 
     override fun setAssetDataSource(path: String, startAtPositionMs: Long) {
         TODO("Not yet implemented")
-    }
-
-    override fun enableHardwareDecoder(enabled: Boolean) {
-        aliPlayer.enableHardwareDecoder(enabled)
     }
 
     override fun release() {

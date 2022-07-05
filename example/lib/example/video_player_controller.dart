@@ -92,10 +92,6 @@ mixin _VideoPlayerOptions {
     LabelValue<APlayerMirrorMode>('垂直镜像', APlayerMirrorMode.vertical),
   ];
 
-  final List<LabelValue<bool>> decoderList = [
-    LabelValue<bool>('硬件解码', true),
-    LabelValue<bool>('软件解码', false),
-  ];
 }
 mixin _VideoPlayerOrientationPlugin {
   final RxBool isFullscreen = false.obs;

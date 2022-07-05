@@ -132,10 +132,6 @@ class ExoPlayerImpl(
         TODO("Not yet implemented")
     }
 
-    override fun enableHardwareDecoder(enabled: Boolean) {
-        // can't enable
-    }
-
     override fun release() {
         handler = null
         listener = null
