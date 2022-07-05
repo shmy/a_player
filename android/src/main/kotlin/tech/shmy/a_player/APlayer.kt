@@ -241,10 +241,16 @@ class APlayer(
         if (config["position"] is Int) {
             config["position"] = (config["position"] as Int).toLong()
         }
-        player?.setHttpDataSource(
-            config["url"] as String,
-            config["position"] as Long, config["httpHeaders"] as Map<String, String>
-        )
+        val url = config["url"] as String
+        val position = config["position"] as Long
+        if (APlayerUtil.isHttpProtocol(url)) {
+            player?.setHttpDataSource(
+                url,
+                position, config["httpHeaders"] as Map<String, String>
+            )
+        } else if (APlayerUtil.isFileProtocol(url)) {
+            player?.setFileDataSource(url, position)
+        }
     }
 
     private fun prepare(isAutoPlay: Boolean) {

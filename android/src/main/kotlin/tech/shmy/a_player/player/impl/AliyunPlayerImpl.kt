@@ -142,7 +142,7 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
     }
 
     override fun setFileDataSource(path: String, startAtPositionMs: Long) {
-        TODO("Not yet implemented")
+        setHttpDataSource(path, startAtPositionMs, mapOf())
     }
 
     override fun release() {
