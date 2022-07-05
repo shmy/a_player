@@ -8,6 +8,7 @@
 import Foundation
 
 protocol APlayerListener {
+    func onPixelBuffer(pixelBuffer: CVPixelBuffer) -> Void
     func onInitializedListener() -> Void
     func onPlayingListener(isPlaying: Bool) -> Void
     func onErrorListener(code: String, message: String) -> Void

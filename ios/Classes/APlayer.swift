@@ -7,36 +7,39 @@
 
 import Foundation
 import Flutter
-import AliyunPlayer
 
-class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHandler, AVPDelegate {
+class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
+    
     private let queuingEventSink: QueuingEventSink = QueuingEventSink.init()
-    private var videoEvent: VideoEvent = VideoEvent.init()
-    private var player: AliPlayer?
+    private var aPlayerEvent: APlayerEvent = APlayerEvent.init()
+  
     private var eventChannel: FlutterEventChannel?
     private var methodChannel: FlutterMethodChannel?
     private var latestBuffer: CVImageBuffer!
     private var registrar: FlutterPluginRegistrar!
     private var _textureId: Int64!
     private var textureRegistry: FlutterTextureRegistry?
+    private var player: APlayerInterface?
+    private var kernel: Int
     
-    init(registrar: FlutterPluginRegistrar) {
+    init(registrar: FlutterPluginRegistrar, kernel: Int) {
         self.registrar = registrar
-        self.textureRegistry = self.registrar.textures()
+        self.kernel = kernel
+        self.textureRegistry = registrar.textures()
         super.init()
         self.bindFlutter()
     }
     
     
     func textureId() -> Int64 {
-        return self._textureId
+        return _textureId
     }
     private func bindFlutter() -> Void {
         
-        self._textureId = self.textureRegistry?.register(self)
+        _textureId = textureRegistry?.register(self)
         
-        self.eventChannel = FlutterEventChannel.init(name: PLAYER_EVENT_CHANNEL_NAME + String(self._textureId), binaryMessenger: registrar.messenger())
-        self.methodChannel = FlutterMethodChannel.init(name: PLAYER_METHOD_CHANNEL_NAME + String(self._textureId), binaryMessenger: registrar.messenger())
+        eventChannel = FlutterEventChannel.init(name: PLAYER_EVENT_CHANNEL_NAME + String(_textureId), binaryMessenger: registrar.messenger())
+        methodChannel = FlutterMethodChannel.init(name: PLAYER_METHOD_CHANNEL_NAME + String(_textureId), binaryMessenger: registrar.messenger())
         
         self.eventChannel?.setStreamHandler(self)
         self.methodChannel?.setMethodCallHandler {[weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
@@ -54,6 +57,9 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
               case "prepare":
                 self?.prepare(isAutoPlay: call.arguments as! Bool)
                 break
+              case "setKernel":
+                self?.setKernel(kernel: call.arguments as! Int)
+                break
               case "setDataSource":
                 self?.setDataSource(config: call.arguments as! Dictionary<String, Any>)
                 break
@@ -66,11 +72,8 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
               case "setLoop":
                 self?.setLoop(loop: call.arguments as! Bool)
                 break
-              case "setHardwareDecoderEnable":
-                self?.setHardwareDecoderEnable(enable: call.arguments as! Bool)
-                break
               case "release":
-                self?.release()
+                self?.destroy()
                 break
               default:
                 break
@@ -78,119 +81,82 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
             result(nil)
         }
     }
-    
-    private func createPlayer() -> Void {
-        self.player = AliPlayer.init()
-        let playerConfig = self.player!.getConfig()
-        playerConfig?.maxBufferDuration = 1000 * 60 * 10
-        playerConfig?.mMAXBackwardDuration =  1 * 60 * 10
-        self.player?.setConfig(playerConfig)
-        self.player?.volume = 1.0
-        self.setupPlayer()
+    private func setupPlayer() -> Void {
+        player?.addListener(listener: self)
     }
     
-    private func setupPlayer() -> Void {
-        self.player?.delegate = self
-        self.player?.renderDelegate = self
+    private func createPlayer() -> Void {
+        player?.destroy()
+        player = nil
+        switch(kernel) {
+        case KERNEL_ALIYUN:
+            player = AliyunPlayerImpl.init()
+            break
+        case KERNEL_AV:
+            break
+        default:
+            break
+        }
+        setupPlayer()
     }
     
     private func resetValue() -> Void {
-        self.videoEvent = VideoEvent.init()
-        self.stop();
-        self.sendEvent()
+        aPlayerEvent = APlayerEvent.init()
+        stop();
+        sendEvent()
     }
     
     private func setDataSource(config: Dictionary<String, Any>) -> Void {
-        let urlSource = AVPUrlSource.init().url(with: config["url"] as? String)
-        if (self.player != nil) {
-            self.resetValue()
-            let playerConfig = self.player!.getConfig()
-            let userAgent: String? = config["userAgent"] as? String
-            let referer: String? = config["referer"] as? String
-            playerConfig?.clearShowWhenStop = true
-            if (userAgent != nil) {
-                playerConfig?.userAgent = userAgent
-            }
-            if (referer != nil) {
-                playerConfig?.referer = referer
-            }
-            
-//            playerConfig?.httpHeaders = NSMutableArray.init(array: config["customHeaders"] as! Array<String>)
-            self.player!.setConfig(playerConfig)
-            self.player!.setUrlSource(urlSource)
+        resetValue()
+        let url = config["url"] as! String
+        let position = config["position"] as! Int64
+        if (APlayerUtil.isHttpProtocol(url: url) == true) {
+            player?.setHttpDataSource(url: url, startAtPositionMs: position, headers: Dictionary<String, String>.init())
+        } else if (APlayerUtil.isFileProtocol(url: url) == true) {
+            player?.setFileDataSource(path: url, startAtPositionMs: position)
         }
         
     }
+    private func setKernel(kernel: Int) {
+        self.kernel = kernel
+        createPlayer()
+    }
     private func prepare(isAutoPlay: Bool) -> Void {
-        self.player?.isAutoPlay = isAutoPlay
-        self.player?.prepare()
+        player?.prepare(isAutoPlay: isAutoPlay)
     }
     
     private func play() -> Void {
-        self.player?.start()
+        player?.play()
     }
     
     private func pause() -> Void {
-        self.player?.pause()
+        player?.pause()
     }
     private func stop() -> Void {
-        self.player?.stop()
-        self.player?.clearScreen()
+        player?.stop()
     }
     private func seekTo(position: Int64) -> Void {
-        self.player?.seek(toTime: position, seekMode: AVP_SEEKMODE_ACCURATE)
-        if (self.player != nil) {
-            self.videoEvent.position = position
-            self.sendEvent()
-        }
-        
+        player?.seekTo(positionMs: position)
     }
     private func setSpeed(speed: Float) -> Void {
-        self.player?.rate = speed
-        if (self.player != nil) {
-            self.videoEvent.playSpeed = speed
-            self.sendEvent()
-        }
+        player?.setSpeed(speed: speed)
     }
     
     private func setLoop(loop: Bool) -> Void {
-        self.player?.isLoop = loop
-        if (self.player != nil) {
-            self.videoEvent.loop = loop
-            self.sendEvent()
-        }
+        player?.setLoop(isLoop: loop)
     }
-    private func setHardwareDecoderEnable(enable: Bool) -> Void {
-        self.resetValue()
-        self.player?.enableHardwareDecoder = enable
-        if (self.player != nil) {
-            self.prepare(isAutoPlay: self.player!.isAutoPlay)
-            self.videoEvent.enableHardwareDecoder = enable
-            self.sendEvent()
-       }
-    }
-    private func release() -> Void {
-        self.player?.destroy()
-        self.player?.delegate = nil
-        self.player?.renderDelegate = nil
-        self.player = nil
-        self.queuingEventSink.endOfStream()
-        self.textureRegistry = nil
-        self.eventChannel = nil
-        self.methodChannel = nil
+    private func destroy() -> Void {
+        player?.destroy()
+        player = nil
+        queuingEventSink.endOfStream()
+        textureRegistry = nil
+        eventChannel = nil
+        methodChannel = nil
     }
     private func sendEvent() -> Void {
-        self.queuingEventSink.success(event: self.videoEvent.toMap())
+        queuingEventSink.success(event: self.aPlayerEvent.toMap())
     }
     
-    func onVideoPixelBuffer(_ pixelBuffer: CVPixelBuffer!, pts: Int64) -> Bool {
-        latestBuffer = pixelBuffer
-        self.textureRegistry?.textureFrameAvailable(self._textureId)
-        return false
-    }
-    func onVideoRawBuffer(_ buffer: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>!, lineSize: UnsafeMutablePointer<Int32>!, pts: Int64, width: Int32, height: Int32) -> Bool {
-        return false
-    }
     func copyPixelBuffer() -> Unmanaged<CVPixelBuffer>? {
         if latestBuffer == nil {
             return nil
@@ -199,107 +165,85 @@ class APlayer: NSObject, FlutterTexture, CicadaRenderDelegate, FlutterStreamHand
     }
     
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        self.queuingEventSink.setDelegate(delegate: events)
-        self.createPlayer()
+        queuingEventSink.setDelegate(delegate: events)
+        createPlayer()
         return nil
     }
     
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        self.queuingEventSink.setDelegate(delegate: nil)
+        queuingEventSink.setDelegate(delegate: nil)
         return nil
     }
-    func onPlayerEvent(_ player: AliPlayer!, eventType: AVPEventType) {
-        switch(eventType) {
-        case AVPEventPrepareDone:
-            self.videoEvent.duration = player.duration
-            self.videoEvent.playSpeed = player.rate
-            self.sendEvent()
-            break
-        case AVPEventLoadingStart:
-            self.videoEvent.isBuffering = true
-            self.videoEvent.bufferingPercentage = 0
-            self.sendEvent()
-            break
-        case AVPEventLoadingEnd:
-            self.videoEvent.isBuffering = false
-            self.sendEvent()
-            break
-        case AVPEventFirstRenderedStart:
-            self.videoEvent.ready = true
-            self.sendEvent()
-            break
-        default:
-            break
-        }
-    }
-    func onPlayerEvent(_ player: AliPlayer!, eventWithString: AVPEventWithString, description: String!) {
-        if (eventWithString == EVENT_SWITCH_TO_SOFTWARE_DECODER) {
-            self.videoEvent.enableHardwareDecoder = false
-            self.sendEvent()
-        }
-    }
-    func onVideoSizeChanged(_ player: AliPlayer!, width: Int32, height: Int32, rotation: Int32) {
-        self.videoEvent.height = height
-        self.videoEvent.width = width
-        self.sendEvent()
-    }
-    func onError(_ player: AliPlayer!, errorModel: AVPErrorModel!) {
-        self.videoEvent.errorDescription = "\(errorModel.code): \(String(describing: errorModel.message))"
-        self.sendEvent()
-        
-    }
-    func onCurrentDownloadSpeed(_ player: AliPlayer!, speed: Int64) {
-        self.videoEvent.bufferingSpeed = speed
-        self.sendEvent()
-    }
-    func onCurrentPositionUpdate(_ player: AliPlayer!, position: Int64) {
-        self.videoEvent.position = position
-        self.sendEvent()
-    }
-    func onLoadingProgress(_ player: AliPlayer!, progress: Float) {
-        self.videoEvent.bufferingPercentage = Int(progress)
-        self.sendEvent()
-    }
-    func onBufferedPositionUpdate(_ player: AliPlayer!, position: Int64) {
-        self.videoEvent.buffered = position
-        self.sendEvent()
+    func onPixelBuffer(pixelBuffer: CVPixelBuffer) {
+        latestBuffer = pixelBuffer
+        textureRegistry?.textureFrameAvailable(_textureId)
     }
     
-    func onPlayerStatusChanged(_ player: AliPlayer!, oldStatus: AVPStatus, newStatus: AVPStatus) {
-        var ready = self.videoEvent.ready
-        var state = -1
-        switch(newStatus) {
-        case AVPStatusIdle:
-            state = 0
-            break
-        case AVPStatusInitialzed:
-            state = 1
-            break
-        case AVPStatusPrepared:
-            state = 2
-            break
-        case AVPStatusStarted:
-            state = 3
-            break
-        case AVPStatusPaused:
-            state = 4
-            break
-        case AVPStatusStopped:
-            state = 5
-            ready = false
-            break
-        case AVPStatusCompletion:
-            state = 6
-            break
-        case AVPStatusError:
-            state = 7
-            break
-        default:
-            break
-        }
-        self.videoEvent.state = state
-        self.videoEvent.ready = ready
-        self.sendEvent()
+    func onInitializedListener() {
+        aPlayerEvent.isInitialized = true
+        sendEvent()
     }
     
+    func onPlayingListener(isPlaying: Bool) {
+        aPlayerEvent.isPlaying = isPlaying
+        sendEvent()
+    }
+    
+    func onErrorListener(code: String, message: String) {
+        aPlayerEvent.isError = true
+        aPlayerEvent.errorDescription = "\(code): \(message)"
+        sendEvent()
+    }
+    
+    func onCompletionListener() {
+        aPlayerEvent.isCompletion = true
+        sendEvent()
+    }
+    
+    func onReadyToPlayListener() {
+        aPlayerEvent.isReadyToPlay = true
+        aPlayerEvent.duration = player!.duration
+        aPlayerEvent.playSpeed = player!.speed
+        aPlayerEvent.isPlaying = true
+        aPlayerEvent.isError = false
+        aPlayerEvent.isCompletion = false
+        aPlayerEvent.isBuffering = false
+        sendEvent()
+    }
+    
+    func onVideoSizeChangedListener(width: Int32, height: Int32) {
+        aPlayerEvent.width = width
+        aPlayerEvent.height = height
+        sendEvent()
+    }
+    
+    func onCurrentPositionChangedListener(position: Int64) {
+        aPlayerEvent.position = position
+        sendEvent()
+    }
+    
+    func onCurrentDownloadSpeedChangedListener(speed: Int64) {
+        aPlayerEvent.bufferingSpeed = speed
+        sendEvent()
+    }
+    
+    func onBufferedPositionChangedListener(buffered: Int64) {
+        aPlayerEvent.buffered = buffered
+        sendEvent()
+    }
+    
+    func onLoadingBeginListener() {
+        aPlayerEvent.isBuffering = true
+        sendEvent()
+    }
+    
+    func onLoadingProgressListener(percent: Int) {
+        aPlayerEvent.bufferingPercentage = percent
+        sendEvent()
+    }
+    
+    func onLoadingEndListener() {
+        aPlayerEvent.isBuffering = false
+        sendEvent()
+    }
 }

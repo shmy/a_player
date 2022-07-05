@@ -16,6 +16,8 @@ protocol APlayerInterface {
     func play() -> Void
     func pause() -> Void
     func stop() -> Void
+    func setHttpDataSource(url: String, startAtPositionMs: Int64, headers: Dictionary<String, String>)
+    func setFileDataSource(path: String, startAtPositionMs: Int64)
     func destroy() -> Void
     func prepare(isAutoPlay: Bool) -> Void
     func seekTo(positionMs: Int64) -> Void

@@ -8,23 +8,65 @@
 import Foundation
 import AliyunPlayer
 
-class AliyunPlayer: NSObject, APlayerInterface, AVPDelegate {
+class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDelegate {
+   
     private let aliPlayer: AliPlayer = AliPlayer.init()
     private var listener: APlayerListener?
-    var duration: Int64 = 0
+    var duration: Int64 {
+        get {
+            return aliPlayer.duration
+        }
+    }
     
-    var speed: Float = 0
+    var speed: Float {
+        get {
+            return aliPlayer.rate
+        }
+    }
     
-    var isLoop: Bool = false
+    var isLoop: Bool {
+        get {
+            return aliPlayer.isLoop
+        }
+    }
     
-    var isAutoPlay: Bool = false
+    var isAutoPlay: Bool {
+        get {
+            return aliPlayer.isAutoPlay
+        }
+    }
     
     override init() {
         super.init()
         aliPlayer.delegate = self
+        aliPlayer.renderDelegate = self
     }
     func addListener(listener: APlayerListener) {
         self.listener = listener
+    }
+    func setHttpDataSource(url: String, startAtPositionMs: Int64, headers: Dictionary<String, String>) {
+        let urlSource = AVPUrlSource.init().url(with: url)
+    
+//        self.resetValue()
+//        let playerConfig = aliPlayer.getConfig()
+//        let userAgent: String? = config["userAgent"] as? String
+//        let referer: String? = config["referer"] as? String
+//        playerConfig?.clearShowWhenStop = true
+//        if (userAgent != nil) {
+//            playerConfig?.userAgent = userAgent
+//        }
+//        if (referer != nil) {
+//            playerConfig?.referer = referer
+//        }
+//
+////            playerConfig?.httpHeaders = NSMutableArray.init(array: config["customHeaders"] as! Array<String>)
+//        self.player!.setConfig(playerConfig)
+        aliPlayer.setUrlSource(urlSource)
+        
+    }
+    
+    func setFileDataSource(path: String, startAtPositionMs: Int64) {
+        setHttpDataSource(url: path, startAtPositionMs: startAtPositionMs, headers: Dictionary<String, String>.init())
     }
     
     func play() {
@@ -60,6 +102,12 @@ class AliyunPlayer: NSObject, APlayerInterface, AVPDelegate {
         aliPlayer.isLoop = isLoop
     }
     
+    // CicadaRenderDelegate
+    func onVideoPixelBuffer(_ pixelBuffer: CVPixelBuffer!, pts: Int64) -> Bool {
+        listener?.onPixelBuffer(pixelBuffer: pixelBuffer)
+        return false
+    }
+    // AVPDelegate
     func onPlayerEvent(_ player: AliPlayer!, eventType: AVPEventType) {
         switch(eventType) {
         case AVPEventPrepareDone:

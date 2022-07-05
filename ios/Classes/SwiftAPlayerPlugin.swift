@@ -17,7 +17,7 @@ public class SwiftAPlayerPlugin: NSObject, FlutterPlugin {
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       if (call.method == "initialize") {
-          let textureId: Int64 = APlayer.init(registrar: registrar).textureId()
+          let textureId: Int64 = APlayer.init(registrar: registrar, kernel: call.arguments as! Int).textureId()
          result(textureId)
       } else {
           result(FlutterMethodNotImplemented)
