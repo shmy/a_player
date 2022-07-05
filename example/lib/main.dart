@@ -1,3 +1,4 @@
+import 'package:a_player_example/file_player_page.dart';
 import 'package:a_player_example/network_player_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,7 +37,11 @@ class MainPage extends StatelessWidget {
         children: [
           MaterialButton(onPressed: () {
             Get.to(() => const NetworkPlayerPage());
-          }, child: const Text('点击进入'),)
+          }, child: const Text('Network Test'),),
+
+          MaterialButton(onPressed: () {
+            Get.to(() => const FilePlayerPage());
+          }, child: const Text('File Test'),)
         ],
       ),
     );
