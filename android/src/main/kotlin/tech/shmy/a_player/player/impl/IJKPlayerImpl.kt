@@ -1,6 +1,7 @@
 package tech.shmy.a_player.player.impl
 
 import android.content.Context
+import android.net.Uri
 import android.os.Handler
 import android.view.Surface
 import tech.shmy.a_player.player.APlayerInterface
@@ -9,7 +10,7 @@ import tech.shmy.a_player.player.APlayerUtil
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import tv.danmaku.ijk.media.player.IjkMediaPlayer
 
-class IJKPlayerImpl : APlayerInterface, Runnable {
+class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
 
     private var ijkMediaPlayer: IjkMediaPlayer = IjkMediaPlayer()
     private var _speed: Float = 1.0F
@@ -24,7 +25,7 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
 
     companion object {
         fun createPlayer(context: Context): APlayerInterface {
-            return IJKPlayerImpl()
+            return IJKPlayerImpl(context)
         }
     }
 
@@ -58,14 +59,17 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
     override fun stop() {
         ijkMediaPlayer.stop()
     }
-
+    private fun willSetDataSource() {
+        ijkMediaPlayer.stop()
+        ijkMediaPlayer.reset()
+        ijkMediaPlayer.setSurface(surface)
+    }
     override fun setHttpDataSource(
         url: String,
         startAtPositionMs: Long,
         headers: Map<String, String>
     ) {
-        ijkMediaPlayer.reset()
-        ijkMediaPlayer.setSurface(surface)
+        willSetDataSource()
         var userAgent: String? = null
         val customHeaders: MutableMap<String, String> = mutableMapOf()
         headers.forEach { header ->
@@ -102,11 +106,8 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
     }
 
     override fun setFileDataSource(path: String, startAtPositionMs: Long) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setAssetDataSource(path: String, startAtPositionMs: Long) {
-        TODO("Not yet implemented")
+        willSetDataSource()
+        ijkMediaPlayer.setDataSource(context, Uri.parse(path))
     }
 
     override fun release() {

@@ -13,9 +13,7 @@ import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import com.google.android.exoplayer2.upstream.*
 import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.video.VideoSize
 import tech.shmy.a_player.player.APlayerInterface
@@ -87,15 +85,16 @@ class ExoPlayerImpl(
     override fun stop() {
         exoPlayer.stop()
     }
-
+    private fun willSetDataSource() {
+        exoPlayer.stop()
+        exoPlayer.clearMediaItems()
+    }
     override fun setHttpDataSource(
         url: String,
         startAtPositionMs: Long,
         headers: Map<String, String>
     ) {
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
-        val uri = Uri.parse(url)
+        willSetDataSource()
         var userAgent = "ExoPlayer"
         val customHeaders: MutableMap<String, String> = mutableMapOf()
 
@@ -109,27 +108,22 @@ class ExoPlayerImpl(
                 }
             }
         }
-        val dataSourceFactory: DataSource.Factory = if (isHTTP(uri)) {
-            val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-                .setUserAgent(userAgent)
-                .setAllowCrossProtocolRedirects(true)
-                .setKeepPostFor302Redirects(true)
-                .setDefaultRequestProperties(customHeaders)
-            httpDataSourceFactory
-        } else {
-            DefaultDataSource.Factory(context)
-        }
+        val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+            .setUserAgent(userAgent)
+            .setAllowCrossProtocolRedirects(true)
+            .setKeepPostFor302Redirects(true)
+            .setDefaultRequestProperties(customHeaders)
         val mediaSource = buildMediaSource(Uri.parse(url), dataSourceFactory, context)
         exoPlayer.setMediaSource(mediaSource)
         exoPlayer.seekTo(startAtPositionMs)
     }
 
     override fun setFileDataSource(path: String, startAtPositionMs: Long) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setAssetDataSource(path: String, startAtPositionMs: Long) {
-        TODO("Not yet implemented")
+        willSetDataSource()
+        val dataSourceFactory: DataSource.Factory = FileDataSource.Factory()
+        val mediaSource = buildMediaSource(Uri.parse(path), dataSourceFactory, context)
+        exoPlayer.setMediaSource(mediaSource)
+        exoPlayer.seekTo(startAtPositionMs)
     }
 
     override fun release() {
@@ -217,14 +211,6 @@ class ExoPlayerImpl(
             else -> ProgressiveMediaSource.Factory(mediaDataSourceFactory)
                 .createMediaSource(MediaItem.fromUri(uri))
         }
-    }
-
-    private fun isHTTP(uri: Uri?): Boolean {
-        if (uri == null || uri.scheme == null) {
-            return false
-        }
-        val scheme = uri.scheme
-        return scheme == "http" || scheme == "https"
     }
 
     override fun run() {

@@ -145,10 +145,6 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         TODO("Not yet implemented")
     }
 
-    override fun setAssetDataSource(path: String, startAtPositionMs: Long) {
-        TODO("Not yet implemented")
-    }
-
     override fun release() {
         listener = null
         aliPlayer.clearScreen()

@@ -14,7 +14,7 @@ interface APlayerInterface {
     fun stop()
     fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Map<String, String>)
     fun setFileDataSource(path: String, startAtPositionMs: Long)
-    fun setAssetDataSource(path: String, startAtPositionMs: Long)
+//    fun setAssetDataSource(path: String, startAtPositionMs: Long)
 //    fun enableHardwareDecoder(enabled: Boolean)
     fun release()
     fun prepare(isAutoPlay: Boolean)
