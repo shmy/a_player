@@ -16,8 +16,8 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
     private var _speed: Float = 1.0F
     private var _isAutoPlay: Boolean = false
     private var listener: APlayerListener? = null
-    private var handler: Handler? = null
     private var surface: Surface? = null
+    private var handler: Handler? = null
 
     init {
         bindEvent()
@@ -115,20 +115,28 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
     }
 
     override fun release() {
-
-        object : Thread() {
-            override fun run() {
-                handler = null
-                listener = null
-                surface = null
-                ijkMediaPlayer.setSurface(null)
-                ijkMediaPlayer.resetListeners()
-                ijkMediaPlayer.reset()
-                ijkMediaPlayer.stop()
-                ijkMediaPlayer.release()
-                IjkMediaPlayer.native_profileEnd()
-            }
-        }.start()
+        handler = null
+        listener = null
+        surface = null
+        ijkMediaPlayer.setSurface(null)
+        removeEvent()
+        ijkMediaPlayer.reset()
+        ijkMediaPlayer.stop()
+        ijkMediaPlayer.release()
+        IjkMediaPlayer.native_profileEnd()
+//        object : Thread() {
+//            override fun run() {
+//                handler = null
+//                listener = null
+//                surface = null
+//                ijkMediaPlayer.setSurface(null)
+//                removeEvent()
+//                ijkMediaPlayer.reset()
+//                ijkMediaPlayer.stop()
+//                ijkMediaPlayer.release()
+//                IjkMediaPlayer.native_profileEnd()
+//            }
+//        }.start()
     }
 
     override fun prepare(isAutoPlay: Boolean) {
@@ -195,5 +203,14 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
         ijkMediaPlayer.setOnCompletionListener {
             listener?.onCompletionListener()
         }
+    }
+    private fun removeEvent() {
+        ijkMediaPlayer.resetListeners()
+        ijkMediaPlayer.setOnVideoSizeChangedListener(null)
+        ijkMediaPlayer.setOnPreparedListener(null)
+        ijkMediaPlayer.setOnInfoListener(null)
+        ijkMediaPlayer.setOnBufferingUpdateListener(null)
+        ijkMediaPlayer.setOnErrorListener(null)
+        ijkMediaPlayer.setOnCompletionListener(null)
     }
 }

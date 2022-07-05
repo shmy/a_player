@@ -108,6 +108,7 @@ class ExoPlayerImpl(
     override fun release() {
         handler = null
         listener = null
+        exoPlayer.clearVideoSurface()
         exoPlayer.setVideoSurface(null)
         exoPlayer.stop()
         exoPlayer.release()

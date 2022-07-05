@@ -31,6 +31,7 @@ class APlayer(
 ) : EventChannel.StreamHandler {
     private var player: APlayerInterface? = null
     private val surfaceTexture: SurfaceTexture = textureEntry.surfaceTexture()
+    private var surface: Surface? = null
     private val queuingEventSink: QueuingEventSink = QueuingEventSink()
     private var eventChannel: EventChannel? = null
     private var methodChannel: MethodChannel? = null
@@ -130,9 +131,6 @@ class APlayer(
     }
 
     private fun setupPlayer() {
-//        val canvas = surface.lockCanvas(null)
-//        canvas.drawColor(Color.BLUE)
-//        surface.unlockCanvasAndPost(canvas)
         player?.addListener(object: APlayerListener {
             override fun onVideoSizeChangedListener(width: Int, height: Int) {
                 surfaceTexture.setDefaultBufferSize(width, height)
@@ -234,7 +232,9 @@ class APlayer(
                 sendEvent()
             }
         })
-        player?.setSurface(Surface(textureEntry.surfaceTexture()))
+        surface?.release()
+        surface = Surface(surfaceTexture)
+        player?.setSurface(surface!!)
     }
 
     private fun resetValue() {

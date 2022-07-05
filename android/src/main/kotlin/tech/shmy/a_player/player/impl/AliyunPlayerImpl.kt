@@ -159,6 +159,7 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
 
     override fun release() {
         listener = null
+        aliPlayer.clearScreen()
         aliPlayer.setSurface(null)
         aliPlayer.stop()
         aliPlayer.release()
