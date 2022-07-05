@@ -32,12 +32,11 @@ class APlayer(
 ) : EventChannel.StreamHandler {
     private var player: APlayerInterface? = null
     private val surfaceTexture: SurfaceTexture = textureEntry.surfaceTexture()
-    private val surface: Surface = Surface(surfaceTexture)
     private val queuingEventSink: QueuingEventSink = QueuingEventSink()
     private var eventChannel: EventChannel? = null
     private var methodChannel: MethodChannel? = null
     private var aPlayerEvent: APlayerEvent = APlayerEvent()
-    private var lastDataSource: Map<String, Any>? = null
+    private var lastDataSource: MutableMap<String, Any>? = null
 
     init {
         bindFlutter()
@@ -71,7 +70,7 @@ class APlayer(
                     result.success(null)
                 }
                 "setDataSource" -> {
-                    lastDataSource = call.arguments as Map<String, Any>
+                    lastDataSource = call.arguments as MutableMap<String, Any>
                     setDataSource(lastDataSource!!)
                     result.success(null)
                 }
@@ -111,10 +110,9 @@ class APlayer(
     }
 
     private fun createPlayer(): Unit {
+        resetValue()
         player?.release()
         player = null
-        Thread.sleep(5_000)
-        resetValue()
         when(kernel) {
             KERNEL_ALIYUN -> {
                 player = AliyunPlayerImpl.createPlayer(context)
@@ -133,7 +131,6 @@ class APlayer(
     }
 
     private fun setupPlayer(): Unit {
-        player?.setSurface(surface)
 //        val canvas = surface.lockCanvas(null)
 //        canvas.drawColor(Color.BLUE)
 //        surface.unlockCanvasAndPost(canvas)
@@ -238,6 +235,7 @@ class APlayer(
                 sendEvent()
             }
         })
+        player?.setSurface(Surface(textureEntry.surfaceTexture()))
     }
 
     private fun resetValue(): Unit {
@@ -249,10 +247,13 @@ class APlayer(
         sendEvent()
     }
 
-    private fun setDataSource(config: Map<String, Any>): Unit {
+    private fun setDataSource(config: MutableMap<String, Any>): Unit {
         resetValue();
+        if (config["position"] is Int) {
+            config["position"] = (config["position"] as Int).toLong()
+        }
         player?.setHttpDataSource(config["url"] as String,
-            (config["position"] as Int).toLong(), arrayOf<APlayerHeader>())
+            config["position"] as Long, arrayOf<APlayerHeader>())
     }
 
     private fun prepare(isAutoPlay: Boolean): Unit {
@@ -279,8 +280,8 @@ class APlayer(
         val positionBefore = aPlayerEvent.position
         createPlayer()
         if (lastDataSource != null) {
+            lastDataSource!!["position"] = positionBefore
             setDataSource(lastDataSource!!)
-            seekTo(positionBefore)
             prepare(isAutoPlay)
         }
     }
