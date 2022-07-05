@@ -72,7 +72,7 @@ class APlayer(
                 }
                 "setDataSource" -> {
                     lastDataSource = call.arguments as MutableMap<String, Any>
-                    setDataSource(lastDataSource!!)
+                    setDataSource()
                     result.success(null)
                 }
                 "seekTo" -> {
@@ -242,8 +242,9 @@ class APlayer(
         sendEvent()
     }
 
-    private fun setDataSource(config: MutableMap<String, Any>) {
+    private fun setDataSource() {
         resetValue()
+        val config: MutableMap<String, Any> = lastDataSource!!
         if (config["position"] is Int) {
             config["position"] = (config["position"] as Int).toLong()
         }
@@ -285,7 +286,7 @@ class APlayer(
         createPlayer()
         if (lastDataSource != null) {
             lastDataSource!!["position"] = positionBefore
-            setDataSource(lastDataSource!!)
+            setDataSource()
             prepare(isAutoPlay)
         }
     }

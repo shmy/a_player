@@ -53,11 +53,7 @@ class VideoPlayerItem {
 }
 
 mixin _VideoPlayerOptions {
-  final List<LabelValue<APlayerKernel>> kernelList = [
-    LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyun),
-    LabelValue<APlayerKernel>('IJK', APlayerKernel.ijk),
-    LabelValue<APlayerKernel>('EXO', APlayerKernel.exo),
-  ];
+
   final List<LabelValue<APlayerFit>> fitList = [
     LabelValue<APlayerFit>('适应', APlayerFit.contain),
     LabelValue<APlayerFit>('拉伸', APlayerFit.fill),
@@ -460,6 +456,21 @@ class VideoPlayerController
       speedList.add(LabelValue<double>('$value', value));
     }
     return speedList;
+  }
+  List<LabelValue<APlayerKernel>> get kernelList {
+    if (Platform.isAndroid) {
+      return [
+        LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyun),
+        LabelValue<APlayerKernel>('IJK', APlayerKernel.ijk),
+        LabelValue<APlayerKernel>('EXO', APlayerKernel.exo),
+      ];
+    } else if (Platform.isIOS) {
+      return [
+        LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyun),
+        LabelValue<APlayerKernel>('AV KIT', APlayerKernel.av),
+      ];
+    }
+    return [];
   }
   VideoPlayerItem? get currentPlayItem {
     if (currentPlayIndex.value == -1) {

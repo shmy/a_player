@@ -62,6 +62,7 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
 ////            playerConfig?.httpHeaders = NSMutableArray.init(array: config["customHeaders"] as! Array<String>)
 //        self.player!.setConfig(playerConfig)
         aliPlayer.setUrlSource(urlSource)
+        aliPlayer.seek(toTime: startAtPositionMs, seekMode: AVP_SEEKMODE_ACCURATE)
         
     }
     

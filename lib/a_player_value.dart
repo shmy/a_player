@@ -45,7 +45,7 @@ class APlayerFit {
 
 enum APlayerMirrorMode { none, horizontal, vertical }
 
-enum APlayerKernel { aliyun, ijk, exo }
+enum APlayerKernel { aliyun, ijk, exo, av }
 
 class APlayerValue {
   final bool isInitialized;

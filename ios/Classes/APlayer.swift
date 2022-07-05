@@ -21,6 +21,7 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     private var textureRegistry: FlutterTextureRegistry?
     private var player: APlayerInterface?
     private var kernel: Int
+    private var lastDataSource: Dictionary<String, Any>?
     
     init(registrar: FlutterPluginRegistrar, kernel: Int) {
         self.registrar = registrar
@@ -61,7 +62,8 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
                 self?.setKernel(kernel: call.arguments as! Int)
                 break
               case "setDataSource":
-                self?.setDataSource(config: call.arguments as! Dictionary<String, Any>)
+                self?.lastDataSource = call.arguments as! Dictionary<String, Any>
+                self?.setDataSource()
                 break
               case "seekTo":
                 self?.seekTo(position: call.arguments as! Int64)
@@ -86,6 +88,7 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     }
     
     private func createPlayer() -> Void {
+        resetValue()
         player?.destroy()
         player = nil
         switch(kernel) {
@@ -97,17 +100,22 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         default:
             break
         }
+        if (player == nil) {
+            return
+        }
         setupPlayer()
     }
     
     private func resetValue() -> Void {
         aPlayerEvent = APlayerEvent.init()
+        aPlayerEvent.kernel = kernel
         stop();
         sendEvent()
     }
     
-    private func setDataSource(config: Dictionary<String, Any>) -> Void {
+    private func setDataSource() -> Void {
         resetValue()
+        let config: Dictionary<String, Any> = lastDataSource!
         let url = config["url"] as! String
         let position = config["position"] as! Int64
         if (APlayerUtil.isHttpProtocol(url: url) == true) {
@@ -118,8 +126,18 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         
     }
     private func setKernel(kernel: Int) {
+        if (self.kernel == kernel) {
+            return
+        }
         self.kernel = kernel
+        let isAutoPlay = player?.isAutoPlay == true
+        let positionBefore = aPlayerEvent.position
         createPlayer()
+        if (lastDataSource != nil) {
+            lastDataSource!["position"] = positionBefore
+            setDataSource()
+            prepare(isAutoPlay: isAutoPlay)
+        }
     }
     private func prepare(isAutoPlay: Bool) -> Void {
         player?.prepare(isAutoPlay: isAutoPlay)
@@ -137,13 +155,19 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     }
     private func seekTo(position: Int64) -> Void {
         player?.seekTo(positionMs: position)
+        aPlayerEvent.position = position
+        sendEvent()
     }
     private func setSpeed(speed: Float) -> Void {
         player?.setSpeed(speed: speed)
+        aPlayerEvent.playSpeed = speed
+        sendEvent()
     }
     
     private func setLoop(loop: Bool) -> Void {
         player?.setLoop(isLoop: loop)
+        aPlayerEvent.loop = loop
+        sendEvent()
     }
     private func destroy() -> Void {
         player?.destroy()
