@@ -5,6 +5,7 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.os.Build
@@ -132,6 +133,9 @@ class APlayer(
 
     private fun setupPlayer(): Unit {
         player?.setSurface(surface)
+//        val canvas = surface.lockCanvas(null)
+//        canvas.drawColor(Color.BLUE)
+//        surface.unlockCanvasAndPost(canvas)
         player?.addListener(object: APlayerListener {
             override fun onVideoSizeChangedListener(width: Int, height: Int) {
                 surfaceTexture.setDefaultBufferSize(width, height)

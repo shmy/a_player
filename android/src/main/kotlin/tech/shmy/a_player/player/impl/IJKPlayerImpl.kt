@@ -118,6 +118,7 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
         handler = null
         ijkMediaPlayer.setSurface(null)
         ijkMediaPlayer.stop()
+        ijkMediaPlayer.reset()
         ijkMediaPlayer.release()
     }
 
