@@ -80,6 +80,7 @@ class ExoPlayerImpl(
 
     override fun release(): Unit {
         handler = null
+        listener = null
         exoPlayer.setVideoSurface(null)
         exoPlayer.stop()
         exoPlayer.release()

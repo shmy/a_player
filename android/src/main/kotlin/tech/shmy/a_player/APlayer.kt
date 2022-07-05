@@ -113,6 +113,7 @@ class APlayer(
     private fun createPlayer(): Unit {
         player?.release()
         player = null
+        Thread.sleep(5_000)
         resetValue()
         when(kernel) {
             KERNEL_ALIYUN -> {
