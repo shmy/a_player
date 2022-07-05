@@ -85,10 +85,12 @@ class ExoPlayerImpl(
     override fun stop() {
         exoPlayer.stop()
     }
+
     private fun willSetDataSource() {
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
     }
+
     override fun setHttpDataSource(
         url: String,
         startAtPositionMs: Long,
@@ -214,9 +216,9 @@ class ExoPlayerImpl(
     }
 
     override fun run() {
-        if (exoPlayer.isPlaying) {
-            listener?.onCurrentPositionChangedListener(exoPlayer.currentPosition)
-        }
+        listener?.onCurrentPositionChangedListener(exoPlayer.currentPosition)
+        listener?.onLoadingProgressListener(exoPlayer.bufferedPercentage)
+        listener?.onBufferedPositionChangedListener(exoPlayer.bufferedPosition)
         handler?.postDelayed(this, 500)
     }
 }
