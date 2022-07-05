@@ -9,18 +9,18 @@ interface APlayerInterface {
     val speed: Float
     val isLoop: Boolean
     val isAutoPlay: Boolean
-    fun addListener(listener: APlayerListener): Unit
-    fun setSurface(surface: Surface): Unit
-    fun play(): Unit
-    fun pause(): Unit
-    fun stop(): Unit
-    fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>): Unit
-    fun setFileDataSource(path: String, startAtPositionMs: Long): Unit
-    fun setAssetDataSource(path: String, startAtPositionMs: Long): Unit
-    fun enableHardwareDecoder(enabled: Boolean): Unit
-    fun release(): Unit
-    fun prepare(isAutoPlay: Boolean): Unit
-    fun seekTo(positionMs: Long): Unit
-    fun setSpeed(speed: Float): Unit
-    fun setLoop(isLoop: Boolean): Unit
+    fun addListener(listener: APlayerListener)
+    fun setSurface(surface: Surface)
+    fun play()
+    fun pause()
+    fun stop()
+    fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>)
+    fun setFileDataSource(path: String, startAtPositionMs: Long)
+    fun setAssetDataSource(path: String, startAtPositionMs: Long)
+    fun enableHardwareDecoder(enabled: Boolean)
+    fun release()
+    fun prepare(isAutoPlay: Boolean)
+    fun seekTo(positionMs: Long)
+    fun setSpeed(speed: Float)
+    fun setLoop(isLoop: Boolean)
 }

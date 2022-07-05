@@ -161,7 +161,7 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
         handler?.postDelayed(this, 500)
     }
 
-    private fun bindEvent(): Unit {
+    private fun bindEvent() {
         ijkMediaPlayer.setOnVideoSizeChangedListener { _, width, height, _, _ ->
             listener?.onVideoSizeChangedListener(width, height)
         }

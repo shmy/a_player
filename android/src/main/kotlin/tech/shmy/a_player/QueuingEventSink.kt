@@ -55,7 +55,7 @@ internal class QueuingEventSink : EventSink {
     }
 
     private class EndOfStreamEvent
-    private class ErrorEvent internal constructor(
+    private class ErrorEvent(
         var code: String,
         var message: String,
         var details: Any

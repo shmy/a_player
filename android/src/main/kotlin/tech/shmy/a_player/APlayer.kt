@@ -5,7 +5,6 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.os.Build
@@ -42,7 +41,7 @@ class APlayer(
         bindFlutter()
     }
 
-    private fun bindFlutter(): Unit {
+    private fun bindFlutter() {
         val textureId: Long = textureEntry.id()
         val eventChannel = EventChannel(binaryMessenger, "$PLAYER_EVENT_CHANNEL_NAME$textureId")
         val methodChannel = MethodChannel(binaryMessenger, "$PLAYER_METHOD_CHANNEL_NAME$textureId")
@@ -109,7 +108,7 @@ class APlayer(
 
     }
 
-    private fun createPlayer(): Unit {
+    private fun createPlayer() {
         resetValue()
         player?.release()
         player = null
@@ -130,7 +129,7 @@ class APlayer(
         setupPlayer()
     }
 
-    private fun setupPlayer(): Unit {
+    private fun setupPlayer() {
 //        val canvas = surface.lockCanvas(null)
 //        canvas.drawColor(Color.BLUE)
 //        surface.unlockCanvasAndPost(canvas)
@@ -238,17 +237,17 @@ class APlayer(
         player?.setSurface(Surface(textureEntry.surfaceTexture()))
     }
 
-    private fun resetValue(): Unit {
+    private fun resetValue() {
         aPlayerEvent = APlayerEvent().copy(
             kernel = kernel,
             featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         )
-        stop();
+        stop()
         sendEvent()
     }
 
-    private fun setDataSource(config: MutableMap<String, Any>): Unit {
-        resetValue();
+    private fun setDataSource(config: MutableMap<String, Any>) {
+        resetValue()
         if (config["position"] is Int) {
             config["position"] = (config["position"] as Int).toLong()
         }
@@ -256,22 +255,22 @@ class APlayer(
             config["position"] as Long, arrayOf<APlayerHeader>())
     }
 
-    private fun prepare(isAutoPlay: Boolean): Unit {
+    private fun prepare(isAutoPlay: Boolean) {
         player?.prepare(isAutoPlay)
     }
 
-    private fun play(): Unit {
+    private fun play() {
         player?.play()
     }
 
-    private fun pause(): Unit {
+    private fun pause() {
         player?.pause()
     }
 
-    private fun stop(): Unit {
+    private fun stop() {
         player?.stop()
     }
-    private fun setKernel(kernel: Int): Unit {
+    private fun setKernel(kernel: Int) {
         if (kernel == this.kernel) {
             return
         }
@@ -286,7 +285,7 @@ class APlayer(
         }
     }
 
-    private fun seekTo(position: Long): Unit {
+    private fun seekTo(position: Long) {
         player?.seekTo(position)
         if (player != null) {
             aPlayerEvent = aPlayerEvent.copy(
@@ -296,7 +295,7 @@ class APlayer(
         }
     }
 
-    private fun setSpeed(speed: Float): Unit {
+    private fun setSpeed(speed: Float) {
         player?.setSpeed(speed)
         if (player != null) {
             aPlayerEvent = aPlayerEvent.copy(
@@ -306,7 +305,7 @@ class APlayer(
         }
     }
 
-    private fun setLoop(isLoop: Boolean): Unit {
+    private fun setLoop(isLoop: Boolean) {
         player?.setLoop(isLoop)
         if (player != null) {
             aPlayerEvent = aPlayerEvent.copy(
@@ -316,7 +315,7 @@ class APlayer(
         }
     }
 
-    private fun setHardwareDecoderEnable(enable: Boolean): Unit {
+    private fun setHardwareDecoderEnable(enable: Boolean) {
         resetValue()
         player?.enableHardwareDecoder(enable)
         if (player != null) {
@@ -328,7 +327,7 @@ class APlayer(
         }
     }
 
-    private fun release(): Unit {
+    private fun release() {
         player?.release()
         player = null
         queuingEventSink.endOfStream()
@@ -338,7 +337,7 @@ class APlayer(
         methodChannel = null
     }
 
-    private fun sendEvent(): Unit {
+    private fun sendEvent() {
         queuingEventSink.success(aPlayerEvent.toMap())
     }
 
@@ -357,15 +356,15 @@ class APlayer(
                 )
             }
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
-                activity.enterPictureInPictureMode();
-                return true;
+                activity.enterPictureInPictureMode()
+                return true
             }
             else -> {
-                return false;
+                return false
             }
         }
     }
-    private fun openSettings(): Unit {
+    private fun openSettings() {
         Toast.makeText(
             context, "请在设置-画中画, 选择本App, 允许进入画中画模式", Toast.LENGTH_SHORT
         ).show()
@@ -373,11 +372,11 @@ class APlayer(
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        queuingEventSink.setDelegate(events);
-        createPlayer();
+        queuingEventSink.setDelegate(events)
+        createPlayer()
     }
 
     override fun onCancel(arguments: Any?) {
-        queuingEventSink.setDelegate(null);
+        queuingEventSink.setDelegate(null)
     }
 }

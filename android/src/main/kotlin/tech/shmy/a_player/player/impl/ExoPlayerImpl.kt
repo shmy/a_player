@@ -105,7 +105,7 @@ class ExoPlayerImpl(
         // can't enable
     }
 
-    override fun release(): Unit {
+    override fun release() {
         handler = null
         listener = null
         exoPlayer.setVideoSurface(null)
@@ -172,8 +172,7 @@ class ExoPlayerImpl(
         uri: Uri, mediaDataSourceFactory: DataSource.Factory, context: Context
     ): MediaSource {
         println(Util.inferContentType(uri))
-        return when (val type: Int =
-            Util.inferContentType(uri)) {
+        return when (Util.inferContentType(uri)) {
             C.CONTENT_TYPE_SS -> SsMediaSource.Factory(
                 DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                 DefaultDataSource.Factory(context, mediaDataSourceFactory)
@@ -204,6 +203,6 @@ class ExoPlayerImpl(
         if (exoPlayer.isPlaying) {
             listener?.onCurrentPositionChangedListener(exoPlayer.currentPosition)
         }
-        handler?.postDelayed(this, 500);
+        handler?.postDelayed(this, 500)
     }
 }

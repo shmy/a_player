@@ -42,7 +42,7 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         aliPlayer.setOnCompletionListener {
             listener?.onCompletionListener()
         }
-        aliPlayer.setOnInfoListener { it ->
+        aliPlayer.setOnInfoListener {
             when (it.code) {
                 InfoCode.CurrentPosition -> {
                     listener?.onCurrentPositionChangedListener(it.extraValue)
@@ -56,6 +56,7 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
                 InfoCode.SwitchToSoftwareVideoDecoder -> {
                     listener?.onSwitchToSoftwareVideoDecoderListener()
                 }
+                else -> {}
             }
 
         }
@@ -89,7 +90,7 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
     override val isAutoPlay: Boolean
         get() = aliPlayer.isAutoPlay
 
-    override fun addListener(listener: APlayerListener): Unit {
+    override fun addListener(listener: APlayerListener) {
         this.listener = listener
     }
 
@@ -97,19 +98,19 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         aliPlayer.setSurface(surface)
     }
 
-    override fun play(): Unit {
+    override fun play() {
         aliPlayer.start()
     }
 
-    override fun pause(): Unit {
+    override fun pause() {
         aliPlayer.pause()
     }
 
-    override fun stop(): Unit {
+    override fun stop() {
         aliPlayer.stop()
     }
 
-    override fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>): Unit {
+    override fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>) {
         val config = aliPlayer.config
         config.mMaxBufferDuration = 1000 * 60 * 10
         config.mMaxBackwardBufferDurationMs = 1 * 60 * 10
@@ -156,27 +157,27 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         aliPlayer.enableHardwareDecoder(enabled)
     }
 
-    override fun release(): Unit {
+    override fun release() {
         listener = null
         aliPlayer.setSurface(null)
         aliPlayer.stop()
         aliPlayer.release()
     }
 
-    override fun prepare(isAutoPlay: Boolean): Unit {
+    override fun prepare(isAutoPlay: Boolean) {
         aliPlayer.isAutoPlay = isAutoPlay
         aliPlayer.prepare()
     }
 
-    override fun seekTo(positionMs: Long): Unit {
+    override fun seekTo(positionMs: Long) {
         aliPlayer.seekTo(positionMs, IPlayer.SeekMode.Accurate)
     }
 
-    override fun setSpeed(speed: Float): Unit {
+    override fun setSpeed(speed: Float) {
         aliPlayer.speed = speed
     }
 
-    override fun setLoop(isLoop: Boolean): Unit {
+    override fun setLoop(isLoop: Boolean) {
         aliPlayer.isLoop = isLoop
     }
 }
