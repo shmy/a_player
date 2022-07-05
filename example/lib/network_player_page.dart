@@ -32,14 +32,14 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             //     'https://upos-szbyjkm8g1.bilivideo.com//upgcxcode//76//67//757156776//757156776_nb3-1-112.flv?e=ig8euxZM2rNcNbTH7bdVhwdl7bejhwdVhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=&uipk=5&nbs=1&deadline=1656575206&gen=playurlv2&os=hwbv&oi=2034112005&trid=7f1d25d9a9ef4d57bfea21a8383b8d63u&mid=1623204697&platform=pc&upsig=65407b8cb09f81c8ab03432b6f265a95&uparams=e,uipk,nbs,deadline,gen,os,oi,trid,mid,platform&bvc=vod&nettype=0&orderid=0,3&agrr=1&bw=696713&logo=80000000&_t=1656568006845&YIM&qq=452507220',
             //     'b [m3u8]',
             //     ''),
-            // VideoPlayerItem(
-            //     'https://m3u8.taopianplay.com/taopian/54fdb532-e89b-4567-bc07-aa93a0c6a79b/a891bf2e-a823-4ae0-ac07-107cdf1703d8/45148/6d3af2a3-090b-486b-ac82-2c3fc6d21603/SD/playlist.m3u8',
-            //     'taopianplay',
-            //     ''),
-            // VideoPlayerItem(
-            //     'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
-            //     '惊奇队长 预告片[mp4]',
-            //     ''),
+            VideoPlayerItem(
+                'https://m3u8.taopianplay.com/taopian/54fdb532-e89b-4567-bc07-aa93a0c6a79b/a891bf2e-a823-4ae0-ac07-107cdf1703d8/45148/6d3af2a3-090b-486b-ac82-2c3fc6d21603/SD/playlist.m3u8',
+                'taopianplay',
+                ''),
+            VideoPlayerItem(
+                'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
+                '惊奇队长 预告片[mp4]',
+                ''),
             VideoPlayerItem(
                 'https://video.pddugc.com/backbone-video/2022-06-21/9d29d0f5668c0f5c1256748b3386313d.mp4',
                 '奇艺博士2 高清[mp4]',
@@ -69,7 +69,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
                 '漳浦综合HD [m3u8]',
                 ''),
           ])
-          ..playByIndex(0);
+          ..playByIndex(3);
       });
     super.initState();
   }
