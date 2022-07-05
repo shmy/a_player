@@ -7,7 +7,6 @@ import com.aliyun.player.AliPlayerFactory
 import com.aliyun.player.IPlayer
 import com.aliyun.player.bean.InfoCode
 import com.aliyun.player.source.UrlSource
-import tech.shmy.a_player.player.APlayerHeader
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
 import tech.shmy.a_player.player.APlayerUtil
@@ -110,7 +109,7 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         aliPlayer.stop()
     }
 
-    override fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>) {
+    override fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Map<String, String>) {
         val config = aliPlayer.config
         config.mMaxBufferDuration = 1000 * 60 * 10
         config.mMaxBackwardBufferDurationMs = 1 * 60 * 10

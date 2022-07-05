@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Handler
 import android.view.Surface
 import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.analytics.AnalyticsListener
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
@@ -17,9 +18,9 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.video.VideoSize
-import tech.shmy.a_player.player.APlayerHeader
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
+import tech.shmy.a_player.player.APlayerUtil
 
 
 class ExoPlayerImpl(
@@ -32,6 +33,22 @@ class ExoPlayerImpl(
 
     init {
         exoPlayer.addListener(this)
+        exoPlayer.addAnalyticsListener(object : AnalyticsListener {
+            override fun onBandwidthEstimate(
+                eventTime: AnalyticsListener.EventTime,
+                totalLoadTimeMs: Int,
+                totalBytesLoaded: Long,
+                bitrateEstimate: Long
+            ) {
+                listener?.onCurrentDownloadSpeedChangedListener(bitrateEstimate / 8)
+                super.onBandwidthEstimate(
+                    eventTime,
+                    totalLoadTimeMs,
+                    totalBytesLoaded,
+                    bitrateEstimate
+                )
+            }
+        })
     }
 
     companion object {
@@ -71,19 +88,33 @@ class ExoPlayerImpl(
         exoPlayer.stop()
     }
 
-    override fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Array<APlayerHeader>) {
+    override fun setHttpDataSource(
+        url: String,
+        startAtPositionMs: Long,
+        headers: Map<String, String>
+    ) {
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
-        exoPlayer.clearMediaItems()
         val uri = Uri.parse(url)
+        var userAgent = "ExoPlayer"
+        val customHeaders: MutableMap<String, String> = mutableMapOf()
+
+        headers.forEach { header ->
+            when {
+                APlayerUtil.isUserAgentKey(header.key) -> {
+                    userAgent = header.value
+                }
+                else -> {
+                    customHeaders[header.key] = header.value
+                }
+            }
+        }
         val dataSourceFactory: DataSource.Factory = if (isHTTP(uri)) {
-            // TODO: 设置header userAgent
             val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-                .setUserAgent("ExoPlayer")
+                .setUserAgent(userAgent)
                 .setAllowCrossProtocolRedirects(true)
-//            if (httpHeaders != null && !httpHeaders.isEmpty()) {
-//                httpDataSourceFactory.setDefaultRequestProperties(httpHeaders)
-//            }
+                .setKeepPostFor302Redirects(true)
+                .setDefaultRequestProperties(customHeaders)
             httpDataSourceFactory
         } else {
             DefaultDataSource.Factory(context)
@@ -172,7 +203,6 @@ class ExoPlayerImpl(
     private fun buildMediaSource(
         uri: Uri, mediaDataSourceFactory: DataSource.Factory, context: Context
     ): MediaSource {
-        println(Util.inferContentType(uri))
         return when (Util.inferContentType(uri)) {
             C.CONTENT_TYPE_SS -> SsMediaSource.Factory(
                 DefaultSsChunkSource.Factory(mediaDataSourceFactory),
@@ -200,6 +230,7 @@ class ExoPlayerImpl(
         val scheme = uri.scheme
         return scheme == "http" || scheme == "https"
     }
+
     override fun run() {
         if (exoPlayer.isPlaying) {
             listener?.onCurrentPositionChangedListener(exoPlayer.currentPosition)

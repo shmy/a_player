@@ -113,7 +113,7 @@ class APlayer(
         resetValue()
         player?.release()
         player = null
-        when(kernel) {
+        when (kernel) {
             KERNEL_ALIYUN -> {
                 player = AliyunPlayerImpl.createPlayer(context)
             }
@@ -131,7 +131,7 @@ class APlayer(
     }
 
     private fun setupPlayer() {
-        player?.addListener(object: APlayerListener {
+        player?.addListener(object : APlayerListener {
             override fun onVideoSizeChangedListener(width: Int, height: Int) {
                 surfaceTexture.setDefaultBufferSize(width, height)
                 aPlayerEvent = aPlayerEvent.copy(
@@ -203,6 +203,7 @@ class APlayer(
                 )
                 sendEvent()
             }
+
             override fun onSwitchToSoftwareVideoDecoderListener() {
                 aPlayerEvent = aPlayerEvent.copy(
                     enableHardwareDecoder = false,
@@ -251,8 +252,10 @@ class APlayer(
         if (config["position"] is Int) {
             config["position"] = (config["position"] as Int).toLong()
         }
-        player?.setHttpDataSource(config["url"] as String,
-            config["position"] as Long, arrayOf<APlayerHeader>())
+        player?.setHttpDataSource(
+            config["url"] as String,
+            config["position"] as Long, config["httpHeaders"] as Map<String, String>
+        )
     }
 
     private fun prepare(isAutoPlay: Boolean) {
@@ -270,6 +273,7 @@ class APlayer(
     private fun stop() {
         player?.stop()
     }
+
     private fun setKernel(kernel: Int) {
         if (kernel == this.kernel) {
             return
@@ -364,6 +368,7 @@ class APlayer(
             }
         }
     }
+
     private fun openSettings() {
         Toast.makeText(
             context, "请在设置-画中画, 选择本App, 允许进入画中画模式", Toast.LENGTH_SHORT

@@ -3,7 +3,6 @@ package tech.shmy.a_player.player.impl
 import android.content.Context
 import android.os.Handler
 import android.view.Surface
-import tech.shmy.a_player.player.APlayerHeader
 import tech.shmy.a_player.player.APlayerInterface
 import tech.shmy.a_player.player.APlayerListener
 import tech.shmy.a_player.player.APlayerUtil
@@ -63,7 +62,7 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
     override fun setHttpDataSource(
         url: String,
         startAtPositionMs: Long,
-        headers: Array<APlayerHeader>
+        headers: Map<String, String>
     ) {
         ijkMediaPlayer.reset()
         ijkMediaPlayer.setSurface(surface)

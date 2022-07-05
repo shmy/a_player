@@ -35,7 +35,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   Throttle<APlayerValue>? _streamThrottle;
 
   @mustCallSuper
-  Future<void> initialize({APlayerKernel kernel = APlayerKernel.ijk}) async {
+  Future<void> initialize({APlayerKernel kernel = APlayerKernel.exo}) async {
     final textureId =
         await _methodChannel.invokeMethod<int>('initialize', kernel.index);
     if (textureId != null) {
@@ -59,25 +59,14 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
       {List<APlayerConfigHeader> headers = const [],
       int position = 0,
       bool isAutoPlay = true}) async {
-    String? userAgent;
-    String? referer;
-    List<String> customHeaders = [];
-    for (APlayerConfigHeader header in headers) {
-      final String key = header.key.toUpperCase();
-      if (key == "USER-AGENT") {
-        userAgent = header.value;
-      } else if (key == "REFERER") {
-        referer = header.value;
-      } else {
-        customHeaders.add('${header.key}:${header.value}');
-      }
+    Map<String, String> httpHeaders = {};
+    for (var header in headers) {
+      httpHeaders[header.key] = header.value;
     }
     await methodChannel?.invokeMethod('setDataSource', {
       "url": source,
-      "userAgent": userAgent,
-      "referer": referer,
-      "customHeaders": customHeaders,
-      "position": position
+      "position": position,
+      "httpHeaders": httpHeaders,
     });
     prepare(isAutoPlay: isAutoPlay);
   }
