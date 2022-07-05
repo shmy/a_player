@@ -58,18 +58,6 @@ mixin _VideoPlayerOptions {
     LabelValue<APlayerKernel>('IJK', APlayerKernel.ijk),
     LabelValue<APlayerKernel>('EXO', APlayerKernel.exo),
   ];
-  final List<LabelValue<double>> speedList = [
-    LabelValue<double>('0.5', 0.5),
-    LabelValue<double>('1.0', 1.0),
-    LabelValue<double>('1.5', 1.5),
-    LabelValue<double>('2.0', 2.0),
-    LabelValue<double>('2.5', 2.5),
-    LabelValue<double>('3.0', 3.0),
-    LabelValue<double>('3.5', 3.5),
-    LabelValue<double>('4.0', 4.0),
-    LabelValue<double>('4.5', 4.5),
-    LabelValue<double>('5.0', 5.0),
-  ];
   final List<LabelValue<APlayerFit>> fitList = [
     LabelValue<APlayerFit>('适应', APlayerFit.contain),
     LabelValue<APlayerFit>('拉伸', APlayerFit.fill),
@@ -223,6 +211,7 @@ mixin _VideoPlayerGestureDetector {
   final RxBool isTempSeekEnable = false.obs;
   final RxBool isShowSelections = false.obs;
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
+  double get maxSpeed;
   Timer? _showBarTimer;
   double _startDx = 0.0;
   double _startDy = 0.0;
@@ -260,7 +249,7 @@ mixin _VideoPlayerGestureDetector {
 
   void onLongPressStart() {
     _lastPlaySpeed = playerValue.playSpeed;
-    playerController.setSpeed(5.0);
+    playerController.setSpeed(maxSpeed);
     playerController.play();
     isQuickPlaying.value = true;
   }
@@ -458,6 +447,20 @@ class VideoPlayerController
   bool _appPaused = false;
   bool _willPlayResumed = false;
   ValueChanged<APlayerValue>? onEventCallback;
+  List<LabelValue<double>> get speedList {
+    const double step = 0.5;
+    double max = 5.0;
+    if (value.value.kernel == APlayerKernel.ijk) {
+      max = 2.0;
+    }
+    int steps = max ~/ step;
+    final List<LabelValue<double>> speedList = [];
+    for (var i = 0; i < steps; i ++) {
+      final value = i * step + step;
+      speedList.add(LabelValue<double>('$value', value));
+    }
+    return speedList;
+  }
   VideoPlayerItem? get currentPlayItem {
     if (currentPlayIndex.value == -1) {
       return null;
@@ -704,4 +707,7 @@ class VideoPlayerController
 
   @override
   double get _currentBrightness => brightness.value;
+
+  @override
+  double get maxSpeed => speedList.last.value;
 }

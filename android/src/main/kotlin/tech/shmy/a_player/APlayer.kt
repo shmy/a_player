@@ -5,6 +5,7 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.os.Build
@@ -222,11 +223,16 @@ class APlayer(
                 sendEvent()
             }
         })
+        setSurface()
+    }
+    private fun setSurface() {
+        val canvas = surface?.lockCanvas(null)
+        canvas?.drawColor(Color.BLACK)
+        surface?.unlockCanvasAndPost(canvas)
         surface?.release()
         surface = Surface(surfaceTexture)
         player?.setSurface(surface!!)
     }
-
     private fun resetValue() {
         aPlayerEvent = APlayerEvent().copy(
             kernel = kernel,

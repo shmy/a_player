@@ -35,7 +35,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   Throttle<APlayerValue>? _streamThrottle;
 
   @mustCallSuper
-  Future<void> initialize({APlayerKernel kernel = APlayerKernel.exo}) async {
+  Future<void> initialize({APlayerKernel kernel = APlayerKernel.aliyun}) async {
     final textureId =
         await _methodChannel.invokeMethod<int>('initialize', kernel.index);
     if (textureId != null) {
