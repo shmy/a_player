@@ -124,19 +124,6 @@ class IJKPlayerImpl : APlayerInterface, Runnable {
         ijkMediaPlayer.stop()
         ijkMediaPlayer.release()
         IjkMediaPlayer.native_profileEnd()
-//        object : Thread() {
-//            override fun run() {
-//                handler = null
-//                listener = null
-//                surface = null
-//                ijkMediaPlayer.setSurface(null)
-//                removeEvent()
-//                ijkMediaPlayer.reset()
-//                ijkMediaPlayer.stop()
-//                ijkMediaPlayer.release()
-//                IjkMediaPlayer.native_profileEnd()
-//            }
-//        }.start()
     }
 
     override fun prepare(isAutoPlay: Boolean) {
