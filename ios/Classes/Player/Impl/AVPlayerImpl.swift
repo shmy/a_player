@@ -56,6 +56,14 @@ class AVPlayerImpl: NSObject, APlayerInterface {
             }
         }
     }
+    @objc func playerItemDidReachEnd() {
+        if (_isLoop) {
+            seekTo(positionMs: 0)
+            play()
+        } else {
+            listener?.onCompletionListener()
+        }
+    }
     override init() {
         super.init()
         let videoOutputOptions = [kCVPixelBufferPixelFormatTypeKey as String : Int(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)]
@@ -100,7 +108,8 @@ class AVPlayerImpl: NSObject, APlayerInterface {
         avPlayerItem?.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackLikelyToKeepUp), options: .new, context: nil)
         avPlayerItem?.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackBufferEmpty), options: .new, context: nil)
         avPlayerItem?.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackBufferFull), options: .new, context: nil)
-    
+        NotificationCenter.default.addObserver(self, selector: #selector(playerItemDidReachEnd), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+                        
     }
 
     private func removeEvent() {
@@ -200,6 +209,7 @@ class AVPlayerImpl: NSObject, APlayerInterface {
         avPlayerItem = nil
         avPlayer?.replaceCurrentItem(with: nil)
         avPlayer = nil
+        NotificationCenter.default.removeObserver(self)
     }
     
     func prepare(isAutoPlay: Bool) {
