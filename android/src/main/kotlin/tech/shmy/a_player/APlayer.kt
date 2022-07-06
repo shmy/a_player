@@ -149,6 +149,11 @@ class APlayer(
                 aPlayerEvent = aPlayerEvent.copy(
                     isPlaying = isPlaying
                 )
+                if (isPlaying) {
+                    aPlayerEvent.copy(
+                        isCompletion = false
+                    )
+                }
                 sendEvent()
             }
 

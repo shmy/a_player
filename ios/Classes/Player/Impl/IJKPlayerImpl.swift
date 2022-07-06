@@ -25,6 +25,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     private var listener: APlayerListener?
     private var _isAutoPlay = false
     private var _speed: Float = 1.0
+    private var _isLoop = false
     override init() {
         super.init()
         bindEvent()
@@ -47,7 +48,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     
     var isLoop: Bool {
         get {
-            return ijkPlayer?.getLoop() == 1
+            return _isLoop
         }
     }
     
@@ -78,6 +79,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
         ijkPlayer?.reset()
         
         ijkPlayer?.setOptionValue("fcc-bgra", forKey: "overlay-format", of: kIJKFFOptionCategoryPlayer)
+        ijkPlayer?.setOptionIntValue(startAtPositionMs, forKey: "seek-at-start", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(5, forKey: "reconnect", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(5, forKey: "framedrop", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(10 * 1024 * 1024, forKey: "max-buffer-size", of: kIJKFFOptionCategoryPlayer)
@@ -88,7 +90,6 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
         ijkPlayer?.setOptionIntValue(1, forKey: "videotoolbox", of: kIJKFFOptionCategoryPlayer)
         
         ijkPlayer?.setDataSource(url)
-        seekTo(positionMs: startAtPositionMs)
     }
     
     func setFileDataSource(path: String, startAtPositionMs: Int64) {
@@ -118,7 +119,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     }
     
     func setLoop(isLoop: Bool) {
-        ijkPlayer?.setLoop(isLoop == true ? 1 : 0)
+        _isLoop = isLoop
     }
     private func bindEvent() {
         ijkPlayer?.add(self)
@@ -126,7 +127,11 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     }
     private func onStateChange(state: Int32) {
         if (state == IJK_STATTE_COMPLETED) {
-            listener?.onCompletionListener()
+            if (_isLoop) {
+                play()
+            } else {
+                listener?.onCompletionListener()
+            }
         }
         listener?.onPlayingListener(isPlaying: state == IJK_STATTE_STARTED)
     }

@@ -45,8 +45,10 @@ class AVPlayerImpl: NSObject, APlayerInterface {
         if (avPlayerItemVideoOutput == nil) {
             return
         }
-        listener?.onCurrentPositionChangedListener(position: cmtTimeToMillisecond(avPlayerItem!.currentTime()))
-        let outputItemTime: CMTime = avPlayerItemVideoOutput!.itemTime(forHostTime: CACurrentMediaTime())
+        // https://xinnyu.github.io/2016/11/15/iOS%20AVPlayer%20%E7%AE%80%E5%8D%95%E5%B0%81%E8%A3%85/
+       listener?.onCurrentPositionChangedListener(position: cmtTimeToMillisecond(avPlayerItem!.currentTime()))
+        let nextVSync = displayLink.timestamp + displayLink.duration
+        let outputItemTime: CMTime = avPlayerItemVideoOutput!.itemTime(forHostTime: nextVSync)
         if (avPlayerItemVideoOutput!.hasNewPixelBuffer(forItemTime: outputItemTime)) {
             let pixelBuffer: CVPixelBuffer? = avPlayerItemVideoOutput?.copyPixelBuffer(forItemTime: outputItemTime, itemTimeForDisplay: nil)
             if (pixelBuffer != nil) {
@@ -56,7 +58,9 @@ class AVPlayerImpl: NSObject, APlayerInterface {
     }
     override init() {
         super.init()
-        avPlayerItemVideoOutput = AVPlayerItemVideoOutput.init()
+        let videoOutputOptions = [kCVPixelBufferPixelFormatTypeKey as String : Int(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)]
+                    
+        avPlayerItemVideoOutput = AVPlayerItemVideoOutput.init(pixelBufferAttributes: videoOutputOptions)
         displayLink = CADisplayLink.init(target: self, selector: #selector(onDisplayLink(_:)))
         displayLink?.add(to: .current, forMode: .common)
     }
@@ -97,6 +101,16 @@ class AVPlayerImpl: NSObject, APlayerInterface {
         avPlayerItem?.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackBufferEmpty), options: .new, context: nil)
         avPlayerItem?.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackBufferFull), options: .new, context: nil)
     
+    }
+
+    private func removeEvent() {
+        avPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.status))
+        avPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.loadedTimeRanges))
+        avPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.presentationSize))
+        avPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.duration))
+        avPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackLikelyToKeepUp))
+        avPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackBufferEmpty))
+        avPlayerItem?.removeObserver(self, forKeyPath: #keyPath(AVPlayerItem.isPlaybackBufferFull))
     }
     
     private func onStatusChanged() {
@@ -154,9 +168,11 @@ class AVPlayerImpl: NSObject, APlayerInterface {
         self.listener = listener
     }
     func setHttpDataSource(url: String, startAtPositionMs: Int64, headers: Dictionary<String, String>) {
+        removeEvent()
         avPlayerItem = AVPlayerItem.init(url: URL.init(string: url)!)
         bindEvent()
         avPlayer?.replaceCurrentItem(with: avPlayerItem!)
+        seekTo(positionMs: startAtPositionMs)
     }
     
     func setFileDataSource(path: String, startAtPositionMs: Int64) {

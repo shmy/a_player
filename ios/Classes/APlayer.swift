@@ -111,6 +111,7 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     }
     
     private func resetValue() -> Void {
+        latestBuffer = nil
         aPlayerEvent = APlayerEvent.init()
         aPlayerEvent.kernel = kernel
         stop();
@@ -217,6 +218,9 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     
     func onPlayingListener(isPlaying: Bool) {
         aPlayerEvent.isPlaying = isPlaying
+        if (isPlaying) {
+            aPlayerEvent.isCompletion = false
+        }
         sendEvent()
     }
     
