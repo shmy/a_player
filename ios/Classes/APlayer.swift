@@ -62,7 +62,7 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
                 self?.setKernel(kernel: call.arguments as! Int)
                 break
               case "setDataSource":
-                self?.lastDataSource = call.arguments as! Dictionary<String, Any>
+                self?.lastDataSource = call.arguments as? Dictionary<String, Any>
                 self?.setDataSource()
                 break
               case "seekTo":
