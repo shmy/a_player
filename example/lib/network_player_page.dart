@@ -20,7 +20,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
         APlayerConfigHeader('user-Agent',
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36 Edg/103.0.1264.37'),
         // APlayerConfigHeader('referer', 'https://www.baidu.com'),
-        // APlayerConfigHeader('bb', 'cc'),
+        APlayerConfigHeader('bb', 'cc'),
       ]);
     })
       ..initialize().then((value) {

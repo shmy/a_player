@@ -47,21 +47,31 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
    }
    func setHttpDataSource(url: String, startAtPositionMs: Int64, headers: Dictionary<String, String>) {
        let urlSource = AVPUrlSource.init().url(with: url)
+       let playerConfig = aliPlayer.getConfig()
+       playerConfig?.clearShowWhenStop = true
+       playerConfig?.maxBufferDuration = 1000 * 60 * 10
+       playerConfig?.mMAXBackwardDuration = 1 * 60 * 10
+       var userAgent: String? = nil
+       var referer: String? = nil
+       let customHeaders: NSMutableArray = NSMutableArray.init()
+       headers.forEach { (key: String, value: String) in
+           if (APlayerUtil.isUserAgentKey(key: key)) {
+               userAgent = value
+           } else if (APlayerUtil.isRefererKey(key: key)) {
+               referer = value
+           } else {
+               customHeaders.add("\(key):\(value)")
+           }
+       }
+       if (userAgent != nil) {
+         playerConfig?.userAgent = userAgent
+       }
+       if (referer != nil) {
+         playerConfig?.referer = referer
+       }
 
-//        self.resetValue()
-//        let playerConfig = aliPlayer.getConfig()
-//        let userAgent: String? = config["userAgent"] as? String
-//        let referer: String? = config["referer"] as? String
-//        playerConfig?.clearShowWhenStop = true
-//        if (userAgent != nil) {
-//            playerConfig?.userAgent = userAgent
-//        }
-//        if (referer != nil) {
-//            playerConfig?.referer = referer
-//        }
-//
-////            playerConfig?.httpHeaders = NSMutableArray.init(array: config["customHeaders"] as! Array<String>)
-//        self.player!.setConfig(playerConfig)
+//       playerConfig?.httpHeaders = customHeaders
+       aliPlayer.setConfig(playerConfig)
        aliPlayer.setUrlSource(urlSource)
        aliPlayer.seek(toTime: startAtPositionMs, seekMode: AVP_SEEKMODE_ACCURATE)
 

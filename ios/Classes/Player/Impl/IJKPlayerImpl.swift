@@ -77,8 +77,22 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     func setHttpDataSource(url: String, startAtPositionMs: Int64, headers: Dictionary<String, String>) {
         ijkPlayer?.stop()
         ijkPlayer?.reset()
+        var userAgent: String? = nil
+        let customHeaders: NSMutableArray = NSMutableArray.init()
+        headers.forEach { (key: String, value: String) in
+            if (APlayerUtil.isUserAgentKey(key: key)) {
+                userAgent = value
+            } else {
+                customHeaders.add("\(key):\(value)")
+            }
+        }
+        if (userAgent != nil) {
+            ijkPlayer?.setOptionValue(userAgent!, forKey: "user_agent", of: kIJKFFOptionCategoryFormat)
+        }
+        if (customHeaders.count > 0) {
+            ijkPlayer?.setOptionValue(customHeaders.componentsJoined(by: "\r\n"), forKey: "headers", of: kIJKFFOptionCategoryFormat)
+        }
         
-        ijkPlayer?.setOptionValue("fcc-bgra", forKey: "overlay-format", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(startAtPositionMs, forKey: "seek-at-start", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(5, forKey: "reconnect", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(5, forKey: "framedrop", of: kIJKFFOptionCategoryPlayer)

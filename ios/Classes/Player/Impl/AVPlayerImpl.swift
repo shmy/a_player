@@ -7,7 +7,12 @@
 
 import Foundation
 import AVFoundation
+extension AVPlayer {
 
+    var isPlaying: Bool {
+        return ((rate != 0) && (error == nil))
+    }
+}
 class AVPlayerImpl: NSObject, APlayerInterface {
 
     private var avPlayer: AVPlayer? = AVPlayer.init()
@@ -46,7 +51,8 @@ class AVPlayerImpl: NSObject, APlayerInterface {
             return
         }
         // https://xinnyu.github.io/2016/11/15/iOS%20AVPlayer%20%E7%AE%80%E5%8D%95%E5%B0%81%E8%A3%85/
-       listener?.onCurrentPositionChangedListener(position: cmtTimeToMillisecond(avPlayerItem!.currentTime()))
+        listener?.onCurrentPositionChangedListener(position: cmtTimeToMillisecond(avPlayerItem!.currentTime()))
+        listener?.onPlayingListener(isPlaying: avPlayer!.isPlaying)
         let nextVSync = displayLink.timestamp + displayLink.duration
         let outputItemTime: CMTime = avPlayerItemVideoOutput!.itemTime(forHostTime: nextVSync)
         if (avPlayerItemVideoOutput!.hasNewPixelBuffer(forItemTime: outputItemTime)) {
@@ -178,7 +184,8 @@ class AVPlayerImpl: NSObject, APlayerInterface {
     }
     func setHttpDataSource(url: String, startAtPositionMs: Int64, headers: Dictionary<String, String>) {
         removeEvent()
-        avPlayerItem = AVPlayerItem.init(url: URL.init(string: url)!)
+        let asset = AVURLAsset(url: URL.init(string: url)!, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+        avPlayerItem = AVPlayerItem.init(asset: asset)
         bindEvent()
         avPlayer?.replaceCurrentItem(with: avPlayerItem!)
         seekTo(positionMs: startAtPositionMs)

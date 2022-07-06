@@ -124,7 +124,7 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         let url = config["url"] as! String
         let position = config["position"] as! Int64
         if (APlayerUtil.isHttpProtocol(url: url) == true) {
-            player?.setHttpDataSource(url: url, startAtPositionMs: position, headers: Dictionary<String, String>.init())
+            player?.setHttpDataSource(url: url, startAtPositionMs: position, headers: config["httpHeaders"] as! Dictionary<String, String>)
         } else if (APlayerUtil.isFileProtocol(url: url) == true) {
             player?.setFileDataSource(path: url, startAtPositionMs: position)
         }
@@ -220,6 +220,7 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         aPlayerEvent.isPlaying = isPlaying
         if (isPlaying) {
             aPlayerEvent.isCompletion = false
+//            aPlayerEvent.isBuffering = false
         }
         sendEvent()
     }
