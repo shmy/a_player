@@ -35,7 +35,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   Throttle<APlayerValue>? _streamThrottle;
 
   @mustCallSuper
-  Future<void> initialize({APlayerKernel kernel = APlayerKernel.aliyun}) async {
+  Future<void> initialize({APlayerKernel kernel = APlayerKernel.ijk}) async {
     final textureId =
         await _methodChannel.invokeMethod<int>('initialize', kernel.index);
     if (textureId != null) {
@@ -107,10 +107,6 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> seekTo(int position) async {
     await methodChannel?.invokeMethod('seekTo', position);
-  }
-
-  Future<void> setHardwareDecoderEnable(bool loop) async {
-    await methodChannel?.invokeMethod('setHardwareDecoderEnable', loop);
   }
 
   void enterPip(BuildContext context) {
