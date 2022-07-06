@@ -203,6 +203,9 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         return nil
     }
     func onPixelBuffer(pixelBuffer: CVPixelBuffer) {
+        if (latestBuffer == pixelBuffer) {
+            return
+        }
         latestBuffer = pixelBuffer
         textureRegistry?.textureFrameAvailable(_textureId)
     }

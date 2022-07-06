@@ -82,11 +82,10 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
         ijkPlayer?.setOptionIntValue(5, forKey: "framedrop", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(10 * 1024 * 1024, forKey: "max-buffer-size", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(30, forKey: "max-fps", of: kIJKFFOptionCategoryPlayer)
-//        ijkPlayer?.setOptionIntValue(1, forKey: "mediacodec", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(1, forKey: "packet-buffering", of: kIJKFFOptionCategoryPlayer)
         
         ijkPlayer?.setOptionIntValue(1, forKey: "enable-position-notify", of: kIJKFFOptionCategoryPlayer)
-//        ijkPlayer?.setOptionIntValue(1, forKey: "videotoolbox", of: kIJKFFOptionCategoryPlayer)
+        ijkPlayer?.setOptionIntValue(1, forKey: "videotoolbox", of: kIJKFFOptionCategoryPlayer)
         
         ijkPlayer?.setDataSource(url)
         seekTo(positionMs: startAtPositionMs)
