@@ -110,17 +110,20 @@ class AVPlayerImpl: NSObject, APlayerInterface {
             }
             break
         case .failed:
-            break
-        case .unknown:
+            listener?.onErrorListener(code: "-1", message: "play error")
             break
         default:
             break
         }
     }
     private func onLoadedTimeRangesChanged() {
-        
-        listener?.onCurrentPositionChangedListener(position: cmtTimeToMillisecond(avPlayerItem!.currentTime()))
-//        let d = cmtTimeToMillisecond(avPlayerItem?.loadedTimeRanges.last)
+        let last = avPlayerItem?.loadedTimeRanges.last
+        if (last == nil) {
+            return
+        }
+        let range: CMTimeRange = last!.timeRangeValue
+        let buffered = cmtTimeToMillisecond(range.end)
+        listener?.onBufferedPositionChangedListener(buffered: buffered)
     }
     private func onPresentationSizeChanged() {
         let presentationSize = avPlayerItem!.presentationSize

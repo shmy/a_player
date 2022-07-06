@@ -463,19 +463,16 @@ class VideoPlayerController
   }
 
   List<LabelValue<APlayerKernel>> get kernelList {
+    final List<LabelValue<APlayerKernel>> items = [
+      LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyun),
+      LabelValue<APlayerKernel>('IJK', APlayerKernel.ijk),
+    ];
     if (Platform.isAndroid) {
-      return [
-        LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyun),
-        LabelValue<APlayerKernel>('IJK', APlayerKernel.ijk),
-        LabelValue<APlayerKernel>('EXO', APlayerKernel.exo),
-      ];
+      items.add(LabelValue<APlayerKernel>('EXO', APlayerKernel.exo));
     } else if (Platform.isIOS) {
-      return [
-        LabelValue<APlayerKernel>('阿里云', APlayerKernel.aliyun),
-        LabelValue<APlayerKernel>('AV KIT', APlayerKernel.av),
-      ];
+      items.add(LabelValue<APlayerKernel>('AV_KIT', APlayerKernel.av));
     }
-    return [];
+    return items;
   }
 
   VideoPlayerItem? get currentPlayItem {

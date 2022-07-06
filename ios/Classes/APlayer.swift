@@ -94,9 +94,12 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         switch(kernel) {
         case KERNEL_ALIYUN:
 //            player = AliyunPlayerImpl.init()
-            player = AVPlayerImpl.init()
+            break
+        case KERNEL_IJK:
+            player = IJKPlayerImpl.init()
             break
         case KERNEL_AV:
+            player = AVPlayerImpl.init()
             break
         default:
             break
