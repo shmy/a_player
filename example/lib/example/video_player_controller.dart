@@ -21,8 +21,8 @@ import 'dlna_page.dart';
 
 typedef VideoSourceResolver = Future<VideoSourceResolve> Function(
     VideoPlayerItem playerItem);
-typedef VideoResolverFailed = void Function(
-    VideoPlayerItem playerItem);
+typedef VideoResolverFailed = void Function(VideoPlayerItem playerItem);
+
 class VideoSourceResolve {
   final bool isSuccess;
   final String url;
@@ -53,7 +53,6 @@ class VideoPlayerItem {
 }
 
 mixin _VideoPlayerOptions {
-
   final List<LabelValue<APlayerFit>> fitList = [
     LabelValue<APlayerFit>('适应', APlayerFit.contain),
     LabelValue<APlayerFit>('拉伸', APlayerFit.fill),
@@ -75,7 +74,6 @@ mixin _VideoPlayerOptions {
     LabelValue<APlayerMirrorMode>('水平镜像', APlayerMirrorMode.horizontal),
     LabelValue<APlayerMirrorMode>('垂直镜像', APlayerMirrorMode.vertical),
   ];
-
 }
 mixin _VideoPlayerOrientationPlugin {
   final RxBool isFullscreen = false.obs;
@@ -207,7 +205,9 @@ mixin _VideoPlayerGestureDetector {
   final RxBool isTempSeekEnable = false.obs;
   final RxBool isShowSelections = false.obs;
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
+
   double get maxSpeed;
+
   Timer? _showBarTimer;
   double _startDx = 0.0;
   double _startDy = 0.0;
@@ -368,7 +368,6 @@ mixin _VideoPlayerResolver {
   RxBool isResolveing = false.obs;
   RxBool isResolveFailed = false.obs;
 
-
   void onResolveFailed(VideoResolverFailed callback) {
     _videoResolverFailed = callback;
   }
@@ -382,10 +381,12 @@ mixin _VideoDlnaPlugin {
   search? _searcher;
 
   Future<void> _showDlnaSheet(VideoPlayerController controller) async {
-   await showMaterialModalBottomSheet(
-     context: Get.context!,
+    await showMaterialModalBottomSheet(
+      context: Get.context!,
       builder: (BuildContext context) {
-       return DlnaPage(controller: controller,);
+        return DlnaPage(
+          controller: controller,
+        );
       },
       elevation: 0,
       barrierColor: Colors.transparent,
@@ -401,6 +402,7 @@ mixin _VideoDlnaPlugin {
       return false;
     }
   }
+
   Future<void> _initDlnaPlugin() async {
     _searcher = search();
     final manager m = await _searcher!.start();
@@ -409,6 +411,7 @@ mixin _VideoDlnaPlugin {
       _getDeviceList(m);
     });
   }
+
   void _deinitDlnaPlugin() {
     _searcher?.stop();
     _searcher = null;
@@ -443,20 +446,22 @@ class VideoPlayerController
   bool _appPaused = false;
   bool _willPlayResumed = false;
   ValueChanged<APlayerValue>? onEventCallback;
+
   List<LabelValue<double>> get speedList {
     const double step = 0.5;
     double max = 5.0;
-    if (value.value.kernel == APlayerKernel.ijk) {
+    if ([APlayerKernel.ijk, APlayerKernel.av].contains(value.value.kernel)) {
       max = 2.0;
     }
     int steps = max ~/ step;
     final List<LabelValue<double>> speedList = [];
-    for (var i = 0; i < steps; i ++) {
+    for (var i = 0; i < steps; i++) {
       final value = i * step + step;
       speedList.add(LabelValue<double>('$value', value));
     }
     return speedList;
   }
+
   List<LabelValue<APlayerKernel>> get kernelList {
     if (Platform.isAndroid) {
       return [
@@ -472,6 +477,7 @@ class VideoPlayerController
     }
     return [];
   }
+
   VideoPlayerItem? get currentPlayItem {
     if (currentPlayIndex.value == -1) {
       return null;
@@ -481,12 +487,15 @@ class VideoPlayerController
     }
     return playlist[currentPlayIndex.value];
   }
+
   String _realPlayUrl = '';
+
   String get currentPlayUrl => currentPlayItem?.source ?? '';
 
   String get title => currentPlayItem?.title ?? '';
 
   bool get ready => playerValue.isReadyToPlay && !isResolveing.value;
+
   @override
   APlayerValue get playerValue => value.value;
 
@@ -537,17 +546,22 @@ class VideoPlayerController
       setExpectedDataSource(resolve, position);
     }
   }
+
   void setExpectedDataSource(VideoSourceResolve resolve, [int position = 0]) {
     isResolveFailed.value = false;
     _realPlayUrl = resolve.url;
-    playerController.setDataSouce(resolve.url, headers: resolve.headers, position: position);
+    playerController.setDataSouce(resolve.url,
+        headers: resolve.headers, position: position);
   }
+
   void showResolverFailedSheet() {
     _videoResolverFailed?.call(currentPlayItem!);
   }
+
   void onEvent(ValueChanged<APlayerValue> callback) {
     onEventCallback = callback;
   }
+
   void setPlayMode(VideoPlayerPlayMode mode) {
     playMode.value = mode;
     switch (playMode.value) {
@@ -622,14 +636,17 @@ class VideoPlayerController
       Get.back();
     }
   }
+
   Future<void> showDlnaSheet() async {
     playerController.pause();
     await _showDlnaSheet(this);
     playerController.play();
   }
+
   Future<void> playToDLAN(device d) async {
     await _playToDLAN(d, _realPlayUrl);
   }
+
   void dispose() {
     Wakelock.disable();
     _videoPlayerResolver = null;
@@ -666,6 +683,7 @@ class VideoPlayerController
         break;
     }
   }
+
   void _listener(APlayerValue value) {
     onEventCallback?.call(value);
     if (_appPaused && value.isPlaying) {

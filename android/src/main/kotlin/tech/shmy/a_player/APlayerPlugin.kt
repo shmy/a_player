@@ -3,8 +3,6 @@ package tech.shmy.a_player
 import android.app.Activity
 import android.content.Context
 import androidx.annotation.NonNull
-import com.aliyun.player.AliPlayerGlobalSettings
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -27,9 +25,6 @@ class APlayerPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var activity: Activity
   private lateinit var context: Context
 
-  init {
-    AliPlayerGlobalSettings.setUseHttp2(true)
-  }
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, METHOD_CHANNEL_NAME)
     channel.setMethodCallHandler(this)

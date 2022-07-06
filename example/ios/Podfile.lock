@@ -1,10 +1,6 @@
 PODS:
   - a_player (0.0.1):
-    - AliPlayerSDK_iOS
     - Flutter
-  - AliPlayerSDK_iOS (5.4.7.0):
-    - AliPlayerSDK_iOS/AliPlayerSDK (= 5.4.7.0)
-  - AliPlayerSDK_iOS/AliPlayerSDK (5.4.7.0)
   - battery_plus (1.0.0):
     - Flutter
   - connectivity_plus (0.0.1):
@@ -43,7 +39,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - AliPlayerSDK_iOS
     - FMDB
     - ReachabilitySwift
 
@@ -70,8 +65,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
-  a_player: f85cc53f125b881ed1ec166c89dcd74110c4e0c5
-  AliPlayerSDK_iOS: a3a2ddb2296d9f212cdb7db26cce6672091cfb43
+  a_player: a758385478e5f76f2bfde310a497f43b62037838
   battery_plus: 7851ab482c336dd101ae735dc9363f01e1223c7c
   connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a

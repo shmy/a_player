@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.Surface
 import com.aliyun.player.AliPlayer
 import com.aliyun.player.AliPlayerFactory
+import com.aliyun.player.AliPlayerGlobalSettings
 import com.aliyun.player.IPlayer
 import com.aliyun.player.bean.InfoCode
 import com.aliyun.player.source.UrlSource
@@ -16,6 +17,7 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
     private var listener: APlayerListener? = null
 
     init {
+        AliPlayerGlobalSettings.setUseHttp2(true)
         aliPlayer.setOnVideoSizeChangedListener { width, height ->
             listener?.onVideoSizeChangedListener(width, height)
         }
