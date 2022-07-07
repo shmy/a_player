@@ -82,13 +82,17 @@ class VideoPlayer extends StatelessWidget {
                 _buildGestureDetector(),
                 _buildTop(),
                 _buildBottom(),
-                _buildSettings(),
-                _buildSelections(),
                 if (controller.isLocked.value && controller.isFullscreen.value)
                   _buildLockedView(),
                 if (controller.isFullscreen.value) _buildRight(),
                 if (controller.isResolveFailed.value)
                   _buildResolveFailedIndicator(),
+                if (controller.playerValue.isError)
+                _buildErrorIndicator(),
+                if (controller.playerValue.isCompletion)
+                  _buildCompletedIndicator(),
+                _buildSettings(),
+                _buildSelections(),
               ],
             ),
           ),
@@ -617,24 +621,25 @@ class VideoPlayer extends StatelessWidget {
   }
 
   Positioned _buildGestureDetector() {
+    final bool isDetectorable = controller.playerValue.isError || controller.playerValue.isCompletion || controller.isResolveFailed.value;
     return Positioned.fill(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => controller.onTap(),
-        onDoubleTap: () => controller.onDoubleTap(),
-        onLongPressStart: (_) => controller.onLongPressStart(),
-        onLongPressEnd: (_) => controller.onLongPressEnd(),
-        onHorizontalDragStart: (details) =>
+        onDoubleTap: isDetectorable ? null :  () => controller.onDoubleTap(),
+        onLongPressStart: isDetectorable ? null :  (_) => controller.onLongPressStart(),
+        onLongPressEnd: isDetectorable ? null :  (_) => controller.onLongPressEnd(),
+        onHorizontalDragStart: isDetectorable ? null :  (details) =>
             controller.onHorizontalDragStart(details),
-        onHorizontalDragUpdate: (details) =>
+        onHorizontalDragUpdate: isDetectorable ? null :  (details) =>
             controller.onHorizontalDragUpdate(details),
-        onHorizontalDragEnd: (details) =>
+        onHorizontalDragEnd: isDetectorable ? null :  (details) =>
             controller.onHorizontalDragEnd(details),
-        onVerticalDragStart: (details) =>
+        onVerticalDragStart: isDetectorable ? null :  (details) =>
             controller.onVerticalDragStart(details),
-        onVerticalDragUpdate: (details) =>
+        onVerticalDragUpdate: isDetectorable ? null :  (details) =>
             controller.onVerticalDragUpdate(details),
-        onVerticalDragEnd: (details) => controller.onVerticalDragEnd(details),
+        onVerticalDragEnd: isDetectorable ? null :  (details) => controller.onVerticalDragEnd(details),
       ),
     );
   }
@@ -773,11 +778,10 @@ class VideoPlayer extends StatelessWidget {
                     controller.playerValue.isBuffering ||
                     !controller.playerValue.isInitialized) &&
                 controller.currentPlayUrl != '' &&
+                !controller.isResolveFailed.value &&
                 !controller.playerValue.isError,
             child: _buildBufferingIndicator(),
           ),
-          _buildErrorIndicator(),
-          _buildCompletedIndicator(),
         ],
       ),
     );
@@ -785,7 +789,7 @@ class VideoPlayer extends StatelessWidget {
 
   Widget _buildErrorIndicator() {
     return _buildCenterIndicator(
-      isShow: controller.playerValue.isError,
+      isShow: true,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -800,12 +804,26 @@ class VideoPlayer extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 40.rpx),
             child: Text(
-              controller.playerValue.errorDescription,
+              '播放失败',
               style: TextStyle(fontSize: secondaryFontSize),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              MaterialButton(
+                onPressed: () => controller.back(),
+                child: const Text('返回上级', style: TextStyle(color: Colors.white),),
+              ),
+              MaterialButton(
+                onPressed: () => controller.toggleSettings(),
+                child: const Text('切换内核', style: TextStyle(color: Colors.white),),
+              ),
+            ],
+          )
         ],
       ),
     );
@@ -813,7 +831,7 @@ class VideoPlayer extends StatelessWidget {
 
   Widget _buildResolveFailedIndicator() {
     return _buildCenterIndicator(
-      isShow: controller.isResolveFailed.value,
+      isShow: true,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -832,9 +850,19 @@ class VideoPlayer extends StatelessWidget {
               style: TextStyle(fontSize: secondaryFontSize),
             ),
           ),
-          MaterialButton(
-            onPressed: () => controller.showResolverFailedSheet(),
-            child: const Text('选择线路'),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              MaterialButton(
+                onPressed: () => controller.back(),
+                child: const Text('返回上级', style: TextStyle(color: Colors.white),),
+              ),
+              MaterialButton(
+                onPressed: () => controller.showResolverFailedSheet(),
+                child: const Text('选择线路', style: TextStyle(color: Colors.white),),
+              ),
+            ],
           ),
         ],
       ),
@@ -843,9 +871,41 @@ class VideoPlayer extends StatelessWidget {
 
   Widget _buildCompletedIndicator() {
     return _buildCenterIndicator(
-      isShow: controller.playerValue.isCompletion,
-      child: _buildClickableIcon(
-          icon: Icons.refresh, onTap: () => {}, size: indicatorSize),
+      isShow: true,
+      child:  Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            String.fromCharCode(Icons.refresh.codePoint),
+            style:
+            TextStyle(fontSize: indicatorSize, fontFamily: _iconFontFamily),
+          ),
+          SizedBox(
+            height: gap,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40.rpx),
+            child: Text(
+              '播放结束',
+              style: TextStyle(fontSize: secondaryFontSize),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              MaterialButton(
+                onPressed: () => controller.back(),
+                child: const Text('返回上级', style: TextStyle(color: Colors.white),),
+              ),
+              MaterialButton(
+                onPressed: () => controller.restart(),
+                child: const Text('重新播放', style: TextStyle(color: Colors.white),),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

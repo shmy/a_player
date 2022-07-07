@@ -75,6 +75,10 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
     await methodChannel?.invokeMethod('play');
   }
 
+  Future<void> restart() async {
+    await methodChannel?.invokeMethod('restart');
+  }
+
   Future<void> pause() async {
     await methodChannel?.invokeMethod('pause');
   }

@@ -65,6 +65,9 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
                 self?.lastDataSource = call.arguments as? Dictionary<String, Any>
                 self?.setDataSource()
                 break
+            case "restart":
+                self?.restartPlay()
+                break
               case "seekTo":
                 self?.seekTo(position: call.arguments as! Int64)
                 break
@@ -117,7 +120,10 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         stop();
         sendEvent()
     }
-    
+    private func restartPlay() -> Void {
+        seekTo(position: 0)
+        play()
+    }
     private func setDataSource() -> Void {
         resetValue()
         let config: Dictionary<String, Any> = lastDataSource!
@@ -149,6 +155,8 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     }
     
     private func play() -> Void {
+        aPlayerEvent.isCompletion = false
+        sendEvent()
         player?.play()
     }
     

@@ -71,6 +71,9 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
                 '漳浦综合HD [m3u8]',
                 ''),
           ])
+          ..onResolveFailed((playerItem) {
+            print(playerItem);
+          })
           ..playByIndex(3);
       });
     super.initState();

@@ -70,6 +70,10 @@ class APlayer(
                     prepare(call.arguments as Boolean)
                     result.success(null)
                 }
+                "restart" -> {
+                    restart()
+                    result.success(null)
+                }
                 "setDataSource" -> {
                     lastDataSource = call.arguments as MutableMap<String, Any>
                     setDataSource()
@@ -243,10 +247,12 @@ class APlayer(
             kernel = kernel,
             featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
         )
-        stop()
         sendEvent()
     }
-
+    private fun restart() {
+        seekTo(0)
+        play()
+    }
     private fun setDataSource() {
         resetValue()
         val config: MutableMap<String, Any> = lastDataSource!!
@@ -270,6 +276,10 @@ class APlayer(
     }
 
     private fun play() {
+        aPlayerEvent = aPlayerEvent.copy(
+            isCompletion = false
+        )
+        sendEvent()
         player?.play()
     }
 
