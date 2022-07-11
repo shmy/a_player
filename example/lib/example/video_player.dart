@@ -423,7 +423,7 @@ class VideoPlayer extends StatelessWidget {
                 _buildRadius(
                   options: controller.kernelList,
                   value: controller.playerValue.kernel,
-                  onTap: controller.playerController.setKernel,
+                  onTap: controller.setKernel,
                 ),
                 if (controller.ready) _buildTitle('播放速度'),
                 if (controller.ready)

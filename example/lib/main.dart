@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:rpx/rpx.dart';
 
 void main() async {
+
   await Rpx.init();
   runApp(const MyApp());
 }

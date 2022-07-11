@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:html_unescape/html_unescape.dart';
 import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_value.dart';
@@ -37,6 +38,8 @@ enum VideoPlayerPlayMode {
   pauseAfterCompleted,
 }
 
+enum VideoPlayerAdType { video, image }
+
 class LabelValue<T> {
   final String label;
   final T value;
@@ -50,6 +53,14 @@ class VideoPlayerItem {
   final dynamic extra;
 
   VideoPlayerItem(this.source, this.title, this.extra);
+}
+
+class VideoAdItem {
+  final VideoPlayerAdType type;
+  final String source;
+  final int minTime;
+
+  VideoAdItem(this.type, this.source, this.minTime);
 }
 
 mixin _VideoPlayerOptions {
@@ -368,7 +379,7 @@ mixin _VideoPlayerResolver {
     _videoResolverFailed = callback;
   }
 }
-mixin _VideoDlnaPlugin {
+mixin _VideoPlayerDlnaPlugin {
   final RxMap<String, device> _cacheDevice = RxMap<String, device>();
 
   List<device> get deviceList => _cacheDevice.values.toList();
@@ -430,7 +441,7 @@ class VideoPlayerController
         _VideoPlayerBatteryConnectivityPlugin,
         _VideoPlayerGestureDetector,
         _VideoPlayerResolver,
-        _VideoDlnaPlugin,
+        _VideoPlayerDlnaPlugin,
         WidgetsBindingObserver {
   @override
   late final APlayerController playerController;
@@ -439,6 +450,7 @@ class VideoPlayerController
   final RxInt currentPlayIndex = (-1).obs;
   final Rx<VideoPlayerPlayMode> playMode =
       Rx<VideoPlayerPlayMode>(VideoPlayerPlayMode.listLoop);
+  final HtmlUnescape unescape = HtmlUnescape();
   bool _appPaused = false;
   bool _willPlayResumed = false;
   ValueChanged<APlayerValue>? onEventCallback;
@@ -542,9 +554,10 @@ class VideoPlayerController
 
   void setExpectedDataSource(VideoSourceResolve resolve, [int position = 0]) {
     isResolveFailed.value = false;
-    _realPlayUrl = resolve.url;
-    playerController.setDataSouce(resolve.url,
-        headers: resolve.headers, position: position);
+    final String url = Uri.encodeFull(unescape.convert(resolve.url));
+    _realPlayUrl = url;
+    playerController.setDataSouce(url,
+        headers: resolve.headers, position: position, isAutoPlay: true);
   }
 
   void showResolverFailedSheet() {
@@ -554,7 +567,9 @@ class VideoPlayerController
   void onEvent(ValueChanged<APlayerValue> callback) {
     onEventCallback = callback;
   }
-
+  void setKernel(APlayerKernel kernel) {
+    playerController.setKernel(kernel);
+  }
   void setPlayMode(VideoPlayerPlayMode mode) {
     playMode.value = mode;
     switch (playMode.value) {
@@ -713,6 +728,10 @@ class VideoPlayerController
   void enterPip() {
     playerController.enterPip(Get.context!);
   }
+
+  // void beforeAdDismissed() {
+  //   playerController.play();
+  // }
 
   @override
   void setBrightness(double value) {
