@@ -74,27 +74,29 @@ class VideoPlayer extends StatelessWidget {
                 ),
               ],
             ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                    child: APlayer(controller: controller.playerController)),
-                _buildIndicator(),
-                _buildGestureDetector(),
-                _buildTop(),
-                _buildBottom(),
-                if (controller.isLocked.value && controller.isFullscreen.value)
-                  _buildLockedView(),
-                if (controller.isFullscreen.value) _buildRight(),
-                if (controller.isResolveFailed.value)
-                  _buildResolveFailedIndicator(),
-                if (controller.playerValue.isError)
-                _buildErrorIndicator(),
-                if (controller.playerValue.isCompletion)
-                  _buildCompletedIndicator(),
-                _buildSettings(),
-                _buildSelections(),
-              ],
-            ),
+            child: Obx(() => Stack(
+                  children: [
+                    Positioned.fill(
+                        child:
+                            APlayer(controller: controller.playerController)),
+                    _buildIndicator(),
+                    _buildGestureDetector(),
+                    _buildTop(),
+                    _buildBottom(),
+                    if (controller.isLocked.value &&
+                        controller.isFullscreen.value)
+                      _buildLockedView(),
+                    if (controller.isFullscreen.value) _buildRight(),
+                    if (controller.isResolveFailed.value)
+                      _buildResolveFailedIndicator(),
+                    if (controller.playerValue.isError) _buildErrorIndicator(),
+                    if (controller.playerValue.isCompletion &&
+                        !controller.isResolveing.value)
+                      _buildCompletedIndicator(),
+                    _buildSettings(),
+                    _buildSelections(),
+                  ],
+                )),
           ),
         ),
       ),
@@ -403,61 +405,56 @@ class VideoPlayer extends StatelessWidget {
   }
 
   Widget _buildSettings() {
-    return Obx(
-      () {
-        final double width =
-            Get.width / (controller.isFullscreen.value ? 2.5 : 1.35);
-        return AnimatedPositioned(
-          duration: _animationDuration,
-          top: 0,
-          right: controller.isShowSettings.value ? 0 : -width,
-          bottom: 0,
-          width: width,
-          child: Container(
-            color: Colors.black.withOpacity(0.8),
-            child: ListView(
-              padding:
-                  EdgeInsets.only(bottom: 10.rpx, left: 10.rpx, right: 10.rpx),
-              children: [
-                _buildTitle('播放内核'),
-                _buildRadius(
-                  options: controller.kernelList,
-                  value: controller.playerValue.kernel,
-                  onTap: controller.setKernel,
-                ),
-                if (controller.ready) _buildTitle('播放速度'),
-                if (controller.ready)
-                  _buildRadius(
-                    options: controller.speedList,
-                    value: controller.playerValue.playSpeed,
-                    onTap: controller.playerController.setSpeed,
-                  ),
-                if (controller.ready) _buildTitle('画面尺寸'),
-                if (controller.ready)
-                  _buildRadius(
-                    options: controller.fitList,
-                    value: controller.playerController.fit,
-                    onTap: controller.playerController.setFit,
-                  ),
-                if (controller.ready) _buildTitle('播放方式'),
-                if (controller.ready)
-                  _buildRadius(
-                    options: controller.playModeList,
-                    value: controller.playMode.value,
-                    onTap: controller.setPlayMode,
-                  ),
-                if (controller.ready) _buildTitle('镜像翻转'),
-                if (controller.ready)
-                  _buildRadius(
-                    options: controller.mirrorModeList,
-                    value: controller.playerController.mirrorMode,
-                    onTap: controller.playerController.setMirrorMode,
-                  ),
-              ],
+    final double width =
+        Get.width / (controller.isFullscreen.value ? 2.5 : 1.35);
+    return AnimatedPositioned(
+      duration: _animationDuration,
+      top: 0,
+      right: controller.isShowSettings.value ? 0 : -width,
+      bottom: 0,
+      width: width,
+      child: Container(
+        color: Colors.black.withOpacity(0.8),
+        child: ListView(
+          padding: EdgeInsets.only(bottom: 10.rpx, left: 10.rpx, right: 10.rpx),
+          children: [
+            _buildTitle('播放内核'),
+            _buildRadius(
+              options: controller.kernelList,
+              value: controller.playerValue.kernel,
+              onTap: controller.setKernel,
             ),
-          ),
-        );
-      },
+            if (controller.ready) _buildTitle('播放速度'),
+            if (controller.ready)
+              _buildRadius(
+                options: controller.speedList,
+                value: controller.playerValue.playSpeed,
+                onTap: controller.playerController.setSpeed,
+              ),
+            if (controller.ready) _buildTitle('画面尺寸'),
+            if (controller.ready)
+              _buildRadius(
+                options: controller.fitList,
+                value: controller.playerController.fit,
+                onTap: controller.playerController.setFit,
+              ),
+            if (controller.ready) _buildTitle('播放方式'),
+            if (controller.ready)
+              _buildRadius(
+                options: controller.playModeList,
+                value: controller.playMode.value,
+                onTap: controller.setPlayMode,
+              ),
+            if (controller.ready) _buildTitle('镜像翻转'),
+            if (controller.ready)
+              _buildRadius(
+                options: controller.mirrorModeList,
+                value: controller.playerController.mirrorMode,
+                onTap: controller.playerController.setMirrorMode,
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -621,25 +618,36 @@ class VideoPlayer extends StatelessWidget {
   }
 
   Positioned _buildGestureDetector() {
-    final bool isDetectorable = controller.playerValue.isError || controller.playerValue.isCompletion || controller.isResolveFailed.value;
+    final bool isDetectorable = controller.playerValue.isError ||
+        controller.playerValue.isCompletion ||
+        controller.isResolveFailed.value;
     return Positioned.fill(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => controller.onTap(),
-        onDoubleTap: isDetectorable ? null :  () => controller.onDoubleTap(),
-        onLongPressStart: isDetectorable ? null :  (_) => controller.onLongPressStart(),
-        onLongPressEnd: isDetectorable ? null :  (_) => controller.onLongPressEnd(),
-        onHorizontalDragStart: isDetectorable ? null :  (details) =>
-            controller.onHorizontalDragStart(details),
-        onHorizontalDragUpdate: isDetectorable ? null :  (details) =>
-            controller.onHorizontalDragUpdate(details),
-        onHorizontalDragEnd: isDetectorable ? null :  (details) =>
-            controller.onHorizontalDragEnd(details),
-        onVerticalDragStart: isDetectorable ? null :  (details) =>
-            controller.onVerticalDragStart(details),
-        onVerticalDragUpdate: isDetectorable ? null :  (details) =>
-            controller.onVerticalDragUpdate(details),
-        onVerticalDragEnd: isDetectorable ? null :  (details) => controller.onVerticalDragEnd(details),
+        onDoubleTap: isDetectorable ? null : () => controller.onDoubleTap(),
+        onLongPressStart:
+            isDetectorable ? null : (_) => controller.onLongPressStart(),
+        onLongPressEnd:
+            isDetectorable ? null : (_) => controller.onLongPressEnd(),
+        onHorizontalDragStart: isDetectorable
+            ? null
+            : (details) => controller.onHorizontalDragStart(details),
+        onHorizontalDragUpdate: isDetectorable
+            ? null
+            : (details) => controller.onHorizontalDragUpdate(details),
+        onHorizontalDragEnd: isDetectorable
+            ? null
+            : (details) => controller.onHorizontalDragEnd(details),
+        onVerticalDragStart: isDetectorable
+            ? null
+            : (details) => controller.onVerticalDragStart(details),
+        onVerticalDragUpdate: isDetectorable
+            ? null
+            : (details) => controller.onVerticalDragUpdate(details),
+        onVerticalDragEnd: isDetectorable
+            ? null
+            : (details) => controller.onVerticalDragEnd(details),
       ),
     );
   }
@@ -816,11 +824,24 @@ class VideoPlayer extends StatelessWidget {
             children: [
               MaterialButton(
                 onPressed: () => controller.back(),
-                child: const Text('返回上级', style: TextStyle(color: Colors.white),),
+                child: const Text(
+                  '返回上级',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              MaterialButton(
+                onPressed: () => controller.showResolverFailedSheet(),
+                child: const Text(
+                  '选择线路',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               MaterialButton(
                 onPressed: () => controller.toggleSettings(),
-                child: const Text('切换内核', style: TextStyle(color: Colors.white),),
+                child: const Text(
+                  '切换内核',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           )
@@ -856,11 +877,17 @@ class VideoPlayer extends StatelessWidget {
             children: [
               MaterialButton(
                 onPressed: () => controller.back(),
-                child: const Text('返回上级', style: TextStyle(color: Colors.white),),
+                child: const Text(
+                  '返回上级',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               MaterialButton(
                 onPressed: () => controller.showResolverFailedSheet(),
-                child: const Text('选择线路', style: TextStyle(color: Colors.white),),
+                child: const Text(
+                  '选择线路',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -872,13 +899,13 @@ class VideoPlayer extends StatelessWidget {
   Widget _buildCompletedIndicator() {
     return _buildCenterIndicator(
       isShow: true,
-      child:  Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             String.fromCharCode(Icons.refresh.codePoint),
             style:
-            TextStyle(fontSize: indicatorSize, fontFamily: _iconFontFamily),
+                TextStyle(fontSize: indicatorSize, fontFamily: _iconFontFamily),
           ),
           SizedBox(
             height: gap,
@@ -896,11 +923,17 @@ class VideoPlayer extends StatelessWidget {
             children: [
               MaterialButton(
                 onPressed: () => controller.back(),
-                child: const Text('返回上级', style: TextStyle(color: Colors.white),),
+                child: const Text(
+                  '返回上级',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               MaterialButton(
                 onPressed: () => controller.restart(),
-                child: const Text('重新播放', style: TextStyle(color: Colors.white),),
+                child: const Text(
+                  '重新播放',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

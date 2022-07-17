@@ -218,6 +218,7 @@ mixin _VideoPlayerGestureDetector {
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
 
   double get maxSpeed;
+  VoidCallback? _onPausedCallback;
 
   Timer? _showBarTimer;
   double _startDx = 0.0;
@@ -225,7 +226,9 @@ mixin _VideoPlayerGestureDetector {
   Duration _startDxValue = Duration.zero;
   double _startDyValue = 0.0;
   double _lastPlaySpeed = 1.0;
-
+  void onPausedCallback(VoidCallback callback) {
+    _onPausedCallback = callback;
+  }
   void onTap() {
     if (isShowSettings.value) {
       toggleSettings();
@@ -247,6 +250,7 @@ mixin _VideoPlayerGestureDetector {
       playerController.play();
     } else {
       playerController.pause();
+      _onPausedCallback?.call();
     }
   }
 
@@ -509,14 +513,14 @@ class VideoPlayerController
     WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<void> initialize() {
+  Future<void> initialize({APlayerKernel kernel = APlayerKernel.aliyun}) {
     Wakelock.enable();
     _initOrientationPlugin();
     _initVolumeBrightnessPlugin();
     _initBatteryConnectivityPlugin();
     _initDlnaPlugin();
     _showBar();
-    return playerController.initialize();
+    return playerController.initialize(kernel: kernel);
   }
 
   @override
@@ -554,7 +558,7 @@ class VideoPlayerController
 
   void setExpectedDataSource(VideoSourceResolve resolve, [int position = 0]) {
     isResolveFailed.value = false;
-    final String url = Uri.encodeFull(unescape.convert(resolve.url));
+    final String url = unescape.convert(resolve.url);
     _realPlayUrl = url;
     playerController.setDataSouce(url,
         headers: resolve.headers, position: position, isAutoPlay: true);
@@ -570,6 +574,7 @@ class VideoPlayerController
   void setKernel(APlayerKernel kernel) {
     playerController.setKernel(kernel);
   }
+
   void setPlayMode(VideoPlayerPlayMode mode) {
     playMode.value = mode;
     switch (playMode.value) {
@@ -698,7 +703,7 @@ class VideoPlayerController
       playerController.pause();
     }
     this.value.value = value;
-    if (this.value.value.isCompletion) {
+    if (this.value.value.isCompletion && !isResolveing.value) {
       if (playMode.value == VideoPlayerPlayMode.listLoop) {
         if (currentPlayIndex.value < playlist.length - 1) {
           playByIndex(currentPlayIndex.value + 1);
