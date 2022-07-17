@@ -218,6 +218,7 @@ mixin _VideoPlayerGestureDetector {
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
 
   double get maxSpeed;
+
   VoidCallback? _onPausedCallback;
 
   Timer? _showBarTimer;
@@ -226,9 +227,11 @@ mixin _VideoPlayerGestureDetector {
   Duration _startDxValue = Duration.zero;
   double _startDyValue = 0.0;
   double _lastPlaySpeed = 1.0;
+
   void onPausedCallback(VoidCallback callback) {
     _onPausedCallback = callback;
   }
+
   void onTap() {
     if (isShowSettings.value) {
       toggleSettings();
@@ -558,7 +561,17 @@ class VideoPlayerController
 
   void setExpectedDataSource(VideoSourceResolve resolve, [int position = 0]) {
     isResolveFailed.value = false;
-    final String url = unescape.convert(resolve.url);
+    String url = unescape.convert(resolve.url);
+    Uri uri = Uri.parse(url);
+    url = Uri(
+      scheme: uri.scheme,
+      userInfo: uri.userInfo,
+      host: uri.host,
+      port: uri.port,
+      path: Uri.decodeComponent(uri.path),
+      query: Uri.decodeQueryComponent(uri.query),
+      fragment: uri.fragment,
+    ).toString();
     _realPlayUrl = url;
     playerController.setDataSouce(url,
         headers: resolve.headers, position: position, isAutoPlay: true);
@@ -571,6 +584,7 @@ class VideoPlayerController
   void onEvent(ValueChanged<APlayerValue> callback) {
     onEventCallback = callback;
   }
+
   void setKernel(APlayerKernel kernel) {
     playerController.setKernel(kernel);
   }

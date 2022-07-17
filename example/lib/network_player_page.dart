@@ -35,6 +35,10 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             //     'b [m3u8]',
             //     ''),
             VideoPlayerItem(
+                'https://sg.storage.bunnycdn.com/dmcc/%5BYMDMACG%5D间谍过家家%20(EP%2009).mp4?AccessKey=a0477265-40ea-474d-bc9607af00a3-7cb0-467a&v=123&tt=9',
+                '1',
+                ''),
+            VideoPlayerItem(
                 'https://m3u8.taopianplay.com/taopian/54fdb532-e89b-4567-bc07-aa93a0c6a79b/a891bf2e-a823-4ae0-ac07-107cdf1703d8/45148/6d3af2a3-090b-486b-ac82-2c3fc6d21603/SD/playlist.m3u8',
                 'taopianplay',
                 ''),
@@ -74,7 +78,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
           ..onResolveFailed((playerItem) {
             print(playerItem);
           })
-          ..playByIndex(3);
+          ..playByIndex(0);
       });
     super.initState();
   }
@@ -91,7 +95,14 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
       appBar: AppBar(title: const Text('Network'),),
       body: Column(
         children: [
-          VideoPlayer(controller: controller),
+          VideoPlayer(controller: controller, watermark: Opacity(
+            opacity: 0.5,
+            child: Image.network(
+              'https://m.gmw.cn/baijia/logo.png',
+              width: 50,
+              height: 20,
+            ),
+          ),),
         ],
       ),
     );

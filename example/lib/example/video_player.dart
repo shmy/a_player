@@ -18,14 +18,18 @@ class VideoPlayer extends StatelessWidget {
   final bool featureDLNA;
   final VideoPlayerProgressColors? videoPlayerProgressColors;
   final ui.Image? handleImage;
+  final Widget? watermark;
+  final Alignment watermarkAlignment;
 
-  const VideoPlayer(
-      {Key? key,
-      required this.controller,
-      this.featureDLNA = true,
-      this.videoPlayerProgressColors,
-      this.handleImage})
-      : super(key: key);
+  const VideoPlayer({
+    Key? key,
+    required this.controller,
+    this.featureDLNA = true,
+    this.videoPlayerProgressColors,
+    this.handleImage,
+    this.watermark,
+    this.watermarkAlignment = Alignment.topLeft,
+  }) : super(key: key);
 
   double get topBarHeight => controller.isFullscreen.value ? 44.rpx : 32.rpx;
 
@@ -79,6 +83,16 @@ class VideoPlayer extends StatelessWidget {
                     Positioned.fill(
                         child:
                             APlayer(controller: controller.playerController)),
+                    Positioned.fill(
+                      child: Padding(
+                        padding: EdgeInsets.all(10.rpx),
+                        child: Align(
+                          alignment: watermarkAlignment,
+                          // alignment: watermarkAlignment,
+                          child: watermark,
+                        ),
+                      ),
+                    ),
                     _buildIndicator(),
                     _buildGestureDetector(),
                     _buildTop(),
