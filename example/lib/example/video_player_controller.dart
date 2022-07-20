@@ -569,8 +569,7 @@ class VideoPlayerController
       host: uri.host,
       port: uri.port,
       path: Uri.decodeComponent(uri.path),
-      query: Uri.decodeQueryComponent(uri.query),
-      fragment: uri.fragment,
+      query: uri.query,
     ).toString();
     _realPlayUrl = url;
     playerController.setDataSouce(url,

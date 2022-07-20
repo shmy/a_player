@@ -35,8 +35,12 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             //     'b [m3u8]',
             //     ''),
             VideoPlayerItem(
-                'https://sg.storage.bunnycdn.com/dmcc/%5BYMDMACG%5D间谍过家家%20(EP%2009).mp4?AccessKey=a0477265-40ea-474d-bc9607af00a3-7cb0-467a&v=123&tt=9',
+                'https://ccp-bj29-video-preview.oss-cn-beijing.aliyuncs.com/lt/C7181956BDE9F8806D784382C4E25A47D82B6D93_1963855800__sha1_bj29/FHD/media.m3u8?di=bj29&dr=87844842&f=62318414b8c375dfbafb4302b67060a39198634d&u=78eea0a5ea6b45ac9ac74c89a03c9244&x-oss-access-key-id=LTAI5t8sJLSvMtxoes9pGyTv&x-oss-expires=1658073753&x-oss-process=hls%2Fsign&x-oss-signature=w7uoTkqk5DN0t1MLC5DY0pbSAv1un8kpUPN6L%2BbqnxM%3D&x-oss-signature-version=OSS2',
                 '1',
+                ''),
+            VideoPlayerItem(
+                'https://sg.storage.bunnycdn.com/dmcc/%5BYMDMACG%5D间谍过家家%20(EP%2009).mp4?AccessKey=a0477265-40ea-474d-bc9607af00a3-7cb0-467a&v=123&tt=9',
+                'bunnycdn',
                 ''),
             VideoPlayerItem(
                 'https://m3u8.taopianplay.com/taopian/54fdb532-e89b-4567-bc07-aa93a0c6a79b/a891bf2e-a823-4ae0-ac07-107cdf1703d8/45148/6d3af2a3-090b-486b-ac82-2c3fc6d21603/SD/playlist.m3u8',
