@@ -47,8 +47,8 @@ class VideoPlayer extends StatelessWidget {
 
   double get primaryFontSize => controller.isFullscreen.value ? 16.rpx : 14.rpx;
 
-  double get durationAreaWidth =>
-      controller.isFullscreen.value ? 70.rpx : 55.rpx;
+  double get progressFontSize =>
+      controller.isFullscreen.value ? 14.rpx : 12.rpx;
 
   double get secondaryFontSize =>
       controller.isFullscreen.value ? 12.rpx : 10.rpx;
@@ -86,18 +86,21 @@ class VideoPlayer extends StatelessWidget {
                     Positioned.fill(
                         child:
                             APlayer(controller: controller.playerController)),
-                    if (!controller.ready)
+                    if (!controller.ready ||
+                        controller.isResolveFailed.value ||
+                        controller.playerValue.isError)
                       Positioned.fill(child: Container(color: Colors.black)),
-                    Positioned.fill(
-                      child: Padding(
-                        padding: EdgeInsets.all(10.rpx),
-                        child: Align(
-                          alignment: watermarkAlignment,
-                          // alignment: watermarkAlignment,
-                          child: watermark,
+                    if (controller.ready && !controller.isResolveFailed.value)
+                      Positioned.fill(
+                        child: Padding(
+                          padding: EdgeInsets.all(10.rpx),
+                          child: Align(
+                            alignment: watermarkAlignment,
+                            // alignment: watermarkAlignment,
+                            child: watermark,
+                          ),
                         ),
                       ),
-                    ),
                     _buildIndicator(),
                     _buildGestureDetector(),
                     _buildTop(),
@@ -272,15 +275,15 @@ class VideoPlayer extends StatelessWidget {
   }
 
   Widget _buildDurationArea({
+    required Duration position,
     required Duration duration,
     required Alignment alignment,
   }) {
     return Container(
-      width: durationAreaWidth,
       alignment: alignment,
       child: Text(
-        VideoPlayerUtil.formatDuration(duration),
-        style: TextStyle(fontSize: primaryFontSize),
+        '${VideoPlayerUtil.formatDuration(position)}/${VideoPlayerUtil.formatDuration(duration)}',
+        style: TextStyle(fontSize: progressFontSize),
       ),
     );
   }
@@ -325,12 +328,6 @@ class VideoPlayer extends StatelessWidget {
                       _buildClickableIcon(
                           icon: Icons.skip_next_sharp,
                           onTap: () => controller.playNext()),
-                    _buildDurationArea(
-                      alignment: Alignment.centerRight,
-                      duration: controller.isTempSeekEnable.value
-                          ? controller.tempSeekPosition.value
-                          : controller.playerValue.position,
-                    ),
                     SizedBox(
                       width: gap * 2,
                     ),
@@ -377,12 +374,16 @@ class VideoPlayer extends StatelessWidget {
                       width: gap * 2,
                     ),
                     _buildDurationArea(
-                      alignment: Alignment.centerRight,
+                      position: controller.isTempSeekEnable.value
+                          ? controller.tempSeekPosition.value
+                          : controller.playerValue.position,
                       duration: controller.playerValue.duration,
+                      alignment: Alignment.centerRight,
                     ),
-                    SizedBox(
-                      width: gap,
-                    ),
+                    if (controller.isFullscreen.value)
+                      SizedBox(
+                        width: gap,
+                      ),
                     if (controller.isFullscreen.value)
                       GestureDetector(
                         onTap: () => controller.toggleSelections(),
@@ -912,9 +913,9 @@ class VideoPlayer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               MaterialButton(
-                onPressed: () => controller.back(),
+                onPressed: () => controller.toggleSelections(),
                 child: const Text(
-                  '返回上级',
+                  '重新选集',
                   style: TextStyle(color: Colors.white),
                 ),
               ),

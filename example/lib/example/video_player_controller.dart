@@ -725,7 +725,7 @@ class VideoPlayerController
     if (this.value.value.isCompletion && !isResolveing.value) {
       if (playMode.value == VideoPlayerPlayMode.listLoop) {
         if (hasNext) {
-          playByIndex(currentPlayIndex.value + 1);
+          playNext();
         }
       }
     }
@@ -752,10 +752,6 @@ class VideoPlayerController
   void enterPip() {
     playerController.enterPip(Get.context!);
   }
-
-  // void beforeAdDismissed() {
-  //   playerController.play();
-  // }
 
   @override
   void setBrightness(double value) {
