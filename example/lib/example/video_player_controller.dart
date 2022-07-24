@@ -28,8 +28,9 @@ class VideoSourceResolve {
   final bool isSuccess;
   final String url;
   final List<APlayerConfigHeader> headers;
+  final APlayerKernel kernel;
 
-  VideoSourceResolve(this.isSuccess, this.url, this.headers);
+  VideoSourceResolve(this.isSuccess, this.url, this.headers, this.kernel);
 }
 
 enum VideoPlayerPlayMode {
@@ -460,6 +461,7 @@ class VideoPlayerController
   final HtmlUnescape unescape = HtmlUnescape();
   bool _appPaused = false;
   bool _willPlayResumed = false;
+  double _userMaxSpeed = 3.0;
   ValueChanged<APlayerValue>? onEventCallback;
 
   List<LabelValue<double>> get speedList {
@@ -507,7 +509,9 @@ class VideoPlayerController
   String get title => currentPlayItem?.title ?? '';
 
   bool get ready => playerValue.isReadyToPlay && !isResolveing.value;
-
+  bool get hasNext {
+    return currentPlayIndex.value < playlist.length - 1;
+  }
   @override
   APlayerValue get playerValue => value.value;
 
@@ -516,7 +520,8 @@ class VideoPlayerController
     WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<void> initialize({APlayerKernel kernel = APlayerKernel.aliyun}) {
+  Future<void> initialize({APlayerKernel kernel = APlayerKernel.aliyun, double userMaxSpeed = 3.0}) {
+    _userMaxSpeed = userMaxSpeed;
     Wakelock.enable();
     _initOrientationPlugin();
     _initVolumeBrightnessPlugin();
@@ -572,6 +577,7 @@ class VideoPlayerController
       query: uri.query,
     ).toString();
     _realPlayUrl = url;
+    setKernel(resolve.kernel);
     playerController.setDataSouce(url,
         headers: resolve.headers, position: position, isAutoPlay: true);
   }
@@ -718,7 +724,7 @@ class VideoPlayerController
     this.value.value = value;
     if (this.value.value.isCompletion && !isResolveing.value) {
       if (playMode.value == VideoPlayerPlayMode.listLoop) {
-        if (currentPlayIndex.value < playlist.length - 1) {
+        if (hasNext) {
           playByIndex(currentPlayIndex.value + 1);
         }
       }
@@ -761,6 +767,9 @@ class VideoPlayerController
     _volumeThrottle?.setValue(value);
   }
 
+  playNext() {
+    playByIndex(currentPlayIndex.value + 1);
+  }
   @override
   double get _currentVolume => volume.value;
 
@@ -768,5 +777,9 @@ class VideoPlayerController
   double get _currentBrightness => brightness.value;
 
   @override
-  double get maxSpeed => speedList.last.value;
+  double get maxSpeed {
+    final playerMaxSpeed = speedList.last.value;
+    return _userMaxSpeed > playerMaxSpeed ? playerMaxSpeed : _userMaxSpeed;
+  }
+
 }

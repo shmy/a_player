@@ -47,6 +47,9 @@ class VideoPlayer extends StatelessWidget {
 
   double get primaryFontSize => controller.isFullscreen.value ? 16.rpx : 14.rpx;
 
+  double get durationAreaWidth =>
+      controller.isFullscreen.value ? 70.rpx : 55.rpx;
+
   double get secondaryFontSize =>
       controller.isFullscreen.value ? 12.rpx : 10.rpx;
 
@@ -266,6 +269,20 @@ class VideoPlayer extends StatelessWidget {
     );
   }
 
+  Widget _buildDurationArea({
+    required Duration duration,
+    required Alignment alignment,
+  }) {
+    return Container(
+      width: durationAreaWidth,
+      alignment: alignment,
+      child: Text(
+        VideoPlayerUtil.formatDuration(duration),
+        style: TextStyle(fontSize: primaryFontSize),
+      ),
+    );
+  }
+
   Widget _buildBottom() {
     return Obx(
       () {
@@ -298,15 +315,19 @@ class VideoPlayer extends StatelessWidget {
                       return _buildClickableIcon(
                           icon: icon, onTap: () => controller.onDoubleTap());
                     }),
-                    SizedBox(
-                      width: gap,
-                    ),
-                    Text(
-                      VideoPlayerUtil.formatDuration(
-                          controller.isTempSeekEnable.value
-                              ? controller.tempSeekPosition.value
-                              : controller.playerValue.position),
-                      style: TextStyle(fontSize: primaryFontSize),
+                    if (controller.hasNext)
+                      SizedBox(
+                        width: gap,
+                      ),
+                    if (controller.hasNext)
+                      _buildClickableIcon(
+                          icon: Icons.skip_next_sharp,
+                          onTap: () => controller.playNext()),
+                    _buildDurationArea(
+                      alignment: Alignment.centerRight,
+                      duration: controller.isTempSeekEnable.value
+                          ? controller.tempSeekPosition.value
+                          : controller.playerValue.position,
                     ),
                     SizedBox(
                       width: gap * 2,
@@ -353,10 +374,9 @@ class VideoPlayer extends StatelessWidget {
                     SizedBox(
                       width: gap * 2,
                     ),
-                    Text(
-                      VideoPlayerUtil.formatDuration(
-                          controller.playerValue.duration),
-                      style: TextStyle(fontSize: primaryFontSize),
+                    _buildDurationArea(
+                      alignment: Alignment.centerRight,
+                      duration: controller.playerValue.duration,
                     ),
                     SizedBox(
                       width: gap,

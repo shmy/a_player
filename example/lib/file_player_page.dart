@@ -1,3 +1,4 @@
+import 'package:a_player/a_player_value.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
@@ -17,9 +18,11 @@ class _FilePlayerPageState extends State<FilePlayerPage> {
   void initState() {
     controller = VideoPlayerController()..setResolver((item) async {
       final file = await DefaultCacheManager().getSingleFile(item.source);
-      return VideoSourceResolve(true, 'file://' + file.path, []);
+      return VideoSourceResolve(true, 'file://' + file.path, [], APlayerKernel.aliyun);
     })
-      ..initialize().then((value) {
+      ..initialize(
+        userMaxSpeed: 2.0
+      ).then((value) {
         controller
           ..setPlaylist([
             VideoPlayerItem(
