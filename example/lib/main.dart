@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rpx/rpx.dart';
 
+import 'danmaku_page.dart';
+
 void main() async {
 
   await Rpx.init();
@@ -42,7 +44,10 @@ class MainPage extends StatelessWidget {
 
           MaterialButton(onPressed: () {
             Get.to(() => const FilePlayerPage());
-          }, child: const Text('File Test'),)
+          }, child: const Text('File Test'),),
+          MaterialButton(onPressed: () {
+            Get.to(() => const DanmakuPage());
+          }, child: const Text('Danmaku Page'),)
         ],
       ),
     );
