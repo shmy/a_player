@@ -86,6 +86,8 @@ class VideoPlayer extends StatelessWidget {
                     Positioned.fill(
                         child:
                             APlayer(controller: controller.playerController)),
+                    if (!controller.ready)
+                      Positioned.fill(child: Container(color: Colors.black)),
                     Positioned.fill(
                       child: Padding(
                         padding: EdgeInsets.all(10.rpx),
@@ -857,9 +859,9 @@ class VideoPlayer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               MaterialButton(
-                onPressed: () => controller.back(),
+                onPressed: () => controller.toggleSelections(),
                 child: const Text(
-                  '返回上级',
+                  '重新选集',
                   style: TextStyle(color: Colors.white),
                 ),
               ),
