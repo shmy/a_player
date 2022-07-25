@@ -7,25 +7,8 @@ import 'danmaku/src/flutter_danmaku_area.dart';
 import 'danmaku/src/flutter_danmaku_bullet.dart';
 import 'danmaku/src/flutter_danmaku_controller.dart';
 import 'data.dart';
+import 'example/video_player_constant.dart';
 
-class DanmakuItem {
-  final double duration;
-  final String content;
-  final Color color;
-  final FlutterDanmakuBulletType bulletType;
-
-  DanmakuItem({
-    required this.duration,
-    required this.content,
-    required this.color,
-    required this.bulletType,
-  });
-
-  @override
-  String toString() {
-    return 'DanmakuItem(duration: $duration, content: $content)';
-  }
-}
 
 class DanmakuPage extends StatefulWidget {
   const DanmakuPage({Key? key}) : super(key: key);
@@ -36,18 +19,16 @@ class DanmakuPage extends StatefulWidget {
 
 class _DanmakuPageState extends State<DanmakuPage>
     with SingleTickerProviderStateMixin {
+  Color fromHex(String hexString) {
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+    buffer.write(hexString.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+
   FlutterDanmakuController flutterDanmakuController =
       FlutterDanmakuController();
-  final List<DanmakuItem> data =
-      (danmakuData['data'] as dynamic).map<DanmakuItem>((e) {
-    return DanmakuItem(
-        content: e[4],
-        duration: (e[0] * 1000).toDouble(),
-        color: Colors.white,
-        bulletType: e[1] == 0
-            ? FlutterDanmakuBulletType.scroll
-            : FlutterDanmakuBulletType.fixed);
-  }).toList();
+  late final List<DanmakuItem> data;
   Timer? timer;
   Ticker? ticker;
   double position = 0.0;
@@ -55,6 +36,15 @@ class _DanmakuPageState extends State<DanmakuPage>
 
   @override
   void initState() {
+    data = (danmakuData['data'] as dynamic).map<DanmakuItem>((e) {
+      return DanmakuItem(
+          content: e[4],
+          duration: (e[0] * 1000).toDouble(),
+          color: fromHex(e[3] as String),
+          bulletType: e[1] == 0
+              ? FlutterDanmakuBulletType.scroll
+              : FlutterDanmakuBulletType.fixed);
+    }).toList();
     data.sort((a, b) {
       return (a.duration - b.duration).toInt();
     });

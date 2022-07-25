@@ -18,6 +18,7 @@ import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
+import '../danmaku/src/flutter_danmaku_controller.dart';
 import 'dlna_page.dart';
 
 typedef VideoSourceResolver = Future<VideoSourceResolve> Function(
@@ -63,7 +64,14 @@ class VideoAdItem {
 
   VideoAdItem(this.type, this.source, this.minTime);
 }
+mixin _DanmakuMixin {
+  int danIndex = 0;
 
+  FlutterDanmakuController flutterDanmakuController =
+  FlutterDanmakuController();
+
+
+}
 mixin _VideoPlayerOptions {
   final List<LabelValue<APlayerFit>> fitList = [
     LabelValue<APlayerFit>('适应', APlayerFit.contain),
@@ -443,6 +451,7 @@ mixin _VideoPlayerDlnaPlugin {
 
 class VideoPlayerController
     with
+        _DanmakuMixin,
         _VideoPlayerOptions,
         _VideoPlayerOrientationPlugin,
         _VideoPlayerVolumeBrightnessPlugin,
@@ -515,8 +524,17 @@ class VideoPlayerController
   @override
   APlayerValue get playerValue => value.value;
 
+  Size get danmakuSize {
+
+    return isFullscreen.value
+        ? MediaQuery.of(Get.context!).size
+        : Size(MediaQuery.of(Get.context!).size.width, 220);
+  }
   VideoPlayerController() {
     playerController = APlayerController()..stream.listen(_listener);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      flutterDanmakuController.init(danmakuSize);
+    });
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -614,7 +632,11 @@ class VideoPlayerController
       _enterFullscreen(widget);
     }
   }
-
+  void _resizeDumakuSize() {
+    Future.delayed(const Duration(seconds: 1), () {
+      flutterDanmakuController.resizeArea(danmakuSize);
+    });
+  }
   void _enterFullscreen(Widget widget) async {
     isFullscreen.value = !isFullscreen.value;
     await Future.wait([
@@ -639,10 +661,10 @@ class VideoPlayerController
           ),
           transition: Transition.noTransition,
         );
+        _resizeDumakuSize();
       }(),
     ]);
   }
-
   void _exitFullscreen() async {
     isFullscreen.value = !isFullscreen.value;
     isShowSettings.value = false;
@@ -657,6 +679,7 @@ class VideoPlayerController
       }(),
       () async {
         Get.back();
+        _resizeDumakuSize();
       }(),
     ]);
   }
@@ -681,6 +704,7 @@ class VideoPlayerController
 
   void dispose() {
     Wakelock.disable();
+    flutterDanmakuController.dispose();
     _videoPlayerResolver = null;
     WidgetsBinding.instance.removeObserver(this);
     _deinitOrientationPlugin();

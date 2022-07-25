@@ -5,6 +5,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rpx/rpx.dart';
+import '../danmaku/src/flutter_danmaku_area.dart';
+import 'danmaku_area.dart';
 import 'video_player_controller.dart';
 import 'video_player_progress.dart';
 import 'video_player_util.dart';
@@ -101,6 +103,7 @@ class VideoPlayer extends StatelessWidget {
                           ),
                         ),
                       ),
+                    Obx(() => DanmakuArea(controller: controller, position: controller.playerValue.position.inMilliseconds.toDouble(), isFullscreen: controller.isFullscreen.value,)),
                     _buildIndicator(),
                     _buildGestureDetector(),
                     _buildTop(),
