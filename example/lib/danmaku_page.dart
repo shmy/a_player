@@ -1,15 +1,26 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+
+import 'danmaku/src/flutter_danmaku_area.dart';
+import 'danmaku/src/flutter_danmaku_bullet.dart';
+import 'danmaku/src/flutter_danmaku_controller.dart';
+import 'data.dart';
 
 class DanmakuItem {
-  final int duration;
+  final double duration;
   final String content;
+  final Color color;
+  final FlutterDanmakuBulletType bulletType;
 
   DanmakuItem({
     required this.duration,
     required this.content,
+    required this.color,
+    required this.bulletType,
   });
+
   @override
   String toString() {
     return 'DanmakuItem(duration: $duration, content: $content)';
@@ -23,121 +34,103 @@ class DanmakuPage extends StatefulWidget {
   State<DanmakuPage> createState() => _DanmakuPageState();
 }
 
-class _DanmakuPageState extends State<DanmakuPage> {
-  final List<DanmakuItem> danmakuList = [
-    [2, "right", "#fff", "", ""],
-    [6.1, "top", "#FFFFFF", "", ""],
-    [
-      12.338,
-      "right",
-      "rgb(255, 255, 255)",
-      "5596875",
-      "\u5373\u53ef",
-      "183.248.114.73",
-      "07-13 00:31",
-      "27.5px"
-    ],
-    [
-      32.65,
-      "right",
-      "rgb(255, 255, 255)",
-      "5899813",
-      "666",
-      "110.182.226.59",
-      "07-18 00:42",
-      "27.5px"
-    ],
-    [
-      33.65,
-      "right",
-      "rgb(255, 255, 255)",
-      "5956029",
-      "666",
-      "110.182.226.59",
-      "07-18 00:42",
-      "27.5px"
-    ],
-    [
-      76.53,
-      "right",
-      "rgb(255, 255, 255)",
-      "5968592",
-      "\uff1f\uff1f\uff1f\uff1f",
-      "123.12.145.82",
-      "07-20 10:03",
-      "27.5px"
-    ]
-  ].map((item) {
+class _DanmakuPageState extends State<DanmakuPage>
+    with SingleTickerProviderStateMixin {
+  FlutterDanmakuController flutterDanmakuController =
+      FlutterDanmakuController();
+  final List<DanmakuItem> data =
+      (danmakuData['data'] as dynamic).map<DanmakuItem>((e) {
     return DanmakuItem(
-      duration: ((item[0] as num) * 1000).toInt(),
-      content: item[4] as String,
-    );
+        content: e[4],
+        duration: (e[0] * 1000).toDouble(),
+        color: Colors.white,
+        bulletType: e[1] == 0
+            ? FlutterDanmakuBulletType.scroll
+            : FlutterDanmakuBulletType.fixed);
   }).toList();
-  late final Timer timer;
+  Timer? timer;
+  Ticker? ticker;
   double position = 0.0;
   int danIndex = 0;
 
   @override
   void initState() {
-    print(danmakuList);
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      position += 1000.0;
-      control();
+    data.sort((a, b) {
+      return (a.duration - b.duration).toInt();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      flutterDanmakuController
+          .init(Size(MediaQuery.of(context).size.width, 220));
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        position += 1000;
+      });
+      ticker = createTicker((elapsed) {
+        final item = data[danIndex];
+        if (item != null && item.duration <= position) {
+          flutterDanmakuController.addDanmaku(
+            item.content,
+            color: item.color,
+            bulletType: item.bulletType,
+          );
+          danIndex++;
+        }
+      });
+      ticker?.start();
     });
     super.initState();
   }
 
   @override
   void dispose() {
-    timer.cancel();
+    flutterDanmakuController.dispose();
+    timer?.cancel();
+    ticker?.dispose();
     super.dispose();
   }
 
-  void control() {
-
-  }
-
-  void seek() {
-    for (int i = 0; i < danmakuList.length; i++) {
-      if (danmakuList[i].duration >= position) {
-        danIndex = i;
-        break;
-      }
-      danIndex = danmakuList.length;
-    }
+  void addDanmaku() {
+    flutterDanmakuController.addDanmaku(
+      data[0].content,
+      color: data[0].color,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Danmaku')),
-      body: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Container(
-          color: Colors.black,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: DefaultTextStyle(
-                  style: TextStyle(color: Colors.white),
-                  child: Column(
-                    children: [
-                      Text('但撒谎撒'),
-                      Text('但撒谎撒'),
-                      Text('但撒谎撒'),
-                      Text('但撒谎撒'),
-                      Text('但撒谎撒'),
-                      Text('但撒谎撒'),
-                      Text('但撒谎撒'),
-                      Text('但撒谎撒'),
-                      Text('但撒谎撒'),
-                    ],
+      body: Column(
+        children: [
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Container(
+              color: Colors.black,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: FlutterDanmakuArea(
+                        controller: flutterDanmakuController),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          MaterialButton(
+            onPressed: () => flutterDanmakuController.pause(),
+            child: Text('pause'),
+          ),
+          MaterialButton(
+            onPressed: () => flutterDanmakuController.play(),
+            child: Text('play'),
+          ),
+          MaterialButton(
+            onPressed: () {
+              flutterDanmakuController.play();
+              flutterDanmakuController.clearScreen();
+            },
+            child: Text('clear'),
+          ),
+        ],
       ),
     );
   }
