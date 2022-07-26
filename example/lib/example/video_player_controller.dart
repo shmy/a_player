@@ -79,7 +79,7 @@ class VideoAdItem {
 mixin _DanmakuMixin {
   int danIndex = 0;
   List<DanmakuItem> danmakuList = [];
-  RxBool showDanmaku = false.obs;
+  RxBool showDanmaku = true.obs;
 
   TextEditingController danmakuEditingController = TextEditingController();
   FlutterDanmakuController flutterDanmakuController =
