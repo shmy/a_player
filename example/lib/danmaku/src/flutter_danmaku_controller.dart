@@ -41,10 +41,10 @@ class FlutterDanmakuController {
   bool _inited = false;
 
   void refreshState() {
-    if (setStateList.length == 2) {
-      setStateList[1].call(() {});
-    } else {
-      setStateList[0].call(() {});
+    for (var setState in setStateList) {
+      setState(() {
+
+      });
     }
   }
 
@@ -77,7 +77,7 @@ class FlutterDanmakuController {
         prevBulletId: track.lastBulletId,
         position: position,
         bulletType: bulletType,
-        color: color!,
+        color: color ?? Colors.white,
         builder: builder,
         offsetMS: offsetMS);
     if (bulletType == FlutterDanmakuBulletType.scroll) {

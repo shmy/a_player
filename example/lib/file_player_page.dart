@@ -18,7 +18,7 @@ class _FilePlayerPageState extends State<FilePlayerPage> {
   void initState() {
     controller = VideoPlayerController()..setResolver((item) async {
       final file = await DefaultCacheManager().getSingleFile(item.source);
-      return VideoSourceResolve(true, 'file://' + file.path, [], APlayerKernel.aliyun);
+      return VideoSourceResolve(isSuccess: true, url: 'file://' + file.path, headers: [], kernel: APlayerKernel.aliyun, danmakuList: []);
     })
       ..initialize(
         userMaxSpeed: 2.0

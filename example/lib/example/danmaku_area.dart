@@ -9,11 +9,13 @@ class DanmakuArea extends StatefulWidget {
   final VideoPlayerController controller;
   final Duration position;
   final bool isFullscreen;
+  final bool show;
 
   const DanmakuArea(
       {Key? key,
       required this.controller,
       required this.position,
+      required this.show,
       required this.isFullscreen})
       : super(key: key);
 
@@ -80,6 +82,9 @@ class _DanmakuAreaState extends State<DanmakuArea>
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.show) {
+      return const SizedBox();
+    }
     return Positioned.fill(
       child: FlutterDanmakuArea(key: const Key('1'), controller: flutterDanmakuController),
     );

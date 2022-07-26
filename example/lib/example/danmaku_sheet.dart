@@ -18,6 +18,7 @@ class _DanmakuSheetState extends State<DanmakuSheet> {
   @override
   void initState() {
     widget.danmakuEditingController.addListener(onEditingChange);
+    onEditingChange();
     super.initState();
   }
   @override

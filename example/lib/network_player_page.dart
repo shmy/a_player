@@ -4,6 +4,11 @@ import 'package:a_player_example/example/video_player.dart';
 import 'package:a_player_example/example/video_player_controller.dart';
 import 'package:flutter/material.dart';
 
+import 'danmaku/src/flutter_danmaku_bullet.dart';
+import 'data.dart';
+import 'example/video_player_constant.dart';
+import 'example/video_player_util.dart';
+
 class NetworkPlayerPage extends StatefulWidget {
   const NetworkPlayerPage({Key? key}) : super(key: key);
 
@@ -18,16 +23,38 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
   void initState() {
     controller = VideoPlayerController()
       ..setResolver((item) async {
+        List<DanmakuItem> data =
+            (danmakuData['data'] as dynamic).map<DanmakuItem>((e) {
+          return DanmakuItem(
+              content: e[4],
+              duration: (e[0] * 1000).toDouble(),
+              color: VideoPlayerUtil.fromHex(e[3] as String),
+              bulletType: e[1] == 0
+                  ? FlutterDanmakuBulletType.scroll
+                  : FlutterDanmakuBulletType.fixed);
+        }).toList();
+        data.sort((a, b) {
+          return (a.duration - b.duration).toInt();
+        });
+        data.insert(
+            0,
+            DanmakuItem(
+              color: Colors.blue,
+              content: item.title,
+              bulletType: FlutterDanmakuBulletType.scroll,
+              duration: 0,
+            ));
         return VideoSourceResolve(
-          true,
-          item.source,
-          [
+          isSuccess: true,
+          url: item.source,
+          headers: [
             APlayerConfigHeader('user-Agent',
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.53 Safari/537.36 Edg/103.0.1264.37'),
             // APlayerConfigHeader('referer', 'https://www.baidu.com'),
             APlayerConfigHeader('bb', 'cc'),
           ],
-          APlayerKernel.ijk,
+          kernel: APlayerKernel.ijk,
+          danmakuList: data,
         );
       })
       ..initialize(userMaxSpeed: 3.0).then((value) {
@@ -54,7 +81,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             //     'taopianplay',
             //     ''),
             VideoPlayerItem(
-                'https://tx.dogevideo.com/vcloud/17/v/20190424/1556036075_818c4125ec9c8cbc7a7a8a7cc1601512/1037/7d515b22c4958598c0fbd1e6290a5ca5.mp4?vkey=00A27F&tkey=16587955524904686f74&auth_key=1658809952-RmuKybVS1JoskTO5-0-e66e1e6008c64bd3ca6ec9fe9a12b98a',
+                'https://tx.dogevideo.com/vcloud/17/v/20190424/1556036075_818c4125ec9c8cbc7a7a8a7cc1601512/1037/7d515b22c4958598c0fbd1e6290a5ca5.mp4?vkey=8B15F3&tkey=16588306949216421315&auth_key=1658845094-STZdmt7zXpnZoF93-0-adff3352ce5761b899ac21877e9be5c0',
                 '惊奇队长 预告片[mp4]',
                 ''),
             VideoPlayerItem(

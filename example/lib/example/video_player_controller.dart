@@ -35,8 +35,14 @@ class VideoSourceResolve {
   final String url;
   final List<APlayerConfigHeader> headers;
   final APlayerKernel kernel;
+  final List<DanmakuItem> danmakuList;
 
-  VideoSourceResolve(this.isSuccess, this.url, this.headers, this.kernel);
+  VideoSourceResolve(
+      {required this.isSuccess,
+      required this.url,
+      required this.headers,
+      required this.kernel,
+      required this.danmakuList});
 }
 
 enum VideoPlayerPlayMode {
@@ -69,37 +75,35 @@ class VideoAdItem {
 
   VideoAdItem(this.type, this.source, this.minTime);
 }
+
 mixin _DanmakuMixin {
   int danIndex = 0;
   List<DanmakuItem> danmakuList = [];
+  RxBool showDanmaku = false.obs;
+
   TextEditingController danmakuEditingController = TextEditingController();
   FlutterDanmakuController flutterDanmakuController =
-  FlutterDanmakuController();
-
-  void loadDanmuku() {
-
-    List<DanmakuItem> data = (danmakuData['data'] as dynamic).map<DanmakuItem>((e) {
-      return DanmakuItem(
-          content: e[4],
-          duration: (e[0] * 1000).toDouble(),
-          color: VideoPlayerUtil.fromHex(e[3] as String),
-          bulletType: e[1] == 0
-              ? FlutterDanmakuBulletType.scroll
-              : FlutterDanmakuBulletType.fixed);
-    }).toList();
-    data.sort((a, b) {
-      return (a.duration - b.duration).toInt();
-    });
-    danmakuList = data;
-  }
+      FlutterDanmakuController();
 
   void sendDanmuku() {
-   final String text = danmakuEditingController.text;
-   if (text.isNotEmpty) {
-     flutterDanmakuController.addDanmaku(text, color: Colors.white );
-   }
-   danmakuEditingController.clear();
-   Get.back();
+    const Color defaultColor = Colors.white;
+    final String text = danmakuEditingController.text;
+    if (text.isNotEmpty) {
+      flutterDanmakuController.addDanmaku(text, color: defaultColor,
+          builder: (widget) {
+        return Container(
+          decoration: BoxDecoration(border: Border.all(color: defaultColor)),
+          padding: EdgeInsets.symmetric(horizontal: 4.rpx),
+          child: widget,
+        );
+      });
+    }
+    danmakuEditingController.clear();
+    Get.back();
+  }
+
+  void toggleDanmaku() {
+    showDanmaku.value = !showDanmaku.value;
   }
 }
 mixin _VideoPlayerOptions {
@@ -255,7 +259,9 @@ mixin _VideoPlayerGestureDetector {
   final RxBool isTempSeekEnable = false.obs;
   final RxBool isShowSelections = false.obs;
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
+
   void seekTo(int position);
+
   double get maxSpeed;
 
   VoidCallback? _onPausedCallback;
@@ -548,18 +554,20 @@ class VideoPlayerController
   String get title => currentPlayItem?.title ?? '';
 
   bool get ready => playerValue.isReadyToPlay && !isResolveing.value;
+
   bool get hasNext {
     return currentPlayIndex.value < playlist.length - 1;
   }
+
   @override
   APlayerValue get playerValue => value.value;
 
   Size get danmakuSize {
-
     return isFullscreen.value
         ? MediaQuery.of(Get.context!).size
         : Size(MediaQuery.of(Get.context!).size.width, 220);
   }
+
   VideoPlayerController() {
     playerController = APlayerController()..stream.listen(_listener);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -568,7 +576,9 @@ class VideoPlayerController
     WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<void> initialize({APlayerKernel kernel = APlayerKernel.aliyun, double userMaxSpeed = 3.0}) {
+  Future<void> initialize(
+      {APlayerKernel kernel = APlayerKernel.aliyun,
+      double userMaxSpeed = 3.0}) {
     _userMaxSpeed = userMaxSpeed;
     Wakelock.enable();
     _initOrientationPlugin();
@@ -576,8 +586,6 @@ class VideoPlayerController
     _initBatteryConnectivityPlugin();
     _initDlnaPlugin();
     _showBar();
-    // TODO: load
-    loadDanmuku();
     ever(isFullscreen, (callback) {
       flutterDanmakuController.isFullscreen = isFullscreen.value;
     });
@@ -633,8 +641,9 @@ class VideoPlayerController
     setKernel(resolve.kernel);
     playerController.setDataSouce(url,
         headers: resolve.headers, position: position, isAutoPlay: true);
-    // flutterDanmakuController.clearScreen();
-    // danIndex = 0;
+    danmakuList = resolve.danmakuList;
+    flutterDanmakuController.clearScreen();
+    danIndex = 0;
   }
 
   void showResolverFailedSheet() {
@@ -669,12 +678,14 @@ class VideoPlayerController
       _enterFullscreen(widget);
     }
   }
+
   void _resizeDumakuSize() {
     Future.delayed(const Duration(milliseconds: 1000), () {
       flutterDanmakuController.resizeArea(danmakuSize);
       flutterDanmakuController.changeRate(isFullscreen.value ? 1.5 : 1);
     });
   }
+
   void _enterFullscreen(Widget widget) async {
     isFullscreen.value = !isFullscreen.value;
     await Future.wait([
@@ -703,6 +714,7 @@ class VideoPlayerController
       }(),
     ]);
   }
+
   void _exitFullscreen() async {
     isFullscreen.value = !isFullscreen.value;
     isShowSettings.value = false;
@@ -819,6 +831,7 @@ class VideoPlayerController
     playerController.play();
     _showBar();
   }
+
   void enterPip() {
     playerController.enterPip(Get.context!);
   }
@@ -836,6 +849,7 @@ class VideoPlayerController
   playNext() {
     playByIndex(currentPlayIndex.value + 1);
   }
+
   @override
   double get _currentVolume => volume.value;
 
@@ -856,16 +870,24 @@ class VideoPlayerController
       return element.duration >= position - 1000;
     });
   }
+
   void showAddDanmakuSheet() async {
     final isPlaying = playerValue.isPlaying;
     if (isPlaying) {
       playerController.pause();
+      flutterDanmakuController.pause();
     }
-    await showMaterialModalBottomSheet(context: Get.context!, builder: (BuildContext context) {
-      return DanmakuSheet(onSend: sendDanmuku, danmakuEditingController: danmakuEditingController,);
-    });
+    await showMaterialModalBottomSheet(
+        context: Get.context!,
+        builder: (BuildContext context) {
+          return DanmakuSheet(
+            onSend: sendDanmuku,
+            danmakuEditingController: danmakuEditingController,
+          );
+        });
     if (isPlaying) {
       playerController.play();
+      flutterDanmakuController.play();
     }
   }
 }

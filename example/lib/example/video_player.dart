@@ -101,11 +101,14 @@ class VideoPlayer extends StatelessWidget {
                           ),
                         ),
                       ),
-                    Obx(() => DanmakuArea(
-                          controller: controller,
-                          position: controller.playerValue.position,
-                          isFullscreen: controller.isFullscreen.value,
-                        )),
+                    Obx(
+                      () => DanmakuArea(
+                        show: controller.showDanmaku.value,
+                        controller: controller,
+                        position: controller.playerValue.position,
+                        isFullscreen: controller.isFullscreen.value,
+                      ),
+                    ),
                     _buildIndicator(),
                     _buildGestureDetector(),
                     _buildTop(),
@@ -526,7 +529,29 @@ class VideoPlayer extends StatelessWidget {
                           SizedBox(
                             width: gap * 2,
                           ),
-                          Expanded(child: _buildDanmakuInput()),
+                          GestureDetector(
+                            onTap: () => controller.toggleDanmaku(),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                const Text('弹幕'),
+                                Obx(() {
+                                  return Text(controller.showDanmaku.value ? '已开启' : '已关闭', style: TextStyle(fontSize: 10.rpx),);
+                                })
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: gap * 2,
+                          ),
+                          Expanded(
+                              child: Obx(
+                            () => Offstage(
+                              offstage: !controller.showDanmaku.value,
+                              child: _buildDanmakuInput(),
+                            ),
+                          )),
                           SizedBox(
                             width: gap,
                           ),
@@ -574,10 +599,9 @@ class VideoPlayer extends StatelessWidget {
         child: Text(
           '发个友善的弹幕见证下',
           style: TextStyle(
-            fontSize: 14.rpx,
-            color: Colors.black.withOpacity(0.7),
-            shadows: const []
-          ),
+              fontSize: 14.rpx,
+              color: Colors.black.withOpacity(0.7),
+              shadows: const []),
         ),
       ),
     );
