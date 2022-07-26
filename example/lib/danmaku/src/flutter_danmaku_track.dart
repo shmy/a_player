@@ -25,7 +25,7 @@ class FlutterDanmakuTrack {
   // 允许注入静止弹幕
   bool get allowInsertFixedBullet => bindFixedBulletId == null;
 
-  void set trackHeight(double height) {
+  set trackHeight(double height) {
     _trackHeight = height;
   }
 

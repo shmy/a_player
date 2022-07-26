@@ -10,7 +10,7 @@ class FlutterDanmakuConfig {
   static int unitTimer = 1000 ~/ FlutterDanmakuConfig.framerate;
 
   static Duration bulletBaseShowDuration = const Duration(seconds: 3);
-  static double bulletLableSize = 14;
+  static double bulletLableSize = 16;
 
   static double bulletRate = 1.0;
 

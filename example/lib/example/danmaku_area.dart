@@ -10,7 +10,7 @@ import 'video_player_constant.dart';
 
 class DanmakuArea extends StatefulWidget {
   final VideoPlayerController controller;
-  final double position;
+  final Duration position;
   final bool isFullscreen;
 
   const DanmakuArea(
@@ -31,7 +31,7 @@ class _DanmakuAreaState extends State<DanmakuArea>
   FlutterDanmakuController get flutterDanmakuController =>
       widget.controller.flutterDanmakuController;
 
-  double get position => widget.position;
+  double get position => widget.position.inMilliseconds.toDouble();
 
   bool get isFullscreen => widget.isFullscreen;
   late final List<DanmakuItem> data;
@@ -95,7 +95,7 @@ class _DanmakuAreaState extends State<DanmakuArea>
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: FlutterDanmakuArea(controller: flutterDanmakuController),
+      child: FlutterDanmakuArea(key: const Key('1'), controller: flutterDanmakuController),
     );
   }
 }

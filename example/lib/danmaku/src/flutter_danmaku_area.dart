@@ -23,7 +23,12 @@ class FlutterDanmakuAreaState extends State<FlutterDanmakuArea> {
   @override
   void initState() {
     super.initState();
-    controller.setState = setState;
+    controller.setStateList.add(setState);
+  }
+  @override
+  void dispose() {
+    controller.setStateList.remove(setState);
+    super.dispose();
   }
 
   // 构建全部的子弹

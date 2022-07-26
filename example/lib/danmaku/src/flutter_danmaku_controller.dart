@@ -7,6 +7,8 @@ import 'flutter_danmaku_render.dart';
 import 'flutter_danmaku_track.dart';
 import 'flutter_danmaku_utils.dart';
 
+typedef SetStateCallback = void Function(void Function());
+
 enum AddBulletResCode { success, noSpace }
 
 class AddBulletResBody {
@@ -28,7 +30,8 @@ class FlutterDanmakuController {
 
   List<FlutterDanmakuBulletModel> get bullets => _bulletManager.bullets;
 
-  late Function setState;
+  bool isFullscreen = false;
+  final List<SetStateCallback> setStateList = [];
 
   /// 是否暂停
   bool get isPause => FlutterDanmakuConfig.pause;
@@ -36,6 +39,14 @@ class FlutterDanmakuController {
   /// 是否初始化过
   bool get inited => _inited;
   bool _inited = false;
+
+  void refreshState() {
+    if (setStateList.length == 2) {
+      setStateList[1].call(() {});
+    } else {
+      setStateList[0].call(() {});
+    }
+  }
 
   /// 清除定时器
   void dispose() => _renderManager.dispose();
@@ -177,7 +188,7 @@ class FlutterDanmakuController {
   void _run() => _renderManager.run(() {
         _renderManager.renderNextFramerate(
             _bulletManager.bullets, _allOutLeaveCallBack);
-      }, setState);
+      }, refreshState);
 
   /// 获取允许注入的轨道
   FlutterDanmakuTrack? _findAllowInsertTrack(Size bulletSize,

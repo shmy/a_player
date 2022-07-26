@@ -3,19 +3,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'config.dart';
 import 'flutter_danmaku_bullet.dart';
+import 'flutter_danmaku_controller.dart';
 
 class FlutterDanmakuRenderManager {
   Timer? _timer;
 
   Timer? get timer => _timer;
 
-  void run(Function nextFrame, Function setState) {
+  void run(Function nextFrame, VoidCallback refreshState) {
     _timer = Timer.periodic(
         Duration(milliseconds: FlutterDanmakuConfig.unitTimer), (Timer timer) {
       // 暂停不执行
       if (!FlutterDanmakuConfig.pause) {
         nextFrame();
-        setState(() {});
+        refreshState();
       }
     });
   }

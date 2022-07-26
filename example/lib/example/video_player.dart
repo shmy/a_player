@@ -103,7 +103,7 @@ class VideoPlayer extends StatelessWidget {
                           ),
                         ),
                       ),
-                    Obx(() => DanmakuArea(controller: controller, position: controller.playerValue.position.inMilliseconds.toDouble(), isFullscreen: controller.isFullscreen.value,)),
+                    Obx(() => DanmakuArea(controller: controller, position: controller.playerValue.position, isFullscreen: controller.isFullscreen.value,)),
                     _buildIndicator(),
                     _buildGestureDetector(),
                     _buildTop(),

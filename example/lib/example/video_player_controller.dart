@@ -546,6 +546,9 @@ class VideoPlayerController
     _initBatteryConnectivityPlugin();
     _initDlnaPlugin();
     _showBar();
+    ever(isFullscreen, (callback) {
+      flutterDanmakuController.isFullscreen = isFullscreen.value;
+    });
     return playerController.initialize(kernel: kernel);
   }
 
@@ -633,8 +636,9 @@ class VideoPlayerController
     }
   }
   void _resizeDumakuSize() {
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       flutterDanmakuController.resizeArea(danmakuSize);
+      flutterDanmakuController.changeRate(isFullscreen.value ? 1.5 : 1);
     });
   }
   void _enterFullscreen(Widget widget) async {
@@ -772,7 +776,6 @@ class VideoPlayerController
     playerController.play();
     _showBar();
   }
-
   void enterPip() {
     playerController.enterPip(Get.context!);
   }
