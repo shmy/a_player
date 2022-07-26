@@ -22,6 +22,7 @@ import 'package:wakelock/wakelock.dart';
 import '../danmaku/src/flutter_danmaku_bullet.dart';
 import '../danmaku/src/flutter_danmaku_controller.dart';
 import '../data.dart';
+import 'danmaku_sheet.dart';
 import 'dlna_page.dart';
 import 'video_player_util.dart';
 
@@ -71,7 +72,7 @@ class VideoAdItem {
 mixin _DanmakuMixin {
   int danIndex = 0;
   List<DanmakuItem> danmakuList = [];
-
+  TextEditingController danmakuEditingController = TextEditingController();
   FlutterDanmakuController flutterDanmakuController =
   FlutterDanmakuController();
 
@@ -92,7 +93,14 @@ mixin _DanmakuMixin {
     danmakuList = data;
   }
 
-
+  void sendDanmuku() {
+   final String text = danmakuEditingController.text;
+   if (text.isNotEmpty) {
+     flutterDanmakuController.addDanmaku(text, color: Colors.white );
+   }
+   danmakuEditingController.clear();
+   Get.back();
+  }
 }
 mixin _VideoPlayerOptions {
   final List<LabelValue<APlayerFit>> fitList = [
@@ -848,5 +856,16 @@ class VideoPlayerController
       return element.duration >= position - 1000;
     });
   }
-
+  void showAddDanmakuSheet() async {
+    final isPlaying = playerValue.isPlaying;
+    if (isPlaying) {
+      playerController.pause();
+    }
+    await showMaterialModalBottomSheet(context: Get.context!, builder: (BuildContext context) {
+      return DanmakuSheet(onSend: sendDanmuku, danmakuEditingController: danmakuEditingController,);
+    });
+    if (isPlaying) {
+      playerController.play();
+    }
+  }
 }

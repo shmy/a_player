@@ -35,8 +35,6 @@ class VideoPlayer extends StatelessWidget {
 
   double get topBarHeight => controller.isFullscreen.value ? 44.rpx : 32.rpx;
 
-  double get bottomBarHeight => controller.isFullscreen.value ? 64.rpx : 32.rpx;
-
   double get barPadding => controller.isFullscreen.value ? 30.rpx : 10.rpx;
 
   double get iconSize => controller.isFullscreen.value ? 28.rpx : 24.rpx;
@@ -103,7 +101,11 @@ class VideoPlayer extends StatelessWidget {
                           ),
                         ),
                       ),
-                    Obx(() => DanmakuArea(controller: controller, position: controller.playerValue.position, isFullscreen: controller.isFullscreen.value,)),
+                    Obx(() => DanmakuArea(
+                          controller: controller,
+                          position: controller.playerValue.position,
+                          isFullscreen: controller.isFullscreen.value,
+                        )),
                     _buildIndicator(),
                     _buildGestureDetector(),
                     _buildTop(),
@@ -292,6 +294,14 @@ class VideoPlayer extends StatelessWidget {
   }
 
   Widget _buildBottom() {
+    if (controller.isFullscreen.value) {
+      return _buildLandscapeBottom();
+    }
+    return _buildPortraitBottom();
+  }
+
+  Widget _buildPortraitBottom() {
+    final double bottomBarHeight = 32.rpx;
     return Obx(
       () {
         return AnimatedPositioned(
@@ -410,6 +420,166 @@ class VideoPlayer extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLandscapeBottom() {
+    final double bottomBarHeight = 88.rpx;
+    return Obx(
+      () {
+        return AnimatedPositioned(
+          duration: _animationDuration,
+          bottom: controller.isShowBar.value && !controller.isLocked.value
+              ? 0
+              : -bottomBarHeight,
+          left: 0,
+          right: 0,
+          child: _buildBar(
+            height: bottomBarHeight,
+            alignment: Alignment.topCenter,
+            child: Obx(
+              () {
+                if (!controller.ready) {
+                  return const SizedBox();
+                }
+                return Column(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: topBarHeight / 2,
+                              child: Obx(
+                                () {
+                                  if (!controller.ready) {
+                                    return const SizedBox();
+                                  }
+                                  return VideoPlayerProgress(
+                                    onChanged: (double value) =>
+                                        controller.onSeekChanged(value),
+                                    onChangeStart: (double value) =>
+                                        controller.onSeekChangeStart(value),
+                                    onChangeEnd: (double value) =>
+                                        controller.onSeekChangeEnd(value),
+                                    position: controller.isTempSeekEnable.value
+                                        ? controller.tempSeekPosition.value
+                                        : controller.playerValue.position,
+                                    duration: controller.playerValue.duration,
+                                    barHeight: 3.rpx,
+                                    handleHeight: controller.isFullscreen.value
+                                        ? 18.rpx
+                                        : 14.rpx,
+                                    handleImage: handleImage,
+                                    buffered: controller.playerValue.buffered,
+                                    colors: videoPlayerProgressColors ??
+                                        VideoPlayerProgressColors(
+                                          backgroundColor:
+                                              Colors.white.withOpacity(0.3),
+                                          playedColor: Colors.white,
+                                          handleColor: Colors.white,
+                                          bufferedColor:
+                                              Colors.white.withOpacity(0.7),
+                                        ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: gap * 2,
+                          ),
+                          _buildDurationArea(
+                            position: controller.isTempSeekEnable.value
+                                ? controller.tempSeekPosition.value
+                                : controller.playerValue.position,
+                            duration: controller.playerValue.duration,
+                            alignment: Alignment.centerRight,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Obx(() {
+                            IconData icon = Icons.block;
+                            if (controller.playerValue.isPlaying) {
+                              icon = Icons.pause;
+                            } else {
+                              icon = Icons.play_arrow;
+                            }
+                            return _buildClickableIcon(
+                                icon: icon,
+                                onTap: () => controller.onDoubleTap());
+                          }),
+                          if (controller.hasNext)
+                            SizedBox(
+                              width: gap,
+                            ),
+                          if (controller.hasNext)
+                            _buildClickableIcon(
+                                icon: Icons.skip_next_sharp,
+                                onTap: () => controller.playNext()),
+                          SizedBox(
+                            width: gap * 2,
+                          ),
+                          Expanded(child: _buildDanmakuInput()),
+                          SizedBox(
+                            width: gap,
+                          ),
+                          GestureDetector(
+                            onTap: () => controller.toggleSelections(),
+                            child: const Text('选集'),
+                          ),
+                          SizedBox(
+                            width: gap,
+                          ),
+                          Obx(
+                            () => _buildClickableIcon(
+                              icon: controller.isFullscreen.value
+                                  ? Icons.fullscreen_exit
+                                  : Icons.fullscreen,
+                              onTap: () => controller.toggleFullscreen(this),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20.rpx,
+                    )
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDanmakuInput() {
+    return GestureDetector(
+      onTap: controller.showAddDanmakuSheet,
+      child: Container(
+        decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(20.rpx)),
+        padding: EdgeInsets.symmetric(horizontal: 15.rpx),
+        alignment: Alignment.centerLeft,
+        height: 32.rpx,
+        child: Text(
+          '发个友善的弹幕见证下',
+          style: TextStyle(
+            fontSize: 14.rpx,
+            color: Colors.black.withOpacity(0.7),
+            shadows: const []
+          ),
+        ),
+      ),
     );
   }
 
