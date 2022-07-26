@@ -780,6 +780,9 @@ class VideoPlayerController
     } else {
       flutterDanmakuController.pause();
     }
+    if (value.isBuffering) {
+      flutterDanmakuController.pause();
+    }
     this.value.value = value;
     if (this.value.value.isCompletion && !isResolveing.value) {
       flutterDanmakuController.clearScreen();
@@ -839,12 +842,11 @@ class VideoPlayerController
 
   @override
   void seekTo(int position) {
-    playerController.seekTo(position);
-    // flutterDanmakuController.pause();
-    danIndex = danmakuList.indexWhere((element) {
-      return element.duration >= position;
-    });
     flutterDanmakuController.clearScreen();
+    playerController.seekTo(position);
+    danIndex = danmakuList.indexWhere((element) {
+      return element.duration >= position - 1000;
+    });
   }
 
 }

@@ -91,7 +91,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
           ..onResolveFailed((playerItem) {
             print(playerItem);
           })
-          ..playByIndex(0);
+          ..playByIndex(7);
       });
     super.initState();
   }

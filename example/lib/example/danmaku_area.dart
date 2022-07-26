@@ -51,11 +51,14 @@ class _DanmakuAreaState extends State<DanmakuArea>
         if (controller.flutterDanmakuController.isPause){
           return;
         }
+        if (controller.danIndex == -1) {
+          return;
+        }
         if (controller.danIndex > controller.danmakuList.length - 1) {
           return;
         }
         final item = controller.danmakuList[controller.danIndex];
-        if (item.duration <= position) {
+        if (position > item.duration) {
           flutterDanmakuController.addDanmaku(
             item.content,
             color: item.color,
