@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:a_player_example/example/video_player_constant.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
@@ -18,8 +19,11 @@ import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
+import '../danmaku/src/flutter_danmaku_bullet.dart';
 import '../danmaku/src/flutter_danmaku_controller.dart';
+import '../data.dart';
 import 'dlna_page.dart';
+import 'video_player_util.dart';
 
 typedef VideoSourceResolver = Future<VideoSourceResolve> Function(
     VideoPlayerItem playerItem);
@@ -66,9 +70,27 @@ class VideoAdItem {
 }
 mixin _DanmakuMixin {
   int danIndex = 0;
+  List<DanmakuItem> danmakuList = [];
 
   FlutterDanmakuController flutterDanmakuController =
   FlutterDanmakuController();
+
+  void loadDanmuku() {
+
+    List<DanmakuItem> data = (danmakuData['data'] as dynamic).map<DanmakuItem>((e) {
+      return DanmakuItem(
+          content: e[4],
+          duration: (e[0] * 1000).toDouble(),
+          color: VideoPlayerUtil.fromHex(e[3] as String),
+          bulletType: e[1] == 0
+              ? FlutterDanmakuBulletType.scroll
+              : FlutterDanmakuBulletType.fixed);
+    }).toList();
+    data.sort((a, b) {
+      return (a.duration - b.duration).toInt();
+    });
+    danmakuList = data;
+  }
 
 
 }
@@ -225,7 +247,7 @@ mixin _VideoPlayerGestureDetector {
   final RxBool isTempSeekEnable = false.obs;
   final RxBool isShowSelections = false.obs;
   final Rx<Duration> tempSeekPosition = (Duration.zero).obs;
-
+  void seekTo(int position);
   double get maxSpeed;
 
   VoidCallback? _onPausedCallback;
@@ -300,7 +322,7 @@ mixin _VideoPlayerGestureDetector {
 
   void onHorizontalDragEnd(DragEndDetails details) {
     isTempSeekEnable.value = false;
-    playerController.seekTo(tempSeekPosition.value.inMilliseconds);
+    seekTo(tempSeekPosition.value.inMilliseconds);
     playerController.play();
   }
 
@@ -546,6 +568,8 @@ class VideoPlayerController
     _initBatteryConnectivityPlugin();
     _initDlnaPlugin();
     _showBar();
+    // TODO: load
+    loadDanmuku();
     ever(isFullscreen, (callback) {
       flutterDanmakuController.isFullscreen = isFullscreen.value;
     });
@@ -601,6 +625,8 @@ class VideoPlayerController
     setKernel(resolve.kernel);
     playerController.setDataSouce(url,
         headers: resolve.headers, position: position, isAutoPlay: true);
+    // flutterDanmakuController.clearScreen();
+    // danIndex = 0;
   }
 
   void showResolverFailedSheet() {
@@ -749,8 +775,14 @@ class VideoPlayerController
     if (_appPaused && value.isPlaying) {
       playerController.pause();
     }
+    if (value.isPlaying) {
+      flutterDanmakuController.play();
+    } else {
+      flutterDanmakuController.pause();
+    }
     this.value.value = value;
     if (this.value.value.isCompletion && !isResolveing.value) {
+      flutterDanmakuController.clearScreen();
       if (playMode.value == VideoPlayerPlayMode.listLoop) {
         if (hasNext) {
           playNext();
@@ -772,7 +804,7 @@ class VideoPlayerController
   void onSeekChangeEnd(double value) {
     isTempSeekEnable.value = false;
     tempSeekPosition.value = Duration.zero;
-    playerController.seekTo(value.toInt());
+    seekTo(value.toInt());
     playerController.play();
     _showBar();
   }
@@ -803,6 +835,16 @@ class VideoPlayerController
   double get maxSpeed {
     final playerMaxSpeed = speedList.last.value;
     return _userMaxSpeed > playerMaxSpeed ? playerMaxSpeed : _userMaxSpeed;
+  }
+
+  @override
+  void seekTo(int position) {
+    playerController.seekTo(position);
+    // flutterDanmakuController.pause();
+    danIndex = danmakuList.indexWhere((element) {
+      return element.duration >= position;
+    });
+    flutterDanmakuController.clearScreen();
   }
 
 }

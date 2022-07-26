@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../danmaku/src/flutter_danmaku_area.dart';
-import '../danmaku/src/flutter_danmaku_bullet.dart';
 import '../danmaku/src/flutter_danmaku_controller.dart';
-import '../data.dart';
-import 'video_player_constant.dart';
 
 class DanmakuArea extends StatefulWidget {
   final VideoPlayerController controller;
@@ -34,7 +31,6 @@ class _DanmakuAreaState extends State<DanmakuArea>
   double get position => widget.position.inMilliseconds.toDouble();
 
   bool get isFullscreen => widget.isFullscreen;
-  late final List<DanmakuItem> data;
 
   Ticker? ticker;
 
@@ -48,31 +44,18 @@ class _DanmakuAreaState extends State<DanmakuArea>
         : Size(MediaQuery.of(context).size.width, 220);
   }
 
-  Color fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
-  }
-
   @override
   void initState() {
-    data = (danmakuData['data'] as dynamic).map<DanmakuItem>((e) {
-      return DanmakuItem(
-          content: e[4],
-          duration: (e[0] * 1000).toDouble(),
-          color: fromHex(e[3] as String),
-          bulletType: e[1] == 0
-              ? FlutterDanmakuBulletType.scroll
-              : FlutterDanmakuBulletType.fixed);
-    }).toList();
-    data.sort((a, b) {
-      return (a.duration - b.duration).toInt();
-    });
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       ticker = createTicker((elapsed) {
-        final item = data[controller.danIndex];
-        if (item != null && item.duration <= position) {
+        if (controller.flutterDanmakuController.isPause){
+          return;
+        }
+        if (controller.danIndex > controller.danmakuList.length - 1) {
+          return;
+        }
+        final item = controller.danmakuList[controller.danIndex];
+        if (item.duration <= position) {
           flutterDanmakuController.addDanmaku(
             item.content,
             color: item.color,

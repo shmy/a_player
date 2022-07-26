@@ -54,7 +54,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             //     'taopianplay',
             //     ''),
             VideoPlayerItem(
-                'https://tx.dogevideo.com/vcloud/17/v/20190424/1556036075_818c4125ec9c8cbc7a7a8a7cc1601512/1037/7d515b22c4958598c0fbd1e6290a5ca5.mp4?vkey=3B2418&tkey=16587494556ea8b5fb63&auth_key=1658763855-yWgTnjOrCdme0mSE-0-642e3efd2e7c092440bfa6e6e3664117',
+                'https://tx.dogevideo.com/vcloud/17/v/20190424/1556036075_818c4125ec9c8cbc7a7a8a7cc1601512/1037/7d515b22c4958598c0fbd1e6290a5ca5.mp4?vkey=00A27F&tkey=16587955524904686f74&auth_key=1658809952-RmuKybVS1JoskTO5-0-e66e1e6008c64bd3ca6ec9fe9a12b98a',
                 '惊奇队长 预告片[mp4]',
                 ''),
             VideoPlayerItem(
