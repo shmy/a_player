@@ -30,6 +30,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   int get videoWidth => _videoWidth;
   bool isPipMode = false;
   BuildContext? context;
+  Size screenSize = Size.zero;
 
   Stream<APlayerValue> get stream => _streamController.stream;
   Throttle<APlayerValue>? _streamThrottle;
@@ -114,9 +115,11 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void enterPip(BuildContext context) {
+
     if (isPipMode) {
       return;
     }
+    screenSize = MediaQuery.of(context).size;
     methodChannel?.invokeMethod('enterPip').then((isOpened) {
       isPipMode = isOpened;
       if (isOpened) {
@@ -143,7 +146,10 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   void exitPip() {
     isPipMode = false;
     if (context != null) {
-      Navigator.of(context!).pop();
+      final size = MediaQuery.of(context!).size;
+      if (size == screenSize) {
+        Navigator.of(context!).pop();
+      }
     }
   }
 

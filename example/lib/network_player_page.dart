@@ -80,10 +80,10 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             //     'https://m3u8.taopianplay.com/taopian/54fdb532-e89b-4567-bc07-aa93a0c6a79b/a891bf2e-a823-4ae0-ac07-107cdf1703d8/45148/6d3af2a3-090b-486b-ac82-2c3fc6d21603/SD/playlist.m3u8',
             //     'taopianplay',
             //     ''),
-            VideoPlayerItem(
-                'https://tx.dogevideo.com/vcloud/17/v/20190424/1556036075_818c4125ec9c8cbc7a7a8a7cc1601512/1037/7d515b22c4958598c0fbd1e6290a5ca5.mp4?vkey=8B15F3&tkey=16588306949216421315&auth_key=1658845094-STZdmt7zXpnZoF93-0-adff3352ce5761b899ac21877e9be5c0',
-                '惊奇队长 预告片[mp4]',
-                ''),
+            // VideoPlayerItem(
+            //     'https://tx.dogevideo.com/vcloud/17/v/20190424/1556036075_818c4125ec9c8cbc7a7a8a7cc1601512/1037/7d515b22c4958598c0fbd1e6290a5ca5.mp4?vkey=8B15F3&tkey=16588306949216421315&auth_key=1658845094-STZdmt7zXpnZoF93-0-adff3352ce5761b899ac21877e9be5c0',
+            //     '惊奇队长 预告片[mp4]',
+            //     ''),
             VideoPlayerItem(
                 'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
                 '惊奇队长 预告片[mp4]',
