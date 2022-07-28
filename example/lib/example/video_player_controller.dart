@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:a_player_example/example/video_player_constant.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
@@ -19,12 +18,10 @@ import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
-import '../danmaku/src/flutter_danmaku_bullet.dart';
 import '../danmaku/src/flutter_danmaku_controller.dart';
-import '../data.dart';
 import 'danmaku_sheet.dart';
 import 'dlna_page.dart';
-import 'video_player_util.dart';
+import 'video_player_constant.dart';
 
 typedef VideoSourceResolver = Future<VideoSourceResolve> Function(
     VideoPlayerItem playerItem);
@@ -79,7 +76,13 @@ class VideoAdItem {
 mixin _DanmakuMixin {
   int danIndex = 0;
   List<DanmakuItem> danmakuList = [];
+  APlayerValue get playerValue;
   RxBool showDanmaku = true.obs;
+  ValueChanged<dynamic>? _onSend;
+
+  void onDanmakuSend(ValueChanged<dynamic> onSend) {
+    _onSend = onSend;
+  }
 
   TextEditingController danmakuEditingController = TextEditingController();
   FlutterDanmakuController flutterDanmakuController =
@@ -88,6 +91,12 @@ mixin _DanmakuMixin {
   void sendDanmuku() {
     const Color defaultColor = Colors.white;
     final String text = danmakuEditingController.text;
+    _onSend?.call({
+      "second": playerValue.position.inSeconds,
+      "position": 0,
+      "color": 'FF000000',
+      "content": text,
+    });
     if (text.isNotEmpty) {
       flutterDanmakuController.addDanmaku(text, color: defaultColor,
           builder: (widget) {
@@ -642,10 +651,14 @@ class VideoPlayerController
     playerController.setDataSouce(url,
         headers: resolve.headers, position: position, isAutoPlay: true);
     danmakuList = resolve.danmakuList;
-    flutterDanmakuController.clearScreen();
-    danIndex = 0;
+    _calcDanIndex(position);
   }
-
+  void _calcDanIndex(int position) {
+    flutterDanmakuController.clearScreen();
+    danIndex = danmakuList.indexWhere((element) {
+      return element.duration >= position - 1000;
+    });
+  }
   void showResolverFailedSheet() {
     _videoResolverFailed?.call(currentPlayItem!);
   }
@@ -800,6 +813,11 @@ class VideoPlayerController
     } else {
       flutterDanmakuController.pause();
     }
+    double speed = value.playSpeed;
+    if (speed == 0.0) {
+      speed = 1.0;
+    }
+    flutterDanmakuController.changeRate(speed + (isFullscreen.value ? 0.5 : 0));
     if (value.isBuffering) {
       flutterDanmakuController.pause();
     }
@@ -864,11 +882,8 @@ class VideoPlayerController
 
   @override
   void seekTo(int position) {
-    flutterDanmakuController.clearScreen();
     playerController.seekTo(position);
-    danIndex = danmakuList.indexWhere((element) {
-      return element.duration >= position - 1000;
-    });
+    _calcDanIndex(position);
   }
 
   void showAddDanmakuSheet() async {

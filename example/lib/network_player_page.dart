@@ -53,7 +53,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
             // APlayerConfigHeader('referer', 'https://www.baidu.com'),
             APlayerConfigHeader('bb', 'cc'),
           ],
-          kernel: APlayerKernel.ijk,
+          kernel: APlayerKernel.exo,
           danmakuList: data,
         );
       })
@@ -118,7 +118,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
           ..onResolveFailed((playerItem) {
             print(playerItem);
           })
-          ..playByIndex(0);
+          ..playByIndex(0, 9000);
       });
     super.initState();
   }

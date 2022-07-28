@@ -1,9 +1,9 @@
-import 'package:a_player_example/example/video_player_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../danmaku/src/flutter_danmaku_area.dart';
 import '../danmaku/src/flutter_danmaku_controller.dart';
+import 'video_player_controller.dart';
 
 class DanmakuArea extends StatefulWidget {
   final VideoPlayerController controller;
