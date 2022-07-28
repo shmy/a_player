@@ -893,6 +893,7 @@ class VideoPlayerController
       flutterDanmakuController.pause();
     }
     await showMaterialModalBottomSheet(
+        barrierColor: Colors.transparent,
         context: Get.context!,
         builder: (BuildContext context) {
           return DanmakuSheet(

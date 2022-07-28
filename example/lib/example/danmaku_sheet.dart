@@ -33,9 +33,17 @@ class _DanmakuSheetState extends State<DanmakuSheet> {
   }
   @override
   Widget build(BuildContext context) {
-    final double height = 52.rpx;
+    final double height = 130.rpx;
     final double bottom = MediaQuery.of(context).viewInsets.bottom;
     return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Colors.grey.withOpacity(0.5),
+            width: 1.rpx,
+          ),
+        ),
+      ),
       padding: EdgeInsets.only(
         left: 10.rpx,
         right: 10.rpx,
@@ -84,6 +92,56 @@ class _DanmakuSheetState extends State<DanmakuSheet> {
                 if (text.isNotEmpty)
                 GestureDetector(onTap: widget.onSend, child: const Icon(Icons.send)),
               ],
+            ),
+            SizedBox(
+              height: 10.rpx,
+            ),
+            SizedBox(
+              height: 28.rpx,
+              child: Row(
+                children: [
+                  const Text('颜色'),
+                  SizedBox(width: 10.rpx,),
+                  Expanded(
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10.rpx,),
+            SizedBox(
+              height: 28.rpx,
+              child: Row(
+                children: [
+                  const Text('位置'),
+                  SizedBox(width: 10.rpx,),
+                  Expanded(
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
