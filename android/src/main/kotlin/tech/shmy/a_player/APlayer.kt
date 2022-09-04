@@ -166,7 +166,7 @@ class APlayer(
                     duration = player!!.duration,
                     playSpeed = player!!.speed,
                     isReadyToPlay = true,
-                    isPlaying = true,
+                    isPlaying = false,
                     isError = false,
                     isCompletion = false,
                     isBuffering = false
