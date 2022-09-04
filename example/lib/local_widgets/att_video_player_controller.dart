@@ -121,6 +121,11 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     );
   }
 
+  void titleAdToPlay() {
+    _freezed = false;
+    aPlayerController.play();
+    uiController.showTitleAd.value = false;
+  }
   void play() {
     _freezed = false;
     aPlayerController.play();
@@ -149,6 +154,8 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     if (_blockAutoPlayCallback != null) {
       _freezed = true;
       _blockAutoPlayCallback?.call();
+    } else if (uiController.showTitleAd.value) {
+      _freezed = true;
     } else {
       aPlayerController.play();
     }

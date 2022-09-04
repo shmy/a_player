@@ -1,6 +1,7 @@
 import 'package:a_player/a_player.dart';
 import 'package:a_player_example/local_widgets/att_video_player_constant.dart';
 import 'package:a_player_example/local_widgets/att_video_player_controller.dart';
+import 'package:a_player_example/local_widgets/att_video_player_title_ad.dart';
 import 'package:a_player_example/local_widgets/att_video_player_ui_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,6 +30,13 @@ class AttVideoPlayer extends StatelessWidget {
             child: DefaultTextStyle(
               style: const TextStyle(color: Colors.white),
               child: Obx(() {
+                if (uiController.showTitleAd.value) {
+                  return AttVideoPlayerTitleAd(
+                    url: 'https://vfx.mtime.cn/Video/2019/03/09/mp4/190309153658147087.mp4',
+                    onDone: controller.titleAdToPlay,
+                    onError: controller.titleAdToPlay,
+                  );
+                }
                 if (uiController.isTryItToEnd.value) {
                   return _buildTryItToEnd();
                 }
@@ -89,15 +97,19 @@ class AttVideoPlayer extends StatelessWidget {
   Widget _buildAnalysisFailed() {
     return _buildBlackBackground(child: const Center(child: Text('解析失败')));
   }
+
   Widget _buildNonPlayable() {
     return _buildBlackBackground(child: const Center(child: Text('无权播放')));
   }
+
   Widget _buildTryItToEnd() {
     return _buildBlackBackground(child: const Center(child: Text('试看结束')));
   }
+
   Widget _buildPlayFailed() {
     return _buildBlackBackground(child: const Center(child: Text('播放失败')));
   }
+
   Widget _buildPlayCompleted() {
     return _buildBlackBackground(child: const Center(child: Text('播放完毕')));
   }

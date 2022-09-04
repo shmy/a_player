@@ -16,6 +16,8 @@ class AttVideoPlayerUIController {
   final RxInt width = 0.obs;
   final RxBool isTryItToEnd = false.obs;
   final RxBool isCompletion = false.obs;
+  final RxBool showTitleAd = true.obs;
+
   void resetState() {
     errorDescription.value = '';
     playSpeed.value = 1.0;
@@ -29,5 +31,6 @@ class AttVideoPlayerUIController {
     width.value = 0;
     isTryItToEnd.value = false;
     isCompletion.value = false;
+    showTitleAd.value = true;
   }
 }

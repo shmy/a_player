@@ -18,16 +18,16 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
   @override
   void initState() {
     controller = AttVideoPlayerController()
-      ..setBlockAutoPlayCallback(() {
-        // 激励广告
-        // 弹窗广告
-        Get.defaultDialog(
-          onConfirm: () {
-            Get.back();
-            controller.play();
-          },
-        );
-      })
+      // ..setBlockAutoPlayCallback(() {
+      //   // 激励广告
+      //   // 弹窗广告
+      //   Get.defaultDialog(
+      //     onConfirm: () {
+      //       Get.back();
+      //       controller.play();
+      //     },
+      //   );
+      // })
       ..setVideoAnalyzerCallback((AttVideoItem item) async {
         await Future.delayed(const Duration(seconds: 1));
         return AttVideoAnalysisResult(
