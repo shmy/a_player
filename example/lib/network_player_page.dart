@@ -1,6 +1,5 @@
-import 'package:a_player/a_player.dart';
-import 'package:a_player/a_player_controller.dart';
-import 'package:a_player/a_player_value.dart';
+import 'package:a_player_example/local_widgets/att_video_player.dart';
+import 'package:a_player_example/local_widgets/att_video_player_controller.dart';
 import 'package:flutter/material.dart';
 
 class NetworkPlayerPage extends StatefulWidget {
@@ -11,17 +10,11 @@ class NetworkPlayerPage extends StatefulWidget {
 }
 
 class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
-  late final APlayerController controller;
+  late final AttVideoPlayerController controller;
 
   @override
   void initState() {
-    controller = APlayerController()..initialize().then((value) async {
-      await controller.setKernel(APlayerKernel.aliyun);
-      await controller.setDataSouce('https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4');
-    });
-    controller.stream.listen((event) {
-      print('isInitialized: ${event.isInitialized}, isReadyToPlay: ${event.isReadyToPlay}');
-    });
+    controller = AttVideoPlayerController();
     super.initState();
   }
 
@@ -37,7 +30,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
       appBar: AppBar(
         title: const Text('Network'),
       ),
-      body: APlayer(
+      body: AttVideoPlayer(
         controller: controller,
       ),
     );
