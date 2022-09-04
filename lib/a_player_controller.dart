@@ -8,39 +8,39 @@ const _methodChannel = MethodChannel(APlayerConstant.methodChannelName);
 
 typedef VideoSizeChangedCallback = void Function(int height, int width);
 
-class APlayerValueListener<T> extends ValueNotifier<T> {
-  APlayerValueListener(super.value);
+class APlayerValueListener<T> extends ChangeNotifier {
+  late T value;
 }
 
 mixin APlayerControllerListener {
   final APlayerValueListener<void> _onInitialized =
-      APlayerValueListener<void>(null);
-  final APlayerValueListener<void> _onReadyToPlay =
-      APlayerValueListener<void>(null);
+      APlayerValueListener<void>();
+  final APlayerValueListener<VideoReadyData> _onReadyToPlay =
+      APlayerValueListener<VideoReadyData>();
   final APlayerValueListener<VideoSizeChangedData> _onVideoSizeChanged =
-      APlayerValueListener<VideoSizeChangedData>(VideoSizeChangedData(0, 0));
+      APlayerValueListener<VideoSizeChangedData>();
   final APlayerValueListener<void> _onLoadingBegin =
-      APlayerValueListener<void>(null);
+      APlayerValueListener<void>();
   final APlayerValueListener<int> _onLoadingProgress =
-      APlayerValueListener<int>(0);
+      APlayerValueListener<int>();
   final APlayerValueListener<void> _onLoadingEnd =
-      APlayerValueListener<void>(null);
+      APlayerValueListener<void>();
   final APlayerValueListener<int> _onCurrentPositionChanged =
-      APlayerValueListener<int>(0);
+      APlayerValueListener<int>();
   final APlayerValueListener<int> _onCurrentDownloadSpeedChanged =
-      APlayerValueListener<int>(0);
+      APlayerValueListener<int>();
   final APlayerValueListener<int> _onBufferedPositionChanged =
-      APlayerValueListener<int>(0);
+      APlayerValueListener<int>();
   final APlayerValueListener<bool> _onPlaying =
-      APlayerValueListener<bool>(false);
+      APlayerValueListener<bool>();
   final APlayerValueListener<String> _onError =
-      APlayerValueListener<String>('');
+      APlayerValueListener<String>();
   final APlayerValueListener<void> _onCompletion =
-      APlayerValueListener<void>(null);
+      APlayerValueListener<void>();
 
   APlayerValueListener<void> get onInitialized => _onInitialized;
 
-  APlayerValueListener<void> get onReadyToPlay => _onReadyToPlay;
+  APlayerValueListener<VideoReadyData> get onReadyToPlay => _onReadyToPlay;
 
   APlayerValueListener<VideoSizeChangedData> get onVideoSizeChanged =>
       _onVideoSizeChanged;
@@ -220,6 +220,7 @@ class APlayerController extends ChangeNotifier
           _onInitialized.notifyListeners();
           break;
         case "readyToPlay":
+          _onReadyToPlay.value = VideoReadyData.fromJSON(event['data']);
           _onReadyToPlay.notifyListeners();
           break;
         case "videoSizeChanged":

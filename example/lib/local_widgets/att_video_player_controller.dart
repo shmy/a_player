@@ -9,8 +9,7 @@ import 'package:get/get.dart';
 class AttVideoPlayerController with WidgetsBindingObserver {
   final AttVideoPlayerUIController uiController = AttVideoPlayerUIController();
   final APlayerController _aPlayerController = APlayerController();
-  final Rx<AttVideoPlayerStatus> _status =
-      Rx<AttVideoPlayerStatus>(AttVideoPlayerStatus.idle);
+
   final Rxn<AttVideoAnalysisResult> _analysisResult =
       Rxn<AttVideoAnalysisResult>(null);
   final List<AttVideoItem> _playlist = [];
@@ -23,8 +22,6 @@ class AttVideoPlayerController with WidgetsBindingObserver {
 
   APlayerController get aPlayerController => _aPlayerController;
 
-  AttVideoPlayerStatus get status => _status.value;
-
   AttVideoAnalysisResult? get analysisResult => _analysisResult.value;
 
   AttVideoPlayerController() {
@@ -32,7 +29,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   }
 
   Future<void> initialize() async {
-    _status.value = AttVideoPlayerStatus.initializing;
+    uiController.status.value = AttVideoPlayerStatus.initializing;
     aPlayerController.onInitialized.addListener(_onInitialized);
     aPlayerController.onReadyToPlay.addListener(_onReadyToPlay);
     aPlayerController.onError.addListener(_onError);
@@ -84,19 +81,19 @@ class AttVideoPlayerController with WidgetsBindingObserver {
       _setDataSource(video.source);
       return;
     }
-    _status.value = AttVideoPlayerStatus.analyzing;
+    uiController.status.value = AttVideoPlayerStatus.analyzing;
     final AttVideoAnalysisResult result =
         await _videoAnalyzerCallback!.call(video);
     if (result.isSuccess) {
       _analysisResult.value = result;
       if (!result.playable) {
-        _status.value = AttVideoPlayerStatus.nonPlayable;
+        uiController.status.value = AttVideoPlayerStatus.nonPlayable;
       } else {
         _setDataSource(result.url,
             headers: result.headers, position: result.position);
       }
     } else {
-      _status.value = AttVideoPlayerStatus.analysisFailed;
+      uiController.status.value = AttVideoPlayerStatus.analysisFailed;
     }
   }
 
@@ -108,7 +105,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   }) async {
     // TODO: setKernel
     // await aPlayerController.setKernel(kernel, position);
-    _status.value = AttVideoPlayerStatus.preparing;
+    uiController.status.value = AttVideoPlayerStatus.preparing;
     await aPlayerController.setDataSouce(
       dataSource,
       headers: headers,
@@ -130,7 +127,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   }
 
   void _onInitialized() {
-    _status.value = AttVideoPlayerStatus.initialized;
+    uiController.status.value = AttVideoPlayerStatus.initialized;
   }
 
   void _onReadyToPlay() {
@@ -141,29 +138,33 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     } else {
       aPlayerController.play();
     }
-    _status.value = AttVideoPlayerStatus.readyToPlay;
+    uiController.duration.value = aPlayerController.onReadyToPlay.value.duration;
+    uiController.playSpeed.value = aPlayerController.onReadyToPlay.value.playSpeed;
+    uiController.status.value = AttVideoPlayerStatus.readyToPlay;
   }
 
   void _onError() {
     final String reson = aPlayerController.onError.value;
-    _status.value = AttVideoPlayerStatus.playFailed;
+    uiController.status.value = AttVideoPlayerStatus.playFailed;
+    uiController.reson.value = reson;
   }
 
   void _onCompletion() {
-    _status.value = AttVideoPlayerStatus.playCompleted;
+    uiController.status.value = AttVideoPlayerStatus.playCompleted;
   }
 
   void _onCurrentPositionChanged() {
     final int position = aPlayerController.onCurrentPositionChanged.value;
+    uiController.position.value = position;
     _trySee(position);
   }
 
   void _onPlaying() {
     final bool playing = aPlayerController.onPlaying.value;
     if (playing) {
-      _status.value = AttVideoPlayerStatus.playing;
+      uiController.status.value = AttVideoPlayerStatus.playing;
     } else {
-      _status.value = AttVideoPlayerStatus.paused;
+      uiController.status.value = AttVideoPlayerStatus.paused;
     }
   }
 

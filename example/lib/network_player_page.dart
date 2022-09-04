@@ -76,7 +76,16 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
           Expanded(child: ListView(
             children: [
               Obx(() {
-                return Text(controller.status.name);
+                return Text(controller.uiController.status.value.name);
+              }),
+              Obx(() {
+                return Text('duration: ${controller.uiController.duration.value}');
+              }),
+              Obx(() {
+                return Text('position: ${controller.uiController.position.value}');
+              }),
+              Obx(() {
+                return Text('playSpeed: ${controller.uiController.playSpeed.value}');
               }),
               MaterialButton(onPressed: () {controller.playByIndex(0);}, child: Text('0'),),
               MaterialButton(onPressed: () {controller.playByIndex(1);}, child: Text('1'),),
