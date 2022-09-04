@@ -38,7 +38,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
           position: 0,
           reason: '',
           playable: true,
-          duration: 3000,
+          duration: 0,
         );
       })
       ..initialize().then((value) {
