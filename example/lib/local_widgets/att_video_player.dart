@@ -10,14 +10,21 @@ class AttVideoPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: VisibilityDetector(
-        key: const Key('att-player'),
-        onVisibilityChanged: (VisibilityInfo info) {
-          controller.setVisible(info.visibleFraction != 0.0);
-        },
-        child: APlayer(
-          controller: controller.aPlayerController,
+    return Material(
+      color: Colors.black,
+      child: SafeArea(
+        bottom: false,
+        child: SizedBox(
+          height: 200,
+          child: VisibilityDetector(
+            key: const Key('att-player'),
+            onVisibilityChanged: (VisibilityInfo info) {
+              controller.setVisible(info.visibleFraction != 0.0);
+            },
+            child: APlayer(
+              controller: controller.aPlayerController,
+            ),
+          ),
         ),
       ),
     );

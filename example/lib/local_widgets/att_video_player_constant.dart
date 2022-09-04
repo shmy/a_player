@@ -10,15 +10,31 @@ enum AttVideoPlayerStatus {
   nonPlayable, // 不可播放
   tryItToEnd, // 试看结束
   preparing, // 准备中
-  prepared, // 准备完毕
-  loadingBegin, // 开始缓冲
-  loadingProgress, // 缓冲进度
-  loadingEnd, // 缓冲结束
+  readyToPlay, // 准备好播放
+  // loadingBegin, // 开始缓冲
+  // loadingProgress, // 缓冲进度
+  // loadingEnd, // 缓冲结束
   playing, // 播放中
+  paused, // 暂停
   playFailed, // 播放失败
   playCompleted, // 播放结束
 }
-
+// class AttVideoPlayerStatusa {
+//   final RxBool initializing = false.obs;
+//   final RxBool initialized = false.obs;
+//   final RxBool analyzing = false.obs;
+//   final RxBool analysisFailed = false.obs;
+//   final RxBool nonPlayable = false.obs;
+//   final RxBool tryItToEnd = false.obs;
+//   final RxBool preparing = false.obs;
+//   final RxBool prepared = false.obs;
+//   final RxBool loadingBegin = false.obs;
+//   final RxBool loadingProgress = false.obs;
+//   final RxBool loadingEnd = false.obs;
+//   final RxBool playing = false.obs;
+//   final RxBool playFailed = false.obs;
+//   final RxBool playCompleted = false.obs;
+// }
 class AttVideoItem<T> {
   final String source;
   final String title;

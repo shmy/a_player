@@ -38,7 +38,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
           position: 0,
           reason: '',
           playable: true,
-          duration: 10000,
+          duration: 0,
         );
       })
       ..initialize().then((value) {
@@ -54,7 +54,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
                 'https://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4',
                 '紧急救援', {}),
           ])
-          ..playByIndex(0);
+          ..playByIndex(2);
       });
     super.initState();
   }
@@ -67,12 +67,23 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Network'),
-      ),
-      body: AttVideoPlayer(
-        controller: controller,
+    return Material(
+      child: Column(
+        children: [
+          AttVideoPlayer(
+            controller: controller,
+          ),
+          Expanded(child: ListView(
+            children: [
+              Obx(() {
+                return Text(controller.status.name);
+              }),
+              MaterialButton(onPressed: () {controller.playByIndex(0);}, child: Text('0'),),
+              MaterialButton(onPressed: () {controller.playByIndex(1);}, child: Text('1'),),
+              MaterialButton(onPressed: () {controller.playByIndex(2);}, child: Text('2'),),
+            ],
+          )),
+        ],
       ),
     );
   }

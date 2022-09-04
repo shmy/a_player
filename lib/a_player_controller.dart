@@ -53,6 +53,9 @@ mixin APlayerControllerListener {
   ValueChanged<ValueChanged<bool>> get onPlaying => _onPlaying.addListener;
   ValueChanged<ValueChanged<String>> get onError => _onError.addListener;
   ValueChanged<ValueChanged<void>> get onCompletion => _onCompletion.addListener;
+  void clearOnPlayingListener() {
+    _onPlaying.listeners.clear();
+  }
 }
 
 class APlayerController extends ChangeNotifier
@@ -239,7 +242,7 @@ class APlayerController extends ChangeNotifier
           _onPlaying.notify(event['data'] as bool);
           break;
         case "error":
-          _onPlaying.notify(event['error'] as bool);
+          _onError.notify(event['data'] as String);
           break;
         case "completion":
           _onCompletion.notify(null);
