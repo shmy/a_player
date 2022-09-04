@@ -114,8 +114,11 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   }) async {
     // TODO: setKernel
     // await aPlayerController.setKernel(kernel, position);
-    await aPlayerController.setDataSouce(dataSource,
-        headers: headers, position: position);
+    await aPlayerController.setDataSouce(
+      dataSource,
+      headers: headers,
+      position: position,
+    );
   }
 
   void play() {
@@ -143,9 +146,11 @@ class AttVideoPlayerController with WidgetsBindingObserver {
       aPlayerController.play();
     }
   }
+
   void _onCurrentPositionChanged(int position) {
     _trySee(position);
   }
+
   void _trySee(int position) {
     if (analysisResult == null) {
       return;
@@ -153,11 +158,12 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     if (analysisResult!.duration == 0) {
       return;
     }
-    print('position $position duration: ${analysisResult!.duration}');
     if (position >= analysisResult!.duration) {
+      _freezed = true;
       pause();
     }
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
