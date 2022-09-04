@@ -67,7 +67,7 @@ class APlayer(
                     result.success(null)
                 }
                 "prepare" -> {
-                    prepare(call.arguments as Boolean)
+                    prepare()
                     result.success(null)
                 }
                 "restart" -> {
@@ -271,8 +271,8 @@ class APlayer(
         }
     }
 
-    private fun prepare(isAutoPlay: Boolean) {
-        player?.prepare(isAutoPlay)
+    private fun prepare() {
+        player?.prepare()
     }
 
     private fun play() {
@@ -296,13 +296,12 @@ class APlayer(
             return
         }
         this.kernel = kernel
-        val isAutoPlay = player?.isAutoPlay == true
         val positionBefore = aPlayerEvent.position
         createPlayer()
         if (lastDataSource != null) {
             lastDataSource!!["position"] = positionBefore
             setDataSource()
-            prepare(isAutoPlay)
+            prepare()
         }
     }
 

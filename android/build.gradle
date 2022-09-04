@@ -26,7 +26,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -42,14 +42,14 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 16
     }
 }
 
 dependencies {
     def aliyun_version = '5.4.6.0-full'
     def ijk_version = '0.8.8'
-    def exo_version = '2.18.0'
+    def exo_version = '2.18.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "com.aliyun.sdk.android:AliyunPlayer:$aliyun_version"
     implementation "tv.danmaku.ijk.media:ijkplayer-java:$ijk_version"

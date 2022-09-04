@@ -14,7 +14,6 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
 
     private var ijkMediaPlayer: IjkMediaPlayer = IjkMediaPlayer()
     private var _speed: Float = 1.0F
-    private var _isAutoPlay: Boolean = false
     private var listener: APlayerListener? = null
     private var surface: Surface? = null
     private var handler: Handler? = null
@@ -35,8 +34,6 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         get() = _speed
     override val isLoop: Boolean
         get() = ijkMediaPlayer.isLooping
-    override val isAutoPlay: Boolean
-        get() = _isAutoPlay
 
     override fun addListener(listener: APlayerListener) {
         this.listener = listener
@@ -128,12 +125,8 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         IjkMediaPlayer.native_profileEnd()
     }
 
-    override fun prepare(isAutoPlay: Boolean) {
+    override fun prepare() {
         ijkMediaPlayer.prepareAsync()
-        _isAutoPlay = isAutoPlay
-        if (isAutoPlay) {
-            ijkMediaPlayer.start()
-        }
     }
 
     override fun seekTo(positionMs: Long) {

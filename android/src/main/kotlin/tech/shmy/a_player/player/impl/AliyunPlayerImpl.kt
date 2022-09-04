@@ -85,8 +85,6 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         get() = aliPlayer.speed
     override val isLoop: Boolean
         get() = aliPlayer.isLoop
-    override val isAutoPlay: Boolean
-        get() = aliPlayer.isAutoPlay
 
     override fun addListener(listener: APlayerListener) {
         this.listener = listener
@@ -155,8 +153,8 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         aliPlayer.release()
     }
 
-    override fun prepare(isAutoPlay: Boolean) {
-        aliPlayer.isAutoPlay = isAutoPlay
+    override fun prepare() {
+        aliPlayer.isAutoPlay = false
         aliPlayer.prepare()
     }
 

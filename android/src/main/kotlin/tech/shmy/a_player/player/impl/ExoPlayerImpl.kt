@@ -61,8 +61,6 @@ class ExoPlayerImpl(
         get() = _speed
     override val isLoop: Boolean
         get() = exoPlayer.repeatMode == Player.REPEAT_MODE_ONE
-    override val isAutoPlay: Boolean
-        get() = exoPlayer.playWhenReady
 
     override fun addListener(listener: APlayerListener) {
         this.listener = listener
@@ -137,8 +135,8 @@ class ExoPlayerImpl(
         exoPlayer.release()
     }
 
-    override fun prepare(isAutoPlay: Boolean) {
-        exoPlayer.playWhenReady = isAutoPlay
+    override fun prepare() {
+        exoPlayer.playWhenReady = false
         exoPlayer.prepare()
     }
 
