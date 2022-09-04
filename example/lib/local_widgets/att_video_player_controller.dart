@@ -9,6 +9,8 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   final APlayerController _aPlayerController = APlayerController();
   final Rx<AttVideoPlayerStatus> _status =
       Rx<AttVideoPlayerStatus>(AttVideoPlayerStatus.idle);
+  final Rxn<AttVideoAnalysisResult> _analysisResult =
+      Rxn<AttVideoAnalysisResult>(null);
   final List<AttVideoItem> _playlist = [];
   int _playIndex = -1;
   bool _visible = true;
@@ -20,6 +22,8 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   APlayerController get aPlayerController => _aPlayerController;
 
   AttVideoPlayerStatus get status => _status.value;
+
+  AttVideoAnalysisResult? get analysisResult => _analysisResult.value;
 
   AttVideoPlayerController() {
     WidgetsBinding.instance.addObserver(this);
@@ -33,9 +37,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
       ..onCompletion((_) {
         print('onCompletion');
       })
-      ..onCurrentPositionChanged((int position) {
-        print('onCurrentPositionChanged $position');
-      })
+      ..onCurrentPositionChanged(_onCurrentPositionChanged)
       ..onCurrentDownloadSpeedChanged((int speed) {
         print('onCurrentDownloadSpeedChanged $speed');
       })
@@ -76,21 +78,31 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     _playlist.assignAll(playlist);
   }
 
-  void playByIndex(int index) async {
+  void playByIndex(int index) {
     if (_playIndex != index) {
       _playIndex = index;
       final AttVideoItem video = _playlist[_playIndex];
-      if (_videoAnalyzerCallback == null) {
-        _setDataSource(video.source);
-        return;
-      }
-      final AttVideoAnalysisResults result =
-          await _videoAnalyzerCallback!.call(video);
-      if (result.isSuccess) {
-        _setDataSource(result.url, headers: result.headers, position: result.position);
+      _startAnalyzeToPlay(video);
+    }
+  }
+
+  Future<void> _startAnalyzeToPlay(AttVideoItem video) async {
+    if (_videoAnalyzerCallback == null) {
+      _setDataSource(video.source);
+      return;
+    }
+    final AttVideoAnalysisResult result =
+        await _videoAnalyzerCallback!.call(video);
+    if (result.isSuccess) {
+      _analysisResult.value = result;
+      if (!result.playable) {
+        _status.value = AttVideoPlayerStatus.nonPlayable;
       } else {
-        _status.value = AttVideoPlayerStatus.analysisFailed;
+        _setDataSource(result.url,
+            headers: result.headers, position: result.position);
       }
+    } else {
+      _status.value = AttVideoPlayerStatus.analysisFailed;
     }
   }
 
@@ -102,7 +114,8 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   }) async {
     // TODO: setKernel
     // await aPlayerController.setKernel(kernel, position);
-    await aPlayerController.setDataSouce(dataSource, headers: headers, position: position);
+    await aPlayerController.setDataSouce(dataSource,
+        headers: headers, position: position);
   }
 
   void play() {
@@ -130,7 +143,21 @@ class AttVideoPlayerController with WidgetsBindingObserver {
       aPlayerController.play();
     }
   }
-
+  void _onCurrentPositionChanged(int position) {
+    _trySee(position);
+  }
+  void _trySee(int position) {
+    if (analysisResult == null) {
+      return;
+    }
+    if (analysisResult!.duration == 0) {
+      return;
+    }
+    print('position $position duration: ${analysisResult!.duration}');
+    if (position >= analysisResult!.duration) {
+      pause();
+    }
+  }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {

@@ -29,8 +29,17 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
         );
       })
       ..setVideoAnalyzerCallback((AttVideoItem item) async {
-        await Future.delayed(const Duration(seconds: 3));
-        return AttVideoAnalysisResults(isSuccess: true, url: item.source, headers: [], kernel: APlayerKernel.ijk, position: 10000);
+        await Future.delayed(const Duration(seconds: 1));
+        return AttVideoAnalysisResult(
+          isSuccess: true,
+          url: item.source,
+          headers: [],
+          kernel: APlayerKernel.ijk,
+          position: 0,
+          reason: '',
+          playable: true,
+          duration: 10000,
+        );
       })
       ..initialize().then((value) {
         controller
