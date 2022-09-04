@@ -57,9 +57,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> setDataSouce(String source,
-      {List<APlayerConfigHeader> headers = const [],
-      int position = 0,
-      bool isAutoPlay = true}) async {
+      {List<APlayerConfigHeader> headers = const [], int position = 0}) async {
     Map<String, String> httpHeaders = {};
     for (var header in headers) {
       httpHeaders[header.key] = header.value;
@@ -69,7 +67,7 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
       "position": position,
       "httpHeaders": httpHeaders,
     });
-    prepare(isAutoPlay: isAutoPlay);
+    prepare();
   }
 
   Future<void> play() async {
@@ -84,8 +82,8 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
     await methodChannel?.invokeMethod('pause');
   }
 
-  Future<void> prepare({bool isAutoPlay = true}) async {
-    await methodChannel?.invokeMethod('prepare', isAutoPlay);
+  Future<void> prepare() async {
+    await methodChannel?.invokeMethod('prepare');
   }
 
   Future<void> stop() async {
@@ -115,7 +113,6 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void enterPip(BuildContext context) {
-
     if (isPipMode) {
       return;
     }

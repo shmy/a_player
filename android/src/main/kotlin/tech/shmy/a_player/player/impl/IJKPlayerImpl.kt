@@ -99,7 +99,7 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
             10 * 1024 * 1024
         )
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30)
-
+        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
 //        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "fastseek")
 //        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1)
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1) // 开硬解
@@ -156,12 +156,13 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         }
         ijkMediaPlayer.setOnPreparedListener {
             listener?.onInitializedListener()
+            listener?.onReadyToPlayListener()
         }
         ijkMediaPlayer.setOnInfoListener { _, what, extraValue ->
             when (what) {
-                IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
-                    listener?.onReadyToPlayListener()
-                }
+//                IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
+//                    listener?.onReadyToPlayListener()
+//                }
                 IMediaPlayer.MEDIA_INFO_BUFFERING_START -> {
                     listener?.onLoadingBeginListener()
                 }

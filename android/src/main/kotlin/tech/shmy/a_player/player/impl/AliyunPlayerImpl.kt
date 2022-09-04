@@ -23,10 +23,11 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         }
         aliPlayer.setOnPreparedListener {
             listener?.onInitializedListener()
-        }
-        aliPlayer.setOnRenderingStartListener {
             listener?.onReadyToPlayListener()
         }
+//        aliPlayer.setOnRenderingStartListener {
+//            listener?.onReadyToPlayListener()
+//        }
         aliPlayer.setOnStateChangedListener {
             when (it) {
                 IPlayer.started -> {
@@ -154,6 +155,7 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
     }
 
     override fun prepare() {
+        aliPlayer.enableHardwareDecoder(false)
         aliPlayer.isAutoPlay = false
         aliPlayer.prepare()
     }
