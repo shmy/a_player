@@ -23,20 +23,16 @@ mixin APlayerControllerListener {
       APlayerValueListener<void>();
   final APlayerValueListener<int> _onLoadingProgress =
       APlayerValueListener<int>();
-  final APlayerValueListener<void> _onLoadingEnd =
-      APlayerValueListener<void>();
+  final APlayerValueListener<void> _onLoadingEnd = APlayerValueListener<void>();
   final APlayerValueListener<int> _onCurrentPositionChanged =
       APlayerValueListener<int>();
   final APlayerValueListener<int> _onCurrentDownloadSpeedChanged =
       APlayerValueListener<int>();
   final APlayerValueListener<int> _onBufferedPositionChanged =
       APlayerValueListener<int>();
-  final APlayerValueListener<bool> _onPlaying =
-      APlayerValueListener<bool>();
-  final APlayerValueListener<String> _onError =
-      APlayerValueListener<String>();
-  final APlayerValueListener<void> _onCompletion =
-      APlayerValueListener<void>();
+  final APlayerValueListener<bool> _onPlaying = APlayerValueListener<bool>();
+  final APlayerValueListener<String> _onError = APlayerValueListener<String>();
+  final APlayerValueListener<void> _onCompletion = APlayerValueListener<void>();
 
   APlayerValueListener<void> get onInitialized => _onInitialized;
 

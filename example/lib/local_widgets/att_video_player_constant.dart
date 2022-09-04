@@ -8,33 +8,55 @@ enum AttVideoPlayerStatus {
   analyzing, // 解析中
   analysisFailed, // 解析失败
   nonPlayable, // 不可播放
-  tryItToEnd, // 试看结束
+  // tryItToEnd, // 试看结束
   preparing, // 准备中
   readyToPlay, // 准备好播放
-  // loadingBegin, // 开始缓冲
-  // loadingProgress, // 缓冲进度
-  // loadingEnd, // 缓冲结束
   playing, // 播放中
   paused, // 暂停
   playFailed, // 播放失败
-  playCompleted, // 播放结束
+  // playCompleted, // 播放结束
 }
-// class AttVideoPlayerStatusa {
-//   final RxBool initializing = false.obs;
-//   final RxBool initialized = false.obs;
-//   final RxBool analyzing = false.obs;
-//   final RxBool analysisFailed = false.obs;
-//   final RxBool nonPlayable = false.obs;
-//   final RxBool tryItToEnd = false.obs;
-//   final RxBool preparing = false.obs;
-//   final RxBool prepared = false.obs;
-//   final RxBool loadingBegin = false.obs;
-//   final RxBool loadingProgress = false.obs;
-//   final RxBool loadingEnd = false.obs;
-//   final RxBool playing = false.obs;
-//   final RxBool playFailed = false.obs;
-//   final RxBool playCompleted = false.obs;
-// }
+
+class AttVideoPlayerState {
+  final double playSpeed;
+  final Duration duration;
+  final Duration position;
+  final bool isBuffering;
+  final int bufferingPercentage;
+  final int bufferingSpeed;
+  final Duration buffered;
+
+  AttVideoPlayerState({
+    required this.playSpeed,
+    required this.duration,
+    required this.position,
+    required this.isBuffering,
+    required this.bufferingPercentage,
+    required this.bufferingSpeed,
+    required this.buffered,
+  });
+
+  AttVideoPlayerState copyWith({
+    double? playSpeed,
+    Duration? duration,
+    Duration? position,
+    bool? isBuffering,
+    int? bufferingPercentage,
+    int? bufferingSpeed,
+    Duration? buffered,
+  }) {
+    return AttVideoPlayerState(
+      playSpeed: playSpeed ?? this.playSpeed,
+      duration: duration ?? this.duration,
+      position: position ?? this.position,
+      isBuffering: isBuffering ?? this.isBuffering,
+      bufferingPercentage: bufferingPercentage ?? this.bufferingPercentage,
+      bufferingSpeed: bufferingSpeed ?? this.bufferingSpeed,
+      buffered: buffered ?? this.buffered,
+    );
+  }
+}
+
 class AttVideoItem<T> {
   final String source;
   final String title;

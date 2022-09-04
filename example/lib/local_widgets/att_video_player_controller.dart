@@ -77,6 +77,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   Future<void> _startAnalyzeToPlay(AttVideoItem video) async {
     aPlayerController.onPlaying.removeListener(_onPlaying);
     aPlayerController.stop();
+    uiController.resetState();
     if (_videoAnalyzerCallback == null) {
       _setDataSource(video.source);
       return;
@@ -138,24 +139,24 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     } else {
       aPlayerController.play();
     }
-    uiController.duration.value = aPlayerController.onReadyToPlay.value.duration;
+    uiController.duration.value = Duration(milliseconds: aPlayerController.onReadyToPlay.value.duration);
     uiController.playSpeed.value = aPlayerController.onReadyToPlay.value.playSpeed;
     uiController.status.value = AttVideoPlayerStatus.readyToPlay;
   }
 
   void _onError() {
-    final String reson = aPlayerController.onError.value;
+    final String errorDescription = aPlayerController.onError.value;
     uiController.status.value = AttVideoPlayerStatus.playFailed;
-    uiController.reson.value = reson;
+    uiController.errorDescription.value = errorDescription;
   }
 
   void _onCompletion() {
-    uiController.status.value = AttVideoPlayerStatus.playCompleted;
+    uiController.isCompletion.value = true;
   }
 
   void _onCurrentPositionChanged() {
     final int position = aPlayerController.onCurrentPositionChanged.value;
-    uiController.position.value = position;
+    uiController.position.value = Duration(milliseconds: position);
     _trySee(position);
   }
 
@@ -177,6 +178,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     }
     if (position >= analysisResult!.duration) {
       _freezed = true;
+      uiController.isTryItToEnd.value = true;
       pause();
     }
   }

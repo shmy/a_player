@@ -38,7 +38,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
           position: 0,
           reason: '',
           playable: true,
-          duration: 0,
+          duration: 3000,
         );
       })
       ..initialize().then((value) {
@@ -54,7 +54,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
                 'https://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4',
                 '紧急救援', {}),
           ])
-          ..playByIndex(2);
+          ..playByIndex(0);
       });
     super.initState();
   }

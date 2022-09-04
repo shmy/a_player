@@ -9,10 +9,11 @@ class APlayerRatio {
 }
 
 class APlayerFit {
-  const APlayerFit(
-      {this.alignment = Alignment.center,
-      this.aspectRatio = -1,
-      this.sizeFactor = 1.0});
+  const APlayerFit({
+    this.alignment = Alignment.center,
+    this.aspectRatio = -1,
+    this.sizeFactor = 1.0,
+  });
 
   final Alignment alignment;
   final double aspectRatio;
@@ -50,16 +51,21 @@ enum APlayerKernel { aliyun, ijk, exo, av }
 class VideoSizeChangedData {
   final int height;
   final int width;
+
   VideoSizeChangedData(this.height, this.width);
-  factory VideoSizeChangedData.fromJSON(dynamic json) => VideoSizeChangedData(json['height'], json['width']);
+
+  factory VideoSizeChangedData.fromJSON(dynamic json) =>
+      VideoSizeChangedData(json['height'], json['width']);
 }
+
 class VideoReadyData {
   final int duration;
   final double playSpeed;
 
   VideoReadyData(this.duration, this.playSpeed);
-  factory VideoReadyData.fromJSON(dynamic json) => VideoReadyData(json['duration'], json['playSpeed']);
 
+  factory VideoReadyData.fromJSON(dynamic json) =>
+      VideoReadyData(json['duration'], json['playSpeed']);
 }
 // class APlayerValue {
 //   final bool isInitialized;
