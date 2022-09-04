@@ -1,10 +1,11 @@
+import 'dart:ffi';
+
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_value.dart';
 import 'package:a_player_example/local_widgets/att_video_player_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-typedef ValueCallback<T> = T Function();
 
 class AttVideoPlayerController with WidgetsBindingObserver {
   final APlayerController _aPlayerController = APlayerController();
@@ -14,7 +15,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   AttVideoPlayerStatus get status => _status.value;
   bool _visible = true;
   bool _freezed = false;
-  ValueCallback<bool>? _autoPlayInspector;
+  VoidCallback? _beforePlayCallback;
 
   AttVideoPlayerController() {
     WidgetsBinding.instance.addObserver(this);
@@ -62,8 +63,8 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     }
   }
 
-  void setAutoPlayInspector(ValueCallback<bool>? inspector) {
-    _autoPlayInspector = inspector;
+  void setBeforePlayCallback(VoidCallback callback) {
+    _beforePlayCallback = callback;
   }
 
   void play() {
@@ -79,12 +80,9 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   }
 
   void _onReadyToPlay(_) {
-    if (_autoPlayInspector != null) {
-      if (_autoPlayInspector!.call()) {
-        aPlayerController.play();
-      } else {
-        _freezed = true;
-      }
+    if (_beforePlayCallback != null) {
+      _freezed = true;
+      _beforePlayCallback?.call();
     } else {
       aPlayerController.play();
     }

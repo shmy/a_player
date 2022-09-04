@@ -13,17 +13,3 @@ enum AttVideoPlayerStatus {
   playFailed,
   playCompleted,
 }
-enum AttVideoPlayerEventName {
-  initialized,
-  readyToPlay,
-  videoSizeChanged,
-  loadingBegin,
-  loadingProgress,
-  loadingEnd,
-  currentPositionChanged,
-  currentDownloadSpeedChanged,
-  bufferedPositionChanged,
-  playing,
-  error,
-  completion,
-}
