@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'a_player_constant.dart';
@@ -8,7 +7,56 @@ import 'a_player_value.dart';
 
 const _methodChannel = MethodChannel(APlayerConstant.methodChannelName);
 
-class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
+typedef VideoSizeChangedCallback = void Function(int height, int width);
+
+class APlayerValueListener<T> {
+  final List<ValueChanged<T>> listeners = [];
+
+  void addListener(ValueChanged<T> listener) {
+    listeners.add(listener);
+  }
+
+  void notify(T value) {
+    for (var listener in listeners) {
+      listener.call(value);
+    }
+  }
+}
+
+mixin APlayerControllerListener {
+  final APlayerValueListener<void> _onInitialized = APlayerValueListener<void>();
+  final APlayerValueListener<void> _onReadyToPlay = APlayerValueListener<void>();
+  final APlayerValueListener<VideoSizeChangedData> _onVideoSizeChanged =
+      APlayerValueListener<VideoSizeChangedData>();
+  final APlayerValueListener<void> _onLoadingBegin = APlayerValueListener<void>();
+  final APlayerValueListener<int> _onLoadingProgress = APlayerValueListener<int>();
+  final APlayerValueListener<void> _onLoadingEnd = APlayerValueListener<void>();
+  final APlayerValueListener<int> _onCurrentPositionChanged =
+      APlayerValueListener<int>();
+  final APlayerValueListener<int> _onCurrentDownloadSpeedChanged =
+      APlayerValueListener<int>();
+  final APlayerValueListener<int> _onBufferedPositionChanged =
+      APlayerValueListener<int>();
+  final APlayerValueListener<bool> _onPlaying = APlayerValueListener<bool>();
+  final APlayerValueListener<String> _onError = APlayerValueListener<String>();
+  final APlayerValueListener<void> _onCompletion = APlayerValueListener<void>();
+
+  ValueChanged<ValueChanged<void>> get onInitialized => _onInitialized.addListener;
+  ValueChanged<ValueChanged<void>> get onReadyToPlay => _onReadyToPlay.addListener;
+  ValueChanged<ValueChanged<VideoSizeChangedData>> get onVideoSizeChanged => _onVideoSizeChanged.addListener;
+  ValueChanged<ValueChanged<void>> get onloadingBegin => _onLoadingBegin.addListener;
+  ValueChanged<ValueChanged<int>> get onLoadingProgress => _onLoadingProgress.addListener;
+  ValueChanged<ValueChanged<void>> get onLoadingEnd => _onLoadingEnd.addListener;
+  ValueChanged<ValueChanged<int>> get onCurrentPositionChanged => _onCurrentPositionChanged.addListener;
+  ValueChanged<ValueChanged<int>> get onCurrentDownloadSpeedChanged => _onCurrentDownloadSpeedChanged.addListener;
+  ValueChanged<ValueChanged<int>> get onBufferedPositionChanged => _onBufferedPositionChanged.addListener;
+  ValueChanged<ValueChanged<bool>> get onPlaying => _onPlaying.addListener;
+  ValueChanged<ValueChanged<String>> get onError => _onError.addListener;
+  ValueChanged<ValueChanged<void>> get onCompletion => _onCompletion.addListener;
+}
+
+class APlayerController extends ChangeNotifier
+    with APlayerControllerListener, WidgetsBindingObserver {
   EventChannel? eventChannel;
   MethodChannel? methodChannel;
   int textureId = -1;
@@ -16,8 +64,6 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   APlayerMirrorMode _mirrorMode = APlayerMirrorMode.none;
   int _videoHeight = 0;
   int _videoWidth = 0;
-  final StreamController<APlayerValue> _streamController =
-      StreamController<APlayerValue>();
 
   bool get hasTextureId => textureId != -1;
 
@@ -32,9 +78,6 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   BuildContext? context;
   Size screenSize = Size.zero;
 
-  Stream<APlayerValue> get stream => _streamController.stream;
-  Throttle<APlayerValue>? _streamThrottle;
-
   @mustCallSuper
   Future<void> initialize({APlayerKernel kernel = APlayerKernel.ijk}) async {
     final textureId =
@@ -46,11 +89,6 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
           EventChannel('${APlayerConstant.playerEventChanneName}$textureId');
       methodChannel =
           MethodChannel('${APlayerConstant.playerMethodChannelName}$textureId');
-      _streamThrottle = Throttle<APlayerValue>(
-          const Duration(milliseconds: 100),
-          initialValue: APlayerValue.uninitialized(), onChanged: (value) {
-        _streamController.add(value);
-      });
       _listen();
       notifyListeners();
     }
@@ -104,8 +142,11 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
     await methodChannel?.invokeMethod('setSpeed', speed);
   }
 
-  Future<void> setKernel(APlayerKernel kernel) async {
-    await methodChannel?.invokeMethod('setKernel', kernel.index);
+  Future<void> setKernel(APlayerKernel kernel, int position) async {
+    await methodChannel?.invokeMethod('setKernel', {
+      "kernel": kernel.index,
+      "position": position,
+    });
   }
 
   Future<void> seekTo(int position) async {
@@ -162,14 +203,47 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
 
   void _listen() {
     eventChannel?.receiveBroadcastStream().listen((event) {
-      final APlayerValue value = APlayerValue.fromJSON(event);
-      if (value.height != _videoHeight || value.width != _videoWidth) {
-        _videoHeight = value.height;
-        _videoWidth = value.width;
-        notifyListeners();
-      }
-      if (!_streamController.isClosed) {
-        _streamThrottle?.setValue(value);
+      switch (event['type'] as String) {
+        case "initialized":
+          _onInitialized.notify(null);
+          break;
+        case "readyToPlay":
+          _onReadyToPlay.notify(null);
+          break;
+        case "videoSizeChanged":
+          final size = VideoSizeChangedData.fromJSON(event['data']);
+          _videoHeight = size.height;
+          _videoWidth = size.width;
+          notifyListeners();
+          _onVideoSizeChanged.notify(size);
+          break;
+        case "loadingBegin":
+          _onLoadingBegin.notify(null);
+          break;
+        case "loadingProgress":
+          _onLoadingProgress.notify(event['data'] as int);
+          break;
+        case "loadingEnd":
+          _onLoadingEnd.notify(null);
+          break;
+        case "currentPositionChanged":
+          _onCurrentPositionChanged.notify(event['data'] as int);
+          break;
+        case "currentDownloadSpeedChanged":
+          _onCurrentDownloadSpeedChanged.notify(event['data'] as int);
+          break;
+        case "bufferedPositionChanged":
+          _onBufferedPositionChanged.notify(event['data'] as int);
+          break;
+        case "playing":
+          _onPlaying.notify(event['data'] as bool);
+          break;
+        case "error":
+          _onPlaying.notify(event['error'] as bool);
+          break;
+        case "completion":
+          _onCompletion.notify(null);
+          break;
       }
     });
   }
@@ -178,9 +252,6 @@ class APlayerController extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void dispose() {
     super.dispose();
-    _streamController.close();
-    _streamThrottle?.cancel();
-    _streamThrottle = null;
     WidgetsBinding.instance.removeObserver(this);
     release();
   }

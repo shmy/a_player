@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
@@ -36,7 +35,6 @@ class APlayer(
     private val queuingEventSink: QueuingEventSink = QueuingEventSink()
     private var eventChannel: EventChannel? = null
     private var methodChannel: MethodChannel? = null
-    private var aPlayerEvent: APlayerEvent = APlayerEvent()
     private var lastDataSource: MutableMap<String, Any>? = null
 
     init {
@@ -63,7 +61,8 @@ class APlayer(
                     result.success(null)
                 }
                 "setKernel" -> {
-                    setKernel(call.arguments as Int)
+                    val args = call.arguments as MutableMap<String, Long>;
+                    setKernel(kernel = args["kernel"]!!.toInt(), position = args["position"]!!)
                     result.success(null)
                 }
                 "prepare" -> {
@@ -135,101 +134,89 @@ class APlayer(
         player?.addListener(object : APlayerListener {
             override fun onVideoSizeChangedListener(width: Int, height: Int) {
                 surfaceTexture.setDefaultBufferSize(width, height)
-                aPlayerEvent = aPlayerEvent.copy(
-                    width = width,
-                    height = height
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "videoSizeChanged",
+                    "data" to mapOf(
+                        "height" to height,
+                        "width" to width,
+                    )
+                ))
             }
 
             override fun onInitializedListener() {
-                aPlayerEvent = aPlayerEvent.copy(
-                    isInitialized = true,
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "initialized",
+                ))
             }
 
             override fun onPlayingListener(isPlaying: Boolean) {
-                aPlayerEvent = aPlayerEvent.copy(
-                    isPlaying = isPlaying
-                )
-                if (isPlaying) {
-                    aPlayerEvent.copy(
-                        isCompletion = false
-                    )
-                }
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "playing",
+                    "data" to isPlaying,
+                ))
             }
 
             override fun onReadyToPlayListener() {
-                aPlayerEvent = aPlayerEvent.copy(
-                    duration = player!!.duration,
-                    playSpeed = player!!.speed,
-                    isReadyToPlay = true,
-                    isPlaying = false,
-                    isError = false,
-                    isCompletion = false,
-                    isBuffering = false
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "readyToPlay",
+                    "data" to mapOf(
+                        "duration" to player!!.duration,
+                        "playSpeed" to player!!.speed,
+                    )
+                ))
             }
 
             override fun onErrorListener(code: String, message: String) {
-                aPlayerEvent = aPlayerEvent.copy(
-                    isError = true,
-                    errorDescription = "$code: $message"
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "error",
+                    "data" to "$code: $message"
+                ))
             }
 
             override fun onCompletionListener() {
-                aPlayerEvent = aPlayerEvent.copy(
-                    isCompletion = true
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "completion",
+                ))
             }
 
             override fun onCurrentPositionChangedListener(position: Long) {
-                aPlayerEvent = aPlayerEvent.copy(
-                    position = position
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "currentPositionChanged",
+                    "data" to position
+                ))
             }
 
             override fun onCurrentDownloadSpeedChangedListener(speed: Long) {
-                aPlayerEvent = aPlayerEvent.copy(
-                    bufferingSpeed = speed
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "currentDownloadSpeedChanged",
+                    "data" to speed
+                ))
             }
 
             override fun onBufferedPositionChangedListener(buffered: Long) {
-                aPlayerEvent = aPlayerEvent.copy(
-                    buffered = buffered
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "bufferedPositionChanged",
+                    "data" to buffered
+                ))
             }
 
             override fun onLoadingBeginListener() {
-                aPlayerEvent = aPlayerEvent.copy(
-                    isBuffering = true,
-                    bufferingPercentage = 0
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "loadingBegin",
+                ))
             }
 
             override fun onLoadingProgressListener(percent: Int) {
-                aPlayerEvent = aPlayerEvent.copy(
-                    bufferingPercentage = percent,
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "loadingProgress",
+                    "data" to percent,
+                ))
             }
 
             override fun onLoadingEndListener() {
-                aPlayerEvent = aPlayerEvent.copy(
-                    isBuffering = false
-                )
-                sendEvent()
+                queuingEventSink.success(mapOf(
+                    "type" to "loadingEnd",
+                ))
             }
         })
         setSurface()
@@ -243,11 +230,11 @@ class APlayer(
         player?.setSurface(surface!!)
     }
     private fun resetValue() {
-        aPlayerEvent = APlayerEvent().copy(
-            kernel = kernel,
-            featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
-        )
-        sendEvent()
+//        aPlayerEvent = APlayerEvent().copy(
+//            kernel = kernel,
+//            featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+//        )
+//        sendEvent()
     }
     private fun restart() {
         seekTo(0)
@@ -276,10 +263,6 @@ class APlayer(
     }
 
     private fun play() {
-        aPlayerEvent = aPlayerEvent.copy(
-            isCompletion = false
-        )
-        sendEvent()
         player?.play()
     }
 
@@ -291,15 +274,14 @@ class APlayer(
         player?.stop()
     }
 
-    private fun setKernel(kernel: Int) {
+    private fun setKernel(kernel: Int, position: Long) {
         if (kernel == this.kernel) {
             return
         }
         this.kernel = kernel
-        val positionBefore = aPlayerEvent.position
         createPlayer()
         if (lastDataSource != null) {
-            lastDataSource!!["position"] = positionBefore
+            lastDataSource!!["position"] = position
             setDataSource()
             prepare()
         }
@@ -307,32 +289,14 @@ class APlayer(
 
     private fun seekTo(position: Long) {
         player?.seekTo(position)
-        if (player != null) {
-            aPlayerEvent = aPlayerEvent.copy(
-                position = position
-            )
-            sendEvent()
-        }
     }
 
     private fun setSpeed(speed: Float) {
         player?.setSpeed(speed)
-        if (player != null) {
-            aPlayerEvent = aPlayerEvent.copy(
-                playSpeed = speed
-            )
-            sendEvent()
-        }
     }
 
     private fun setLoop(isLoop: Boolean) {
         player?.setLoop(isLoop)
-        if (player != null) {
-            aPlayerEvent = aPlayerEvent.copy(
-                loop = player!!.isLoop
-            )
-            sendEvent()
-        }
     }
 
     private fun release() {
@@ -343,10 +307,6 @@ class APlayer(
         methodChannel?.setMethodCallHandler(null)
         eventChannel = null
         methodChannel = null
-    }
-
-    private fun sendEvent() {
-        queuingEventSink.success(aPlayerEvent.toMap())
     }
 
     private fun enterPip(): Boolean {

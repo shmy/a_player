@@ -1,6 +1,7 @@
 import 'package:a_player_example/local_widgets/att_video_player.dart';
 import 'package:a_player_example/local_widgets/att_video_player_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class NetworkPlayerPage extends StatefulWidget {
   const NetworkPlayerPage({Key? key}) : super(key: key);
@@ -14,7 +15,19 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
 
   @override
   void initState() {
-    controller = AttVideoPlayerController();
+    controller = AttVideoPlayerController()
+      ..setAutoPlayInspector(() {
+        // 激励广告
+        // 弹窗广告
+        Get.defaultDialog(
+          onConfirm: () {
+            Get.back();
+            controller.play();
+          },
+        );
+
+        return false;
+      });
     super.initState();
   }
 

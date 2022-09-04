@@ -47,86 +47,93 @@ enum APlayerMirrorMode { none, horizontal, vertical }
 
 enum APlayerKernel { aliyun, ijk, exo, av }
 
-class APlayerValue {
-  final bool isInitialized;
-  final bool isPlaying;
-  final bool isError;
-  final bool isCompletion;
-  final bool isReadyToPlay;
-  final String errorDescription;
-  final Duration duration;
-  final Duration position;
+class VideoSizeChangedData {
   final int height;
   final int width;
-  final double playSpeed;
-  final bool loop;
-  final bool isBuffering;
-  final int bufferingPercentage;
-  final int bufferingSpeed;
-  final Duration buffered;
-  final bool featurePictureInPicture;
-  final APlayerKernel kernel;
-
-  APlayerValue({
-    required this.isInitialized,
-    required this.isPlaying,
-    required this.isError,
-    required this.isCompletion,
-    required this.isReadyToPlay,
-    required this.errorDescription,
-    required this.duration,
-    required this.position,
-    required this.height,
-    required this.width,
-    required this.playSpeed,
-    required this.loop,
-    required this.isBuffering,
-    required this.bufferingPercentage,
-    required this.bufferingSpeed,
-    required this.buffered,
-    required this.featurePictureInPicture,
-    required this.kernel,
-  });
-
-  factory APlayerValue.uninitialized() => APlayerValue(
-        isInitialized: false,
-        isPlaying: false,
-        isError: false,
-        isCompletion: false,
-        isReadyToPlay: false,
-        errorDescription: '',
-        duration: Duration.zero,
-        position: Duration.zero,
-        height: 9,
-        width: 16,
-        playSpeed: 1.0,
-        loop: false,
-        isBuffering: false,
-        bufferingPercentage: 0,
-        bufferingSpeed: 0,
-        buffered: Duration.zero,
-        featurePictureInPicture: false,
-        kernel: APlayerKernel.aliyun,
-      );
-
-  factory APlayerValue.fromJSON(dynamic json) => APlayerValue(
-        isInitialized: json['isInitialized'],
-        isPlaying: json['isPlaying'],
-        isError: json['isError'],
-        isCompletion: json['isCompletion'],
-        isReadyToPlay: json['isReadyToPlay'],
-        errorDescription: json['errorDescription'],
-        duration: Duration(milliseconds: json['duration']),
-        position: Duration(milliseconds: json['position']),
-        height: json['height'],
-        width: json['width'],
-        playSpeed: json['playSpeed'],
-        loop: json['loop'],
-        isBuffering: json['isBuffering'],
-        bufferingPercentage: json['bufferingPercentage'],
-        bufferingSpeed: json['bufferingSpeed'],
-        buffered: Duration(milliseconds: json['buffered']),
-        featurePictureInPicture: json['featurePictureInPicture'],
-        kernel: APlayerKernel.values[json['kernel']],
-      );
+  VideoSizeChangedData(this.height, this.width);
+  factory VideoSizeChangedData.fromJSON(dynamic json) => VideoSizeChangedData(json['height'], json['width']);
 }
+
+// class APlayerValue {
+//   final bool isInitialized;
+//   final bool isPlaying;
+//   final bool isError;
+//   final bool isCompletion;
+//   final bool isReadyToPlay;
+//   final String errorDescription;
+//   final Duration duration;
+//   final Duration position;
+//   final int height;
+//   final int width;
+//   final double playSpeed;
+//   final bool loop;
+//   final bool isBuffering;
+//   final int bufferingPercentage;
+//   final int bufferingSpeed;
+//   final Duration buffered;
+//   final bool featurePictureInPicture;
+//   final APlayerKernel kernel;
+//
+//   APlayerValue({
+//     required this.isInitialized,
+//     required this.isPlaying,
+//     required this.isError,
+//     required this.isCompletion,
+//     required this.isReadyToPlay,
+//     required this.errorDescription,
+//     required this.duration,
+//     required this.position,
+//     required this.height,
+//     required this.width,
+//     required this.playSpeed,
+//     required this.loop,
+//     required this.isBuffering,
+//     required this.bufferingPercentage,
+//     required this.bufferingSpeed,
+//     required this.buffered,
+//     required this.featurePictureInPicture,
+//     required this.kernel,
+//   });
+//
+//   factory APlayerValue.uninitialized() => APlayerValue(
+//         isInitialized: false,
+//         isPlaying: false,
+//         isError: false,
+//         isCompletion: false,
+//         isReadyToPlay: false,
+//         errorDescription: '',
+//         duration: Duration.zero,
+//         position: Duration.zero,
+//         height: 9,
+//         width: 16,
+//         playSpeed: 1.0,
+//         loop: false,
+//         isBuffering: false,
+//         bufferingPercentage: 0,
+//         bufferingSpeed: 0,
+//         buffered: Duration.zero,
+//         featurePictureInPicture: false,
+//         kernel: APlayerKernel.aliyun,
+//       );
+//
+//   factory APlayerValue.fromJSON(dynamic json) => APlayerValue(
+//         isInitialized: json['isInitialized'],
+//         isPlaying: json['isPlaying'],
+//         isError: json['isError'],
+//         isCompletion: json['isCompletion'],
+//         isReadyToPlay: json['isReadyToPlay'],
+//         errorDescription: json['errorDescription'],
+//         duration: Duration(milliseconds: json['duration']),
+//         position: Duration(milliseconds: json['position']),
+//         height: json['height'],
+//         width: json['width'],
+//         playSpeed: json['playSpeed'],
+//         loop: json['loop'],
+//         isBuffering: json['isBuffering'],
+//         bufferingPercentage: json['bufferingPercentage'],
+//         bufferingSpeed: json['bufferingSpeed'],
+//         buffered: Duration(milliseconds: json['buffered']),
+//         featurePictureInPicture: json['featurePictureInPicture'],
+//         kernel: APlayerKernel.values[json['kernel']],
+//       );
+// }
