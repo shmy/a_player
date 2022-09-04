@@ -17,7 +17,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   int _playIndex = -1;
   bool _visible = true;
   bool _freezed = false;
-  VoidCallback? _beforePlayCallback;
+  VoidCallback? _blockAutoPlayCallback;
   ValueChanged<int>? _onPlayIndexChangedCallback;
   AttVideoAnalyzer? _videoAnalyzerCallback;
 
@@ -33,15 +33,11 @@ class AttVideoPlayerController with WidgetsBindingObserver {
 
   Future<void> initialize() async {
     _status.value = AttVideoPlayerStatus.initializing;
-    aPlayerController
-      ..onInitialized(_onInitialized)
-      ..onReadyToPlay(_onReadyToPlay)
-      ..onError(_onError)
-      ..onCompletion(_onCompletion)
-      ..onCurrentPositionChanged(_onCurrentPositionChanged)
-      ..onCurrentDownloadSpeedChanged((int speed) {
-        print('onCurrentDownloadSpeedChanged $speed');
-      });
+    aPlayerController.onInitialized.addListener(_onInitialized);
+    aPlayerController.onReadyToPlay.addListener(_onReadyToPlay);
+    aPlayerController.onError.addListener(_onError);
+    aPlayerController.onCompletion.addListener(_onCompletion);
+    aPlayerController.onCurrentPositionChanged.addListener(_onCurrentPositionChanged);
     await aPlayerController.initialize();
     await aPlayerController.setKernel(APlayerKernel.aliyun, 0);
   }
@@ -61,8 +57,8 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     _videoAnalyzerCallback = callback;
   }
 
-  void setBeforePlayCallback(VoidCallback callback) {
-    _beforePlayCallback = callback;
+  void setBlockAutoPlayCallback(VoidCallback callback) {
+    _blockAutoPlayCallback = callback;
   }
 
   void setPlayIndexChangedCallback(ValueChanged<int> callback) {
@@ -82,6 +78,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   }
 
   Future<void> _startAnalyzeToPlay(AttVideoItem video) async {
+    aPlayerController.onPlaying.removeListener(_onPlaying);
     aPlayerController.stop();
     if (_videoAnalyzerCallback == null) {
       _setDataSource(video.source);
@@ -109,7 +106,6 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     List<APlayerConfigHeader> headers = const [],
     int position = 0,
   }) async {
-    aPlayerController.clearOnPlayingListener();
     // TODO: setKernel
     // await aPlayerController.setKernel(kernel, position);
     _status.value = AttVideoPlayerStatus.preparing;
@@ -133,33 +129,37 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     aPlayerController.dispose();
   }
 
-  void _onInitialized(_) {
+  void _onInitialized() {
     _status.value = AttVideoPlayerStatus.initialized;
   }
 
-  void _onReadyToPlay(_) {
-    // aPlayerController.onPlaying(_onPlaying);
-    if (_beforePlayCallback != null) {
+  void _onReadyToPlay() {
+    aPlayerController.onPlaying.addListener(_onPlaying);
+    if (_blockAutoPlayCallback != null) {
       _freezed = true;
-      _beforePlayCallback?.call();
+      _blockAutoPlayCallback?.call();
     } else {
       aPlayerController.play();
     }
     _status.value = AttVideoPlayerStatus.readyToPlay;
   }
 
-  void _onError(_) {
+  void _onError() {
+    final String reson = aPlayerController.onError.value;
     _status.value = AttVideoPlayerStatus.playFailed;
   }
 
-  void _onCompletion(_) {
+  void _onCompletion() {
     _status.value = AttVideoPlayerStatus.playCompleted;
   }
 
-  void _onCurrentPositionChanged(int position) {
+  void _onCurrentPositionChanged() {
+    final int position = aPlayerController.onCurrentPositionChanged.value;
     _trySee(position);
   }
-  void _onPlaying(bool playing) {
+
+  void _onPlaying() {
+    final bool playing = aPlayerController.onPlaying.value;
     if (playing) {
       _status.value = AttVideoPlayerStatus.playing;
     } else {

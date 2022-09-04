@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'a_player_constant.dart';
@@ -9,53 +8,63 @@ const _methodChannel = MethodChannel(APlayerConstant.methodChannelName);
 
 typedef VideoSizeChangedCallback = void Function(int height, int width);
 
-class APlayerValueListener<T> {
-  final List<ValueChanged<T>> listeners = [];
-
-  void addListener(ValueChanged<T> listener) {
-    listeners.add(listener);
-  }
-
-  void notify(T value) {
-    for (var listener in listeners) {
-      listener.call(value);
-    }
-  }
+class APlayerValueListener<T> extends ValueNotifier<T> {
+  APlayerValueListener(super.value);
 }
 
 mixin APlayerControllerListener {
-  final APlayerValueListener<void> _onInitialized = APlayerValueListener<void>();
-  final APlayerValueListener<void> _onReadyToPlay = APlayerValueListener<void>();
+  final APlayerValueListener<void> _onInitialized =
+      APlayerValueListener<void>(null);
+  final APlayerValueListener<void> _onReadyToPlay =
+      APlayerValueListener<void>(null);
   final APlayerValueListener<VideoSizeChangedData> _onVideoSizeChanged =
-      APlayerValueListener<VideoSizeChangedData>();
-  final APlayerValueListener<void> _onLoadingBegin = APlayerValueListener<void>();
-  final APlayerValueListener<int> _onLoadingProgress = APlayerValueListener<int>();
-  final APlayerValueListener<void> _onLoadingEnd = APlayerValueListener<void>();
+      APlayerValueListener<VideoSizeChangedData>(VideoSizeChangedData(0, 0));
+  final APlayerValueListener<void> _onLoadingBegin =
+      APlayerValueListener<void>(null);
+  final APlayerValueListener<int> _onLoadingProgress =
+      APlayerValueListener<int>(0);
+  final APlayerValueListener<void> _onLoadingEnd =
+      APlayerValueListener<void>(null);
   final APlayerValueListener<int> _onCurrentPositionChanged =
-      APlayerValueListener<int>();
+      APlayerValueListener<int>(0);
   final APlayerValueListener<int> _onCurrentDownloadSpeedChanged =
-      APlayerValueListener<int>();
+      APlayerValueListener<int>(0);
   final APlayerValueListener<int> _onBufferedPositionChanged =
-      APlayerValueListener<int>();
-  final APlayerValueListener<bool> _onPlaying = APlayerValueListener<bool>();
-  final APlayerValueListener<String> _onError = APlayerValueListener<String>();
-  final APlayerValueListener<void> _onCompletion = APlayerValueListener<void>();
+      APlayerValueListener<int>(0);
+  final APlayerValueListener<bool> _onPlaying =
+      APlayerValueListener<bool>(false);
+  final APlayerValueListener<String> _onError =
+      APlayerValueListener<String>('');
+  final APlayerValueListener<void> _onCompletion =
+      APlayerValueListener<void>(null);
 
-  ValueChanged<ValueChanged<void>> get onInitialized => _onInitialized.addListener;
-  ValueChanged<ValueChanged<void>> get onReadyToPlay => _onReadyToPlay.addListener;
-  ValueChanged<ValueChanged<VideoSizeChangedData>> get onVideoSizeChanged => _onVideoSizeChanged.addListener;
-  ValueChanged<ValueChanged<void>> get onloadingBegin => _onLoadingBegin.addListener;
-  ValueChanged<ValueChanged<int>> get onLoadingProgress => _onLoadingProgress.addListener;
-  ValueChanged<ValueChanged<void>> get onLoadingEnd => _onLoadingEnd.addListener;
-  ValueChanged<ValueChanged<int>> get onCurrentPositionChanged => _onCurrentPositionChanged.addListener;
-  ValueChanged<ValueChanged<int>> get onCurrentDownloadSpeedChanged => _onCurrentDownloadSpeedChanged.addListener;
-  ValueChanged<ValueChanged<int>> get onBufferedPositionChanged => _onBufferedPositionChanged.addListener;
-  ValueChanged<ValueChanged<bool>> get onPlaying => _onPlaying.addListener;
-  ValueChanged<ValueChanged<String>> get onError => _onError.addListener;
-  ValueChanged<ValueChanged<void>> get onCompletion => _onCompletion.addListener;
-  void clearOnPlayingListener() {
-    _onPlaying.listeners.clear();
-  }
+  APlayerValueListener<void> get onInitialized => _onInitialized;
+
+  APlayerValueListener<void> get onReadyToPlay => _onReadyToPlay;
+
+  APlayerValueListener<VideoSizeChangedData> get onVideoSizeChanged =>
+      _onVideoSizeChanged;
+
+  APlayerValueListener<void> get onLoadingBegin => _onLoadingBegin;
+
+  APlayerValueListener<int> get onLoadingProgress => _onLoadingProgress;
+
+  APlayerValueListener<void> get onLoadingEnd => _onLoadingEnd;
+
+  APlayerValueListener<int> get onCurrentPositionChanged =>
+      _onCurrentPositionChanged;
+
+  APlayerValueListener<int> get onCurrentDownloadSpeedChanged =>
+      _onCurrentDownloadSpeedChanged;
+
+  APlayerValueListener<int> get onBufferedPositionChanged =>
+      _onBufferedPositionChanged;
+
+  APlayerValueListener<bool> get onPlaying => _onPlaying;
+
+  APlayerValueListener<String> get onError => _onError;
+
+  APlayerValueListener<void> get onCompletion => _onCompletion;
 }
 
 class APlayerController extends ChangeNotifier
@@ -208,44 +217,51 @@ class APlayerController extends ChangeNotifier
     eventChannel?.receiveBroadcastStream().listen((event) {
       switch (event['type'] as String) {
         case "initialized":
-          _onInitialized.notify(null);
+          _onInitialized.notifyListeners();
           break;
         case "readyToPlay":
-          _onReadyToPlay.notify(null);
+          _onReadyToPlay.notifyListeners();
           break;
         case "videoSizeChanged":
           final size = VideoSizeChangedData.fromJSON(event['data']);
           _videoHeight = size.height;
           _videoWidth = size.width;
           notifyListeners();
-          _onVideoSizeChanged.notify(size);
+          _onVideoSizeChanged.value = size;
+          _onVideoSizeChanged.notifyListeners();
           break;
         case "loadingBegin":
-          _onLoadingBegin.notify(null);
+          _onLoadingBegin.notifyListeners();
           break;
         case "loadingProgress":
-          _onLoadingProgress.notify(event['data'] as int);
+          _onLoadingProgress.value = event['data'] as int;
+          _onLoadingProgress.notifyListeners();
           break;
         case "loadingEnd":
-          _onLoadingEnd.notify(null);
+          _onLoadingEnd.notifyListeners();
           break;
         case "currentPositionChanged":
-          _onCurrentPositionChanged.notify(event['data'] as int);
+          _onCurrentPositionChanged.value = event['data'] as int;
+          _onCurrentPositionChanged.notifyListeners();
           break;
         case "currentDownloadSpeedChanged":
-          _onCurrentDownloadSpeedChanged.notify(event['data'] as int);
+          _onCurrentDownloadSpeedChanged.value = event['data'] as int;
+          _onCurrentDownloadSpeedChanged.notifyListeners();
           break;
         case "bufferedPositionChanged":
-          _onBufferedPositionChanged.notify(event['data'] as int);
+          _onBufferedPositionChanged.value = event['data'] as int;
+          _onBufferedPositionChanged.notifyListeners();
           break;
         case "playing":
-          _onPlaying.notify(event['data'] as bool);
+          _onPlaying.value = event['data'] as bool;
+          _onPlaying.notifyListeners();
           break;
         case "error":
-          _onError.notify(event['data'] as String);
+          _onError.value = event['data'] as String;
+          _onError.notifyListeners();
           break;
         case "completion":
-          _onCompletion.notify(null);
+          _onCompletion.notifyListeners();
           break;
       }
     });

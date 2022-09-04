@@ -18,7 +18,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
   @override
   void initState() {
     controller = AttVideoPlayerController()
-      ..setBeforePlayCallback(() {
+      ..setBlockAutoPlayCallback(() {
         // 激励广告
         // 弹窗广告
         Get.defaultDialog(
