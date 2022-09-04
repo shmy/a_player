@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rpx/rpx.dart';
+import 'package:video_cms_app/app/core/util/iconfont.dart';
 import '../danmaku/src/flutter_danmaku_area.dart';
 import 'danmaku_area.dart';
 import 'video_player_controller.dart';
@@ -103,7 +104,7 @@ class VideoPlayer extends StatelessWidget {
                       ),
                     Obx(
                       () => DanmakuArea(
-                        show: controller.showDanmaku.value,
+                        show: controller.danmakuEnabled.value,
                         controller: controller,
                         position: controller.playerValue.position,
                         isFullscreen: controller.isFullscreen.value,
@@ -527,28 +528,27 @@ class VideoPlayer extends StatelessWidget {
                                 icon: Icons.skip_next_sharp,
                                 onTap: () => controller.playNext()),
                           SizedBox(
-                            width: gap * 2,
+                            width: gap,
                           ),
                           GestureDetector(
                             onTap: () => controller.toggleDanmaku(),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                const Text('弹幕'),
-                                Obx(() {
-                                  return Text(controller.showDanmaku.value ? '已开启' : '已关闭', style: TextStyle(fontSize: 10.rpx),);
-                                })
-                              ],
-                            ),
+                            child: Obx(() {
+                              return Icon(
+                                controller.danmakuEnabled.value
+                                    ? IconFont.danmakuEnable
+                                    : IconFont.danmakuDisable,
+                                size: 30.rpx,
+                                color: Colors.white,
+                              );
+                            }),
                           ),
                           SizedBox(
-                            width: gap * 2,
+                            width: gap,
                           ),
                           Expanded(
                               child: Obx(
                             () => Offstage(
-                              offstage: !controller.showDanmaku.value,
+                              offstage: !controller.danmakuEnabled.value,
                               child: _buildDanmakuInput(),
                             ),
                           )),

@@ -16,6 +16,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:orientation/orientation.dart';
 import 'package:rpx/rpx.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:video_cms_app/app/global_widgets/cms_hex_color.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock/wakelock.dart';
 import '../danmaku/src/flutter_danmaku_controller.dart';
@@ -77,7 +78,7 @@ mixin _DanmakuMixin {
   int danIndex = 0;
   List<DanmakuItem> danmakuList = [];
   APlayerValue get playerValue;
-  RxBool showDanmaku = true.obs;
+  RxBool danmakuEnabled = true.obs;
   ValueChanged<dynamic>? _onSend;
 
   void onDanmakuSend(ValueChanged<dynamic> onSend) {
@@ -88,20 +89,19 @@ mixin _DanmakuMixin {
   FlutterDanmakuController flutterDanmakuController =
       FlutterDanmakuController();
 
-  void sendDanmuku() {
-    const Color defaultColor = Colors.white;
+  void sendDanmuku(Color color) {
     final String text = danmakuEditingController.text;
     _onSend?.call({
       "second": playerValue.position.inSeconds,
       "position": 0,
-      "color": 'FF000000',
+      "color": '#${color.value.toRadixString(16)}',
       "content": text,
     });
     if (text.isNotEmpty) {
-      flutterDanmakuController.addDanmaku(text, color: defaultColor,
+      flutterDanmakuController.addDanmaku(text, color: color,
           builder: (widget) {
         return Container(
-          decoration: BoxDecoration(border: Border.all(color: defaultColor)),
+          decoration: BoxDecoration(border: Border.all(color: color)),
           padding: EdgeInsets.symmetric(horizontal: 4.rpx),
           child: widget,
         );
@@ -112,7 +112,7 @@ mixin _DanmakuMixin {
   }
 
   void toggleDanmaku() {
-    showDanmaku.value = !showDanmaku.value;
+    danmakuEnabled.value = !danmakuEnabled.value;
   }
 }
 mixin _VideoPlayerOptions {
@@ -563,6 +563,7 @@ class VideoPlayerController
   String get title => currentPlayItem?.title ?? '';
 
   bool get ready => playerValue.isReadyToPlay && !isResolveing.value;
+  bool get playable => ready && !isResolveFailed.value;
 
   bool get hasNext {
     return currentPlayIndex.value < playlist.length - 1;

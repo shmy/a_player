@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rpx/rpx.dart';
+import 'package:video_cms_app/app/core/util/text_util.dart';
 
 class DanmakuSheet extends StatefulWidget {
   final TextEditingController danmakuEditingController;
-  final VoidCallback onSend;
+  final ValueChanged<Color> onSend;
 
   const DanmakuSheet(
       {Key? key, required this.danmakuEditingController, required this.onSend})
@@ -14,23 +15,38 @@ class DanmakuSheet extends StatefulWidget {
 }
 
 class _DanmakuSheetState extends State<DanmakuSheet> {
+  final List<Color> colors = [
+    Colors.white,
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+    Colors.green,
+    Colors.teal,
+    Colors.blue,
+    Colors.indigo,
+  ];
+  Color selectedColor = Colors.white;
   String text = '';
+
   @override
   void initState() {
     widget.danmakuEditingController.addListener(onEditingChange);
     onEditingChange();
     super.initState();
   }
+
   @override
   void dispose() {
     widget.danmakuEditingController.removeListener(onEditingChange);
     super.dispose();
   }
+
   void onEditingChange() {
     setState(() {
       text = widget.danmakuEditingController.text;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final double height = 130.rpx;
@@ -70,7 +86,7 @@ class _DanmakuSheetState extends State<DanmakuSheet> {
                     child: Center(
                       child: TextField(
                         controller: widget.danmakuEditingController,
-                        onSubmitted: (_) => widget.onSend(),
+                        onSubmitted: (_) => widget.onSend(selectedColor),
                         autofocus: true,
                         decoration: InputDecoration(
                           isCollapsed: true,
@@ -86,11 +102,12 @@ class _DanmakuSheetState extends State<DanmakuSheet> {
                   ),
                 ),
                 if (text.isNotEmpty)
-                SizedBox(
-                  width: 20.rpx,
-                ),
+                  SizedBox(
+                    width: 20.rpx,
+                  ),
                 if (text.isNotEmpty)
-                GestureDetector(onTap: widget.onSend, child: const Icon(Icons.send)),
+                  GestureDetector(
+                      onTap: () => widget.onSend(selectedColor), child: const Icon(Icons.send)),
               ],
             ),
             SizedBox(
@@ -101,43 +118,37 @@ class _DanmakuSheetState extends State<DanmakuSheet> {
               child: Row(
                 children: [
                   const Text('颜色'),
-                  SizedBox(width: 10.rpx,),
-                  Expanded(
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-
-                      ],
-                    ),
+                  SizedBox(
+                    width: 10.rpx,
                   ),
-                ],
-              ),
-            ),
-            SizedBox(height: 10.rpx,),
-            SizedBox(
-              height: 28.rpx,
-              child: Row(
-                children: [
-                  const Text('位置'),
-                  SizedBox(width: 10.rpx,),
                   Expanded(
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: [
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                        Container(color: Colors.red, height: 28.rpx, width: 28.rpx, margin: EdgeInsets.only(right: 10.rpx),),
-                      ],
+                      children: colors.map((color) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedColor = color;
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4.rpx),
+                              border: Border.all(color: selectedColor == color ? color : Colors.transparent),
+                            ),
+                            height: 24.rpx,
+                            width: 32.rpx,
+                            padding: EdgeInsets.all(2.rpx),
+                            margin: EdgeInsets.only(right: 10.rpx),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(2.rpx),
+                                color: color,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ),
                 ],
