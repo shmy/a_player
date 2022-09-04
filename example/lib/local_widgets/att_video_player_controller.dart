@@ -1,35 +1,34 @@
-import 'dart:ffi';
-
+import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_value.dart';
 import 'package:a_player_example/local_widgets/att_video_player_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class AttVideoPlayerController with WidgetsBindingObserver {
   final APlayerController _aPlayerController = APlayerController();
   final Rx<AttVideoPlayerStatus> _status =
       Rx<AttVideoPlayerStatus>(AttVideoPlayerStatus.idle);
-  APlayerController get aPlayerController => _aPlayerController;
-  AttVideoPlayerStatus get status => _status.value;
+  final List<AttVideoItem> _playlist = [];
+  int _playIndex = -1;
   bool _visible = true;
   bool _freezed = false;
   VoidCallback? _beforePlayCallback;
+  ValueChanged<int>? _onPlayIndexChangedCallback;
+  AttVideoAnalyzer? _videoAnalyzerCallback;
+
+  APlayerController get aPlayerController => _aPlayerController;
+
+  AttVideoPlayerStatus get status => _status.value;
 
   AttVideoPlayerController() {
     WidgetsBinding.instance.addObserver(this);
-    _initialize();
   }
 
-
-  Future<void> _initialize() async {
+  Future<void> initialize() async {
     _status.value = AttVideoPlayerStatus.initializing;
     aPlayerController
-      ..onInitialized((_) {
-        _status.value = AttVideoPlayerStatus.initialized;
-        print('onInitialized');
-      })
+      ..onInitialized(_onInitialized)
       ..onReadyToPlay(_onReadyToPlay)
       ..onCompletion((_) {
         print('onCompletion');
@@ -48,8 +47,6 @@ class AttVideoPlayerController with WidgetsBindingObserver {
       });
     await aPlayerController.initialize();
     await aPlayerController.setKernel(APlayerKernel.ijk, 0);
-    await aPlayerController.setDataSouce(
-        'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4');
   }
 
   void setVisible(bool visible) {
@@ -63,20 +60,66 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     }
   }
 
+  void setVideoAnalyzerCallback(AttVideoAnalyzer callback) {
+    _videoAnalyzerCallback = callback;
+  }
+
   void setBeforePlayCallback(VoidCallback callback) {
     _beforePlayCallback = callback;
+  }
+
+  void setPlayIndexChangedCallback(ValueChanged<int> callback) {
+    _onPlayIndexChangedCallback = callback;
+  }
+
+  void setPlaylist(List<AttVideoItem> playlist) {
+    _playlist.assignAll(playlist);
+  }
+
+  void playByIndex(int index) async {
+    if (_playIndex != index) {
+      _playIndex = index;
+      final AttVideoItem video = _playlist[_playIndex];
+      if (_videoAnalyzerCallback == null) {
+        _setDataSource(video.source);
+        return;
+      }
+      final AttVideoAnalysisResults result =
+          await _videoAnalyzerCallback!.call(video);
+      if (result.isSuccess) {
+        _setDataSource(result.url, headers: result.headers, position: result.position);
+      } else {
+        _status.value = AttVideoPlayerStatus.analysisFailed;
+      }
+    }
+  }
+
+  void _setDataSource(
+    String dataSource, {
+    APlayerKernel kernel = APlayerKernel.aliyun,
+    List<APlayerConfigHeader> headers = const [],
+    int position = 0,
+  }) async {
+    // TODO: setKernel
+    // await aPlayerController.setKernel(kernel, position);
+    await aPlayerController.setDataSouce(dataSource, headers: headers, position: position);
   }
 
   void play() {
     _freezed = false;
     aPlayerController.play();
   }
+
   void pause() {
     aPlayerController.pause();
   }
 
   void dispose() {
     aPlayerController.dispose();
+  }
+
+  void _onInitialized(_) {
+    _status.value = AttVideoPlayerStatus.initialized;
   }
 
   void _onReadyToPlay(_) {
@@ -87,6 +130,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
       aPlayerController.play();
     }
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
