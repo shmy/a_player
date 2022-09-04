@@ -87,6 +87,21 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
               Obx(() {
                 return Text('playSpeed: ${controller.uiController.playSpeed.value}');
               }),
+              Obx(() {
+                return Text('bufferingPercentage: ${controller.uiController.bufferingPercentage.value}');
+              }),
+              Obx(() {
+                return Text('isBuffering: ${controller.uiController.isBuffering.value}');
+              }),
+              Obx(() {
+                return Text('buffered: ${controller.uiController.buffered.value}');
+              }),
+              Obx(() {
+                return Text('size: ${controller.uiController.height.value} * ${controller.uiController.width.value}');
+              }),
+              Obx(() {
+                return Text('bufferingSpeed: ${controller.uiController.bufferingSpeed.value}');
+              }),
               MaterialButton(onPressed: () {controller.playByIndex(0);}, child: Text('0'),),
               MaterialButton(onPressed: () {controller.playByIndex(1);}, child: Text('1'),),
               MaterialButton(onPressed: () {controller.playByIndex(2);}, child: Text('2'),),

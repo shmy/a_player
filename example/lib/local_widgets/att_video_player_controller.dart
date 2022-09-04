@@ -31,10 +31,17 @@ class AttVideoPlayerController with WidgetsBindingObserver {
   Future<void> initialize() async {
     uiController.status.value = AttVideoPlayerStatus.initializing;
     aPlayerController.onInitialized.addListener(_onInitialized);
+    aPlayerController.onVideoSizeChanged.addListener(_onVideoSizeChanged);
     aPlayerController.onReadyToPlay.addListener(_onReadyToPlay);
     aPlayerController.onError.addListener(_onError);
     aPlayerController.onCompletion.addListener(_onCompletion);
     aPlayerController.onCurrentPositionChanged.addListener(_onCurrentPositionChanged);
+    aPlayerController.onBufferedPositionChanged.addListener(_onBufferedPositionChanged);
+    aPlayerController.onCurrentDownloadSpeedChanged.addListener(_onCurrentDownloadSpeedChanged);
+    aPlayerController.onLoadingProgress.addListener(_onLoadingProgress);
+    aPlayerController.onLoadingBegin.addListener(_onLoadingBegin);
+    aPlayerController.onLoadingEnd.addListener(_onLoadingEnd);
+
     await aPlayerController.initialize();
     await aPlayerController.setKernel(APlayerKernel.aliyun, 0);
   }
@@ -131,6 +138,12 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     uiController.status.value = AttVideoPlayerStatus.initialized;
   }
 
+  void _onVideoSizeChanged() {
+    final VideoSizeChangedData size = aPlayerController.onVideoSizeChanged.value;
+    uiController.height.value = size.height;
+    uiController.width.value = size.width;
+  }
+
   void _onReadyToPlay() {
     aPlayerController.onPlaying.addListener(_onPlaying);
     if (_blockAutoPlayCallback != null) {
@@ -158,6 +171,25 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     final int position = aPlayerController.onCurrentPositionChanged.value;
     uiController.position.value = Duration(milliseconds: position);
     _trySee(position);
+  }
+
+  void _onBufferedPositionChanged() {
+    final int buffered = aPlayerController.onBufferedPositionChanged.value;
+    uiController.buffered.value = Duration(milliseconds: buffered);
+  }
+  void _onLoadingProgress() {
+    final int progress = aPlayerController.onLoadingProgress.value;
+    uiController.bufferingPercentage.value = progress;
+  }
+  void _onLoadingBegin() {
+    uiController.isBuffering.value = true;
+  }
+  void _onLoadingEnd() {
+    uiController.isBuffering.value = false;
+  }
+  void _onCurrentDownloadSpeedChanged() {
+    final int speed = aPlayerController.onCurrentDownloadSpeedChanged.value;
+    uiController.bufferingSpeed.value = speed;
   }
 
   void _onPlaying() {
