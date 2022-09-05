@@ -1,5 +1,6 @@
-import 'package:a_player_example/local_widgets/att_video_player_constant.dart';
 import 'package:get/get.dart';
+
+import 'att_video_player_constant.dart';
 
 class AttVideoPlayerUIController {
   final Rx<AttVideoPlayerStatus> status =

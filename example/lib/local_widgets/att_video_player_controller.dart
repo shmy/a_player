@@ -1,10 +1,11 @@
 import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_controller.dart';
 import 'package:a_player/a_player_value.dart';
-import 'package:a_player_example/local_widgets/att_video_player_constant.dart';
-import 'package:a_player_example/local_widgets/att_video_player_ui_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'att_video_player_constant.dart';
+import 'att_video_player_ui_controller.dart';
 
 class AttVideoPlayerController with WidgetsBindingObserver {
   final AttVideoPlayerUIController uiController = AttVideoPlayerUIController();
