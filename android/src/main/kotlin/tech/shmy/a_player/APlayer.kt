@@ -131,6 +131,10 @@ class APlayer(
             return
         }
         setupPlayer()
+
+        queuingEventSink.success(mapOf(
+            "type" to "initialized"
+        ))
     }
 
     private fun setupPlayer() {
@@ -341,9 +345,6 @@ class APlayer(
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         queuingEventSink.setDelegate(events)
         createPlayer()
-        queuingEventSink.success(mapOf(
-            "type" to "initialized"
-        ))
     }
 
     override fun onCancel(arguments: Any?) {
