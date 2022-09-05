@@ -166,9 +166,6 @@ class ExoPlayerImpl(
                 listener?.onLoadingProgressListener(exoPlayer.bufferedPercentage)
                 listener?.onBufferedPositionChangedListener(exoPlayer.bufferedPosition)
             }
-            Player.STATE_READY -> {
-                listener?.onInitializedListener()
-            }
             Player.STATE_ENDED -> {
                 listener?.onCompletionListener()
             }

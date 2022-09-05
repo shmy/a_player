@@ -13,6 +13,8 @@ class APlayerValueListener<T> extends ChangeNotifier {
 }
 
 mixin APlayerControllerListener {
+  final APlayerValueListener<void> _onInitializing =
+      APlayerValueListener<void>();
   final APlayerValueListener<void> _onInitialized =
       APlayerValueListener<void>();
   final APlayerValueListener<VideoReadyData> _onReadyToPlay =
@@ -33,6 +35,8 @@ mixin APlayerControllerListener {
   final APlayerValueListener<bool> _onPlaying = APlayerValueListener<bool>();
   final APlayerValueListener<String> _onError = APlayerValueListener<String>();
   final APlayerValueListener<void> _onCompletion = APlayerValueListener<void>();
+
+  APlayerValueListener<void> get onInitializing => _onInitializing;
 
   APlayerValueListener<void> get onInitialized => _onInitialized;
 
@@ -212,6 +216,9 @@ class APlayerController extends ChangeNotifier
   void _listen() {
     eventChannel?.receiveBroadcastStream().listen((event) {
       switch (event['type'] as String) {
+        case "initializing":
+          _onInitializing.notifyListeners();
+          break;
         case "initialized":
           _onInitialized.notifyListeners();
           break;

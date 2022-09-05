@@ -22,7 +22,6 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
             listener?.onVideoSizeChangedListener(width, height)
         }
         aliPlayer.setOnPreparedListener {
-            listener?.onInitializedListener()
             listener?.onReadyToPlayListener()
         }
 //        aliPlayer.setOnRenderingStartListener {
@@ -107,7 +106,11 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         aliPlayer.stop()
     }
 
-    override fun setHttpDataSource(url: String, startAtPositionMs: Long, headers: Map<String, String>) {
+    override fun setHttpDataSource(
+        url: String,
+        startAtPositionMs: Long,
+        headers: Map<String, String>
+    ) {
         val config = aliPlayer.config
         config.mMaxBufferDuration = 1000 * 60 * 10
         config.mMaxBackwardBufferDurationMs = 1 * 60 * 10

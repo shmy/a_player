@@ -1,7 +1,6 @@
 package tech.shmy.a_player.player
 
 interface APlayerListener {
-    fun onInitializedListener()
     fun onPlayingListener(isPlaying: Boolean)
     fun onErrorListener(code: String, message: String)
     fun onCompletionListener()

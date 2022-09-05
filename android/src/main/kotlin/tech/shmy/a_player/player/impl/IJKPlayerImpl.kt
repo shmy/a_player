@@ -155,7 +155,6 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
             listener?.onVideoSizeChangedListener(width, height)
         }
         ijkMediaPlayer.setOnPreparedListener {
-            listener?.onInitializedListener()
             listener?.onReadyToPlayListener()
         }
         ijkMediaPlayer.setOnInfoListener { _, what, extraValue ->
@@ -185,6 +184,7 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         ijkMediaPlayer.setOnCompletionListener {
             listener?.onCompletionListener()
         }
+
     }
     private fun removeEvent() {
         ijkMediaPlayer.resetListeners()

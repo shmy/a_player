@@ -110,6 +110,9 @@ class APlayer(
     }
 
     private fun createPlayer() {
+        queuingEventSink.success(mapOf(
+            "type" to "initializing"
+        ))
         resetValue()
         player?.release()
         player = null
@@ -140,12 +143,6 @@ class APlayer(
                         "height" to height,
                         "width" to width,
                     )
-                ))
-            }
-
-            override fun onInitializedListener() {
-                queuingEventSink.success(mapOf(
-                    "type" to "initialized",
                 ))
             }
 
@@ -344,6 +341,9 @@ class APlayer(
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         queuingEventSink.setDelegate(events)
         createPlayer()
+        queuingEventSink.success(mapOf(
+            "type" to "initialized"
+        ))
     }
 
     override fun onCancel(arguments: Any?) {
