@@ -117,7 +117,6 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
    func onPlayerEvent(_ player: AliPlayer!, eventType: AVPEventType) {
        switch(eventType) {
        case AVPEventPrepareDone:
-           listener?.onInitializedListener()
            listener?.onReadyToPlayListener()
            break
        case AVPEventLoadingStart:

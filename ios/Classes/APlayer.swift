@@ -91,6 +91,9 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     }
     
     private func createPlayer() -> Void {
+        queuingEventSink.success(event: [
+            "type": "initializing"
+        ])
         resetValue()
         player?.destroy()
         player = nil
@@ -111,6 +114,9 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
             return
         }
         setupPlayer()
+        queuingEventSink.success(event: [
+            "type": "initialized"
+        ])
     }
     
     private func resetValue() -> Void {
@@ -176,9 +182,6 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         eventChannel = nil
         methodChannel = nil
     }
-//    private func sendEvent() -> Void {
-//        queuingEventSink.success(event: self.aPlayerEvent.toMap())
-//    }
     
     func copyPixelBuffer() -> Unmanaged<CVPixelBuffer>? {
         if latestBuffer == nil {
@@ -203,12 +206,6 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         }
         latestBuffer = pixelBuffer
         textureRegistry?.textureFrameAvailable(_textureId)
-    }
-    
-    func onInitializedListener() {
-        queuingEventSink.success(event: [
-            "type": "initialized"
-        ])
     }
     
     func onPlayingListener(isPlaying: Bool) {

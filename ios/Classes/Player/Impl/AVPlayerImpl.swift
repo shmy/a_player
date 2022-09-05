@@ -125,9 +125,8 @@ class AVPlayerImpl: NSObject, APlayerInterface {
     private func onStatusChanged() {
         switch(avPlayerItem?.status) {
         case .readyToPlay:
-            listener?.onInitializedListener()
-            listener?.onReadyToPlayListener()
             avPlayerItem?.add(avPlayerItemVideoOutput!)
+            listener?.onReadyToPlayListener()
             break
         case .failed:
             listener?.onErrorListener(code: "-1", message: "play error")

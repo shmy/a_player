@@ -144,7 +144,6 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     func onEvent4Player(_ player: IJKFFMediaPlayer, withType waht: Int32, andArg1 arg1: Int32, andArg2 arg2: Int32, andExtra extra: UnsafeMutableRawPointer) {
         switch(Int(waht)) {
         case IJKMPEventType.IJKMPET_PREPARED.rawValue:
-            listener?.onInitializedListener()
             listener?.onReadyToPlayListener()
             break
         case IJKMPEventType.IJKMPET_PLAYBACK_STATE_CHANGED.rawValue:
