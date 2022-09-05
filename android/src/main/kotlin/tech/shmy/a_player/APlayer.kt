@@ -230,6 +230,7 @@ class APlayer(
         player?.setSurface(surface!!)
     }
     private fun resetValue() {
+        stop();
 //        aPlayerEvent = APlayerEvent().copy(
 //            kernel = kernel,
 //            featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)

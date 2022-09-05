@@ -30,15 +30,10 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
        }
    }
 
-   var isAutoPlay: Bool {
-       get {
-           return aliPlayer.isAutoPlay
-       }
-   }
-
    override init() {
        AliPlayerGlobalSettings.setUseHttp2(true)
        super.init()
+       aliPlayer.enableHardwareDecoder = true
        aliPlayer.delegate = self
        aliPlayer.renderDelegate = self
    }
@@ -97,8 +92,7 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
        aliPlayer.destroy()
    }
 
-   func prepare(isAutoPlay: Bool) {
-       aliPlayer.isAutoPlay = isAutoPlay
+   func prepare() {
        aliPlayer.prepare()
    }
 
@@ -124,6 +118,7 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
        switch(eventType) {
        case AVPEventPrepareDone:
            listener?.onInitializedListener()
+           listener?.onReadyToPlayListener()
            break
        case AVPEventLoadingStart:
            listener?.onLoadingBeginListener()
@@ -131,9 +126,9 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
        case AVPEventLoadingEnd:
            listener?.onLoadingEndListener()
            break
-       case AVPEventFirstRenderedStart:
-           listener?.onReadyToPlayListener()
-           break
+//       case AVPEventFirstRenderedStart:
+//           listener?.onReadyToPlayListener()
+//           break
        default:
            break
        }

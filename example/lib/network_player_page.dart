@@ -34,7 +34,7 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
           isSuccess: true,
           url: item.source,
           headers: [],
-          kernel: APlayerKernel.ijk,
+          kernel: APlayerKernel.av,
           position: 0,
           reason: '',
           playable: true,

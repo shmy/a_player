@@ -43,12 +43,14 @@ class _AttVideoPlayerTitleAdState extends State<AttVideoPlayerTitleAd> {
   void initState() {
     controller.onReadyToPlay.addListener(() {
       controller.play();
+      if (!mounted) return;
       setState(() {
         duration =
             Duration(milliseconds: controller.onReadyToPlay.value.duration);
       });
     });
     controller.onCurrentPositionChanged.addListener(() {
+      if (!mounted) return;
       setState(() {
         position =
             Duration(milliseconds: controller.onCurrentPositionChanged.value);

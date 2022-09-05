@@ -11,7 +11,6 @@ import Flutter
 class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     
     private let queuingEventSink: QueuingEventSink = QueuingEventSink.init()
-    private var aPlayerEvent: APlayerEvent = APlayerEvent.init()
   
     private var eventChannel: FlutterEventChannel?
     private var methodChannel: FlutterMethodChannel?
@@ -56,10 +55,11 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
                 self?.stop()
                 break
               case "prepare":
-                self?.prepare(isAutoPlay: call.arguments as! Bool)
+                self?.prepare()
                 break
               case "setKernel":
-                self?.setKernel(kernel: call.arguments as! Int)
+                let args = call.arguments as! Dictionary<String, Int>
+                self?.setKernel(kernel: args["kernel"]!, position: args["position"]!)
                 break
               case "setDataSource":
                 self?.lastDataSource = call.arguments as? Dictionary<String, Any>
@@ -115,10 +115,7 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     
     private func resetValue() -> Void {
         latestBuffer = nil
-        aPlayerEvent = APlayerEvent.init()
-        aPlayerEvent.kernel = kernel
         stop();
-        sendEvent()
     }
     private func restartPlay() -> Void {
         seekTo(position: 0)
@@ -136,27 +133,22 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         }
         
     }
-    private func setKernel(kernel: Int) {
+    private func setKernel(kernel: Int, position: Int) {
         if (self.kernel == kernel) {
             return
         }
-        self.kernel = kernel
-        let isAutoPlay = player?.isAutoPlay == true
-        let positionBefore = aPlayerEvent.position
         createPlayer()
         if (lastDataSource != nil) {
-            lastDataSource!["position"] = positionBefore
+            lastDataSource!["position"] = position
             setDataSource()
-            prepare(isAutoPlay: isAutoPlay)
+            prepare()
         }
     }
-    private func prepare(isAutoPlay: Bool) -> Void {
-        player?.prepare(isAutoPlay: isAutoPlay)
+    private func prepare() -> Void {
+        player?.prepare()
     }
     
     private func play() -> Void {
-        aPlayerEvent.isCompletion = false
-        sendEvent()
         player?.play()
     }
     
@@ -168,19 +160,13 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     }
     private func seekTo(position: Int64) -> Void {
         player?.seekTo(positionMs: position)
-        aPlayerEvent.position = position
-        sendEvent()
     }
     private func setSpeed(speed: Float) -> Void {
         player?.setSpeed(speed: speed)
-        aPlayerEvent.playSpeed = speed
-        sendEvent()
     }
     
     private func setLoop(loop: Bool) -> Void {
         player?.setLoop(isLoop: loop)
-        aPlayerEvent.loop = loop
-        sendEvent()
     }
     private func destroy() -> Void {
         player?.destroy()
@@ -190,9 +176,9 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         eventChannel = nil
         methodChannel = nil
     }
-    private func sendEvent() -> Void {
-        queuingEventSink.success(event: self.aPlayerEvent.toMap())
-    }
+//    private func sendEvent() -> Void {
+//        queuingEventSink.success(event: self.aPlayerEvent.toMap())
+//    }
     
     func copyPixelBuffer() -> Unmanaged<CVPixelBuffer>? {
         if latestBuffer == nil {
@@ -220,74 +206,88 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     }
     
     func onInitializedListener() {
-        aPlayerEvent.isInitialized = true
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "initialized"
+        ])
     }
     
     func onPlayingListener(isPlaying: Bool) {
-        aPlayerEvent.isPlaying = isPlaying
-        if (isPlaying) {
-            aPlayerEvent.isCompletion = false
-//            aPlayerEvent.isBuffering = false
-        }
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "playing",
+            "data": isPlaying
+        ])
     }
     
     func onErrorListener(code: String, message: String) {
-        aPlayerEvent.isError = true
-        aPlayerEvent.errorDescription = "\(code): \(message)"
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "error",
+            "data": "\(code): \(message)"
+        ])
     }
     
     func onCompletionListener() {
-        aPlayerEvent.isCompletion = true
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "completion",
+        ])
     }
     
     func onReadyToPlayListener() {
-        aPlayerEvent.isReadyToPlay = true
-        aPlayerEvent.duration = player!.duration
-        aPlayerEvent.playSpeed = player!.speed
-        aPlayerEvent.isPlaying = true
-        aPlayerEvent.isError = false
-        aPlayerEvent.isCompletion = false
-        aPlayerEvent.isBuffering = false
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "readyToPlay",
+            "data": [
+                "duration": player!.duration,
+                "playSpeed": player!.speed
+            ]
+        ])
     }
     
     func onVideoSizeChangedListener(width: Int32, height: Int32) {
-        aPlayerEvent.width = width
-        aPlayerEvent.height = height
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "videoSizeChanged",
+            "data": [
+                "height": height,
+                "width": width
+            ]
+        ])
     }
     
     func onCurrentPositionChangedListener(position: Int64) {
-        aPlayerEvent.position = position
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "currentPositionChanged",
+            "data": position
+        ])
     }
     
     func onCurrentDownloadSpeedChangedListener(speed: Int64) {
-        aPlayerEvent.bufferingSpeed = speed
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "currentDownloadSpeedChanged",
+            "data": speed
+        ])
     }
     
     func onBufferedPositionChangedListener(buffered: Int64) {
-        aPlayerEvent.buffered = buffered
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "bufferedPositionChanged",
+            "data": buffered
+        ])
     }
     
     func onLoadingBeginListener() {
-        aPlayerEvent.isBuffering = true
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "loadingBegin"
+        ])
     }
     
     func onLoadingProgressListener(percent: Int) {
-        aPlayerEvent.bufferingPercentage = percent
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "loadingProgress",
+            "data": percent
+        ])
     }
     
     func onLoadingEndListener() {
-        aPlayerEvent.isBuffering = false
-        sendEvent()
+        queuingEventSink.success(event: [
+            "type": "loadingEnd"
+        ])
     }
 }

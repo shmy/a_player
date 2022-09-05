@@ -23,7 +23,6 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     
     private var ijkPlayer: IJKFFMediaPlayer? = IJKFFMediaPlayer.init()
     private var listener: APlayerListener?
-    private var _isAutoPlay = false
     private var _speed: Float = 1.0
     private var _isLoop = false
     override init() {
@@ -49,12 +48,6 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     var isLoop: Bool {
         get {
             return _isLoop
-        }
-    }
-    
-    var isAutoPlay: Bool {
-        get {
-            return _isAutoPlay
         }
     }
     
@@ -99,6 +92,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
         ijkPlayer?.setOptionIntValue(10 * 1024 * 1024, forKey: "max-buffer-size", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(30, forKey: "max-fps", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(1, forKey: "packet-buffering", of: kIJKFFOptionCategoryPlayer)
+        ijkPlayer?.setOptionIntValue(0, forKey: "start-on-prepared", of: kIJKFFOptionCategoryPlayer)
         
         ijkPlayer?.setOptionIntValue(1, forKey: "enable-position-notify", of: kIJKFFOptionCategoryPlayer)
         ijkPlayer?.setOptionIntValue(1, forKey: "videotoolbox", of: kIJKFFOptionCategoryPlayer)
@@ -117,9 +111,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
         ijkPlayer = nil
     }
     
-    func prepare(isAutoPlay: Bool) {
-        _isAutoPlay = isAutoPlay
-        ijkPlayer?.setOptionIntValue(_isAutoPlay ? 1 : 0, forKey: "start-on-prepared", of: kIJKFFOptionCategoryPlayer)
+    func prepare() {
         ijkPlayer?.prepareAsync()
     }
     
@@ -153,6 +145,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
         switch(Int(waht)) {
         case IJKMPEventType.IJKMPET_PREPARED.rawValue:
             listener?.onInitializedListener()
+            listener?.onReadyToPlayListener()
             break
         case IJKMPEventType.IJKMPET_PLAYBACK_STATE_CHANGED.rawValue:
             onStateChange(state: arg1)
@@ -170,9 +163,9 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
         case IJKMPEventType.IJKMPET_VIDEO_SIZE_CHANGED.rawValue:
             listener?.onVideoSizeChangedListener(width: arg1, height: arg2)
             break
-        case IJKMPEventType.IJKMPET_VIDEO_RENDERING_START.rawValue:
-            listener?.onReadyToPlayListener()
-            break
+//        case IJKMPEventType.IJKMPET_VIDEO_RENDERING_START.rawValue:
+//            listener?.onReadyToPlayListener()
+//            break
         case IJKMPEventType.IJKMPET_ERROR.rawValue:
             listener?.onErrorListener(code: "\(arg1)", message: "play error")
             break

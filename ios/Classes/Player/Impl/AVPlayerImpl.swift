@@ -22,7 +22,6 @@ class AVPlayerImpl: NSObject, APlayerInterface {
     private var displayLink: CADisplayLink?
     var _duration: Int64 = 0
     var _isLoop: Bool = false
-    var _isAutoPlay: Bool = false
     var duration: Int64 {
         get {
             return _duration
@@ -41,13 +40,8 @@ class AVPlayerImpl: NSObject, APlayerInterface {
         }
     }
     
-    var isAutoPlay: Bool {
-        get {
-            return _isAutoPlay
-        }
-    }
     @objc func onDisplayLink(_ displayLink: CADisplayLink) {
-        if (avPlayerItemVideoOutput == nil) {
+        if (avPlayerItemVideoOutput == nil || avPlayerItem == nil) {
             return
         }
         // https://xinnyu.github.io/2016/11/15/iOS%20AVPlayer%20%E7%AE%80%E5%8D%95%E5%B0%81%E8%A3%85/
@@ -134,9 +128,6 @@ class AVPlayerImpl: NSObject, APlayerInterface {
             listener?.onInitializedListener()
             listener?.onReadyToPlayListener()
             avPlayerItem?.add(avPlayerItemVideoOutput!)
-            if (self._isAutoPlay) {
-                self.play()
-            }
             break
         case .failed:
             listener?.onErrorListener(code: "-1", message: "play error")
@@ -219,8 +210,7 @@ class AVPlayerImpl: NSObject, APlayerInterface {
         NotificationCenter.default.removeObserver(self)
     }
     
-    func prepare(isAutoPlay: Bool) {
-        self._isAutoPlay = isAutoPlay
+    func prepare() {
         avPlayer?.play()
     }
     

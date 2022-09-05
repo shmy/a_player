@@ -11,7 +11,6 @@ protocol APlayerInterface {
     var duration: Int64 { get }
     var speed: Float { get }
     var isLoop: Bool { get }
-    var isAutoPlay: Bool { get }
     func addListener(listener: APlayerListener) -> Void
     func play() -> Void
     func pause() -> Void
@@ -19,7 +18,7 @@ protocol APlayerInterface {
     func setHttpDataSource(url: String, startAtPositionMs: Int64, headers: Dictionary<String, String>)
     func setFileDataSource(path: String, startAtPositionMs: Int64)
     func destroy() -> Void
-    func prepare(isAutoPlay: Bool) -> Void
+    func prepare() -> Void
     func seekTo(positionMs: Int64) -> Void
     func setSpeed(speed: Float) -> Void
     func setLoop(isLoop: Bool) -> Void
