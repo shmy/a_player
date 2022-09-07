@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:a_player/a_player_pip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'a_player_constant.dart';
@@ -165,42 +166,29 @@ class APlayerController extends ChangeNotifier
     await methodChannel?.invokeMethod('seekTo', position);
   }
 
-  void _enterPipPage() {
-    Navigator.of(context!).push(PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Material(
-        color: Colors.black,
-        child: Align(
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Center(
-              child: Texture(
-                textureId: textureId,
-              ),
-            ),
-          ),
-        ),
-      ),
+  Future<void> _enterPipPage() async {
+    await Navigator.of(context!).push(PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          APlayerPip(controller: this),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child;
       },
     ));
   }
-  void enterPip(BuildContext context) {
-    if (isPipMode) {
-      return;
-    }
 
+  Future<bool> enterPip(BuildContext context) async {
+    if (isPipMode) {
+      return true;
+    }
     screenSize = MediaQuery.of(context).size;
-    methodChannel?.invokeMethod('enterPip').then((isOpened) {
-      isPipMode = isOpened;
-      if (isOpened) {
-        this.context = context;
-        _enterPipPage();
-        play();
-      } else {
-        methodChannel?.invokeMethod('openSettings');
-      }
-    });
+    isPipMode = await methodChannel?.invokeMethod('enterPip');
+    if (isPipMode) {
+      this.context = context;
+      _enterPipPage();
+    } else {
+      methodChannel?.invokeMethod('openSettings');
+    }
+    return isPipMode;
   }
 
   void exitPip() {
