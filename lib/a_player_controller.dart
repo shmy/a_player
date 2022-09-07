@@ -165,28 +165,38 @@ class APlayerController extends ChangeNotifier
     await methodChannel?.invokeMethod('seekTo', position);
   }
 
+  void _enterPipPage() {
+    Navigator.of(context!).push(PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Material(
+        color: Colors.black,
+        child: Align(
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Center(
+              child: Texture(
+                textureId: textureId,
+              ),
+            ),
+          ),
+        ),
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return child;
+      },
+    ));
+  }
   void enterPip(BuildContext context) {
     if (isPipMode) {
       return;
     }
+
     screenSize = MediaQuery.of(context).size;
     methodChannel?.invokeMethod('enterPip').then((isOpened) {
       isPipMode = isOpened;
       if (isOpened) {
         this.context = context;
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-          return Material(
-            color: Colors.black,
-            child: Align(
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Texture(
-                  textureId: textureId,
-                ),
-              ),
-            ),
-          );
-        }));
+        _enterPipPage();
+        play();
       } else {
         methodChannel?.invokeMethod('openSettings');
       }

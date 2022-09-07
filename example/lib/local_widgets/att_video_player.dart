@@ -33,7 +33,8 @@ class AttVideoPlayer extends StatelessWidget {
               child: Obx(() {
                 if (uiController.showTitleAd.value) {
                   return AttVideoPlayerTitleAd(
-                    url: 'https://vfx.mtime.cn/Video/2019/03/09/mp4/190309153658147087.mp4',
+                    url:
+                        'https://vfx.mtime.cn/Video/2019/03/09/mp4/190309153658147087.mp4',
                     onDone: controller.titleAdToPlay,
                     onError: controller.titleAdToPlay,
                   );
@@ -80,7 +81,7 @@ class AttVideoPlayer extends StatelessWidget {
     Widget? child,
   }) {
     return Container(
-      decoration: const BoxDecoration(color: Colors.black),
+      decoration: const BoxDecoration(color: Colors.red),
       child: child,
     );
   }
