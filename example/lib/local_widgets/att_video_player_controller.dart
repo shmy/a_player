@@ -43,7 +43,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     aPlayerController.onLoadingBegin.addListener(_onLoadingBegin);
     aPlayerController.onLoadingEnd.addListener(_onLoadingEnd);
 
-    await aPlayerController.initialize(kernel: APlayerKernel.ijk);
+    await aPlayerController.initialize();
   }
 
   void setVisible(bool visible) {

@@ -77,12 +77,18 @@ class APlayerController extends ChangeNotifier
   APlayerMirrorMode _mirrorMode = APlayerMirrorMode.none;
   int _videoHeight = 0;
   int _videoWidth = 0;
+  APlayerKernel _kernel = APlayerKernel.aliyun;
+  String _currentSource = '';
 
   bool get hasTextureId => textureId != -1;
 
   APlayerFit get fit => _fit;
 
   APlayerMirrorMode get mirrorMode => _mirrorMode;
+
+  APlayerKernel get kernel => _kernel;
+
+  String get currentSource => _currentSource;
 
   int get videoHeight => _videoHeight;
 
@@ -92,9 +98,8 @@ class APlayerController extends ChangeNotifier
   Size screenSize = Size.zero;
 
   @mustCallSuper
-  Future<void> initialize({APlayerKernel kernel = APlayerKernel.ijk}) async {
-    final textureId =
-        await _methodChannel.invokeMethod<int>('initialize', kernel.index);
+  Future<void> initialize() async {
+    final textureId = await _methodChannel.invokeMethod<int>('initialize');
     if (textureId != null) {
       WidgetsBinding.instance.addObserver(this);
       this.textureId = textureId;
@@ -107,13 +112,20 @@ class APlayerController extends ChangeNotifier
     }
   }
 
-  Future<void> setDataSouce(String source,
-      {List<APlayerConfigHeader> headers = const [], int position = 0}) async {
+  Future<void> setDataSouce(
+    String source, {
+    APlayerKernel kernel = APlayerKernel.aliyun,
+    List<APlayerConfigHeader> headers = const [],
+    int position = 0,
+  }) async {
+    _currentSource = source;
+    notifyListeners();
     Map<String, String> httpHeaders = {};
     for (var header in headers) {
       httpHeaders[header.key] = header.value;
     }
     await methodChannel?.invokeMethod('setDataSource', {
+      "kernel": kernel.index,
       "url": source,
       "position": position,
       "httpHeaders": httpHeaders,
@@ -153,13 +165,6 @@ class APlayerController extends ChangeNotifier
 
   Future<void> setSpeed(double speed) async {
     await methodChannel?.invokeMethod('setSpeed', speed);
-  }
-
-  Future<void> setKernel(APlayerKernel kernel, int position) async {
-    await methodChannel?.invokeMethod('setKernel', {
-      "kernel": kernel.index,
-      "position": position,
-    });
   }
 
   Future<void> seekTo(int position) async {
@@ -218,6 +223,8 @@ class APlayerController extends ChangeNotifier
           _onInitializing.notifyListeners();
           break;
         case "initialized":
+          _kernel = APlayerKernel.values[event['data']];
+          notifyListeners();
           _onInitialized.notifyListeners();
           break;
         case "readyToPlay":

@@ -27,15 +27,14 @@ class APlayer(
     private val activity: Activity,
     private val textureEntry: TextureRegistry.SurfaceTextureEntry,
     private val binaryMessenger: BinaryMessenger,
-    private var kernel: Int
 ) : EventChannel.StreamHandler {
+    private var kernel: Int? = null;
     private var player: APlayerInterface? = null
     private val surfaceTexture: SurfaceTexture = textureEntry.surfaceTexture()
     private var surface: Surface? = null
     private val queuingEventSink: QueuingEventSink = QueuingEventSink()
     private var eventChannel: EventChannel? = null
     private var methodChannel: MethodChannel? = null
-    private var lastDataSource: MutableMap<String, Any>? = null
 
     init {
         bindFlutter()
@@ -60,11 +59,6 @@ class APlayer(
                     stop()
                     result.success(null)
                 }
-                "setKernel" -> {
-                    val args = call.arguments as MutableMap<String, Long>;
-                    setKernel(kernel = args["kernel"]!!.toInt(), position = args["position"]!!)
-                    result.success(null)
-                }
                 "prepare" -> {
                     prepare()
                     result.success(null)
@@ -74,8 +68,7 @@ class APlayer(
                     result.success(null)
                 }
                 "setDataSource" -> {
-                    lastDataSource = call.arguments as MutableMap<String, Any>
-                    setDataSource()
+                    setDataSource(call.arguments as MutableMap<String, Any>)
                     result.success(null)
                 }
                 "seekTo" -> {
@@ -110,10 +103,11 @@ class APlayer(
     }
 
     private fun createPlayer() {
-        queuingEventSink.success(mapOf(
-            "type" to "initializing"
-        ))
-        resetValue()
+        queuingEventSink.success(
+            mapOf(
+                "type" to "initializing"
+            )
+        )
         player?.release()
         player = null
         when (kernel) {
@@ -132,96 +126,122 @@ class APlayer(
         }
         setupPlayer()
 
-        queuingEventSink.success(mapOf(
-            "type" to "initialized"
-        ))
+        queuingEventSink.success(
+            mapOf(
+                "type" to "initialized",
+                "data" to kernel
+            )
+        )
     }
 
     private fun setupPlayer() {
         player?.addListener(object : APlayerListener {
             override fun onVideoSizeChangedListener(width: Int, height: Int) {
                 surfaceTexture.setDefaultBufferSize(width, height)
-                queuingEventSink.success(mapOf(
-                    "type" to "videoSizeChanged",
-                    "data" to mapOf(
-                        "height" to height,
-                        "width" to width,
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "videoSizeChanged",
+                        "data" to mapOf(
+                            "height" to height,
+                            "width" to width,
+                        )
                     )
-                ))
+                )
             }
 
             override fun onPlayingListener(isPlaying: Boolean) {
-                queuingEventSink.success(mapOf(
-                    "type" to "playing",
-                    "data" to isPlaying,
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "playing",
+                        "data" to isPlaying,
+                    )
+                )
             }
 
             override fun onReadyToPlayListener() {
-                queuingEventSink.success(mapOf(
-                    "type" to "readyToPlay",
-                    "data" to mapOf(
-                        "duration" to player!!.duration,
-                        "playSpeed" to player!!.speed,
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "readyToPlay",
+                        "data" to mapOf(
+                            "duration" to player!!.duration,
+                            "playSpeed" to player!!.speed,
+                        )
                     )
-                ))
+                )
             }
 
             override fun onErrorListener(code: String, message: String) {
-                queuingEventSink.success(mapOf(
-                    "type" to "error",
-                    "data" to "$code: $message"
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "error",
+                        "data" to "$code: $message"
+                    )
+                )
             }
 
             override fun onCompletionListener() {
-                queuingEventSink.success(mapOf(
-                    "type" to "completion",
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "completion",
+                    )
+                )
             }
 
             override fun onCurrentPositionChangedListener(position: Long) {
-                queuingEventSink.success(mapOf(
-                    "type" to "currentPositionChanged",
-                    "data" to position
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "currentPositionChanged",
+                        "data" to position
+                    )
+                )
             }
 
             override fun onCurrentDownloadSpeedChangedListener(speed: Long) {
-                queuingEventSink.success(mapOf(
-                    "type" to "currentDownloadSpeedChanged",
-                    "data" to speed
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "currentDownloadSpeedChanged",
+                        "data" to speed
+                    )
+                )
             }
 
             override fun onBufferedPositionChangedListener(buffered: Long) {
-                queuingEventSink.success(mapOf(
-                    "type" to "bufferedPositionChanged",
-                    "data" to buffered
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "bufferedPositionChanged",
+                        "data" to buffered
+                    )
+                )
             }
 
             override fun onLoadingBeginListener() {
-                queuingEventSink.success(mapOf(
-                    "type" to "loadingBegin",
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "loadingBegin",
+                    )
+                )
             }
 
             override fun onLoadingProgressListener(percent: Int) {
-                queuingEventSink.success(mapOf(
-                    "type" to "loadingProgress",
-                    "data" to percent,
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "loadingProgress",
+                        "data" to percent,
+                    )
+                )
             }
 
             override fun onLoadingEndListener() {
-                queuingEventSink.success(mapOf(
-                    "type" to "loadingEnd",
-                ))
+                queuingEventSink.success(
+                    mapOf(
+                        "type" to "loadingEnd",
+                    )
+                )
             }
         })
         setSurface()
     }
+
     private fun setSurface() {
         val canvas = surface?.lockCanvas(null)
         canvas?.drawColor(Color.BLACK)
@@ -230,30 +250,24 @@ class APlayer(
         surface = Surface(surfaceTexture)
         player?.setSurface(surface!!)
     }
-    private fun resetValue() {
-        stop();
-//        aPlayerEvent = APlayerEvent().copy(
-//            kernel = kernel,
-//            featurePictureInPicture = activity.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
-//        )
-//        sendEvent()
-    }
+
     private fun restart() {
         seekTo(0)
         play()
     }
-    private fun setDataSource() {
-        resetValue()
-        val config: MutableMap<String, Any> = lastDataSource!!
-        if (config["position"] is Int) {
-            config["position"] = (config["position"] as Int).toLong()
-        }
-        val url = config["url"] as String
-        val position = config["position"] as Long
+
+    private fun setDataSource(
+       args: Map<String, Any>
+    ) {
+        val kernel = args["kernel"] as Int
+        val url = args["url"] as String
+        val position = (args["position"] as Int).toLong()
+        val httpHeaders = args["httpHeaders"] as Map<String, String>
+        setKernel(kernel)
         if (APlayerUtil.isHttpProtocol(url)) {
             player?.setHttpDataSource(
                 url,
-                position, config["httpHeaders"] as Map<String, String>
+                position, httpHeaders
             )
         } else if (APlayerUtil.isFileProtocol(url)) {
             player?.setFileDataSource(url, position)
@@ -276,17 +290,12 @@ class APlayer(
         player?.stop()
     }
 
-    private fun setKernel(kernel: Int, position: Long) {
+    private fun setKernel(kernel: Int) {
         if (kernel == this.kernel) {
             return
         }
         this.kernel = kernel
         createPlayer()
-        if (lastDataSource != null) {
-            lastDataSource!!["position"] = position
-            setDataSource()
-            prepare()
-        }
     }
 
     private fun seekTo(position: Long) {
@@ -344,7 +353,6 @@ class APlayer(
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         queuingEventSink.setDelegate(events)
-        createPlayer()
     }
 
     override fun onCancel(arguments: Any?) {
