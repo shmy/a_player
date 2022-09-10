@@ -79,6 +79,8 @@ class APlayerController extends ChangeNotifier
   int _videoWidth = 0;
   APlayerKernel _kernel = APlayerKernel.aliyun;
   String _currentSource = '';
+  List<APlayerConfigHeader> _currenthttpHeaders = [];
+  int _currentPosition = 0;
 
   bool get hasTextureId => textureId != -1;
 
@@ -89,6 +91,10 @@ class APlayerController extends ChangeNotifier
   APlayerKernel get kernel => _kernel;
 
   String get currentSource => _currentSource;
+
+  List<APlayerConfigHeader> get currenthttpHeaders => _currenthttpHeaders;
+
+  int get currentPosition => _currentPosition;
 
   int get videoHeight => _videoHeight;
 
@@ -119,6 +125,8 @@ class APlayerController extends ChangeNotifier
     int position = 0,
   }) async {
     _currentSource = source;
+    _currenthttpHeaders = headers;
+    _currentPosition = position;
     notifyListeners();
     Map<String, String> httpHeaders = {};
     for (var header in headers) {
@@ -131,6 +139,15 @@ class APlayerController extends ChangeNotifier
       "httpHeaders": httpHeaders,
     });
     prepare();
+  }
+
+  Future<void> setKernel(APlayerKernel kernel) async {
+    await setDataSouce(
+      _currentSource,
+      kernel: kernel,
+      headers: _currenthttpHeaders,
+      position: _currentPosition,
+    );
   }
 
   Future<void> play() async {
@@ -251,6 +268,7 @@ class APlayerController extends ChangeNotifier
           break;
         case "currentPositionChanged":
           _onCurrentPositionChanged.value = event['data'] as int;
+          _currentPosition = _onCurrentPositionChanged.value;
           _onCurrentPositionChanged.notifyListeners();
           break;
         case "currentDownloadSpeedChanged":
