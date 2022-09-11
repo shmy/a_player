@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:a_player/a_player_pip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'a_player_constant.dart';
@@ -69,7 +68,7 @@ mixin APlayerControllerListener {
 }
 
 class APlayerController extends ChangeNotifier
-    with APlayerControllerListener, WidgetsBindingObserver {
+    with APlayerControllerListener {
   EventChannel? eventChannel;
   MethodChannel? methodChannel;
   int textureId = -1;
@@ -99,15 +98,11 @@ class APlayerController extends ChangeNotifier
   int get videoHeight => _videoHeight;
 
   int get videoWidth => _videoWidth;
-  bool isPipMode = false;
-  BuildContext? context;
-  Size screenSize = Size.zero;
 
   @mustCallSuper
   Future<void> initialize() async {
     final textureId = await _methodChannel.invokeMethod<int>('initialize');
     if (textureId != null) {
-      WidgetsBinding.instance.addObserver(this);
       this.textureId = textureId;
       eventChannel =
           EventChannel('${APlayerConstant.playerEventChanneName}$textureId');
@@ -188,40 +183,15 @@ class APlayerController extends ChangeNotifier
     await methodChannel?.invokeMethod('seekTo', position);
   }
 
-  Future<void> _enterPipPage() async {
-    await Navigator.of(context!).push(PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          APlayerPip(controller: this),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return child;
-      },
-    ));
-  }
 
-  Future<bool> enterPip(BuildContext context) async {
-    if (isPipMode) {
-      return true;
-    }
-    screenSize = MediaQuery.of(context).size;
-    isPipMode = await methodChannel?.invokeMethod('enterPip');
-    if (isPipMode) {
-      this.context = context;
-      _enterPipPage();
-    } else {
+  Future<bool> enterPip() async {
+    final bool isPipMode = await methodChannel?.invokeMethod('enterPip');
+    if (!isPipMode) {
       methodChannel?.invokeMethod('openSettings');
     }
     return isPipMode;
   }
 
-  void exitPip() {
-    isPipMode = false;
-    if (context != null) {
-      final size = MediaQuery.of(context!).size;
-      if (size == screenSize) {
-        Navigator.of(context!).pop();
-      }
-    }
-  }
 
   void setFit(APlayerFit fit) async {
     _fit = fit;
@@ -298,20 +268,6 @@ class APlayerController extends ChangeNotifier
   @override
   void dispose() {
     super.dispose();
-    WidgetsBinding.instance.removeObserver(this);
     release();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.paused:
-        break;
-      case AppLifecycleState.resumed:
-        exitPip();
-        break;
-      default:
-        break;
-    }
   }
 }
