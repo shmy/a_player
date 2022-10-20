@@ -113,7 +113,7 @@ class APlayerController extends ChangeNotifier
     }
   }
 
-  Future<void> setDataSouce(
+  Future<void> setDataSource(
     String source, {
     APlayerKernel kernel = APlayerKernel.aliyun,
     List<APlayerConfigHeader> headers = const [],
@@ -137,7 +137,7 @@ class APlayerController extends ChangeNotifier
   }
 
   Future<void> setKernel(APlayerKernel kernel) async {
-    await setDataSouce(
+    await setDataSource(
       _currentSource,
       kernel: kernel,
       headers: _currenthttpHeaders,
