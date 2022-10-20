@@ -113,7 +113,7 @@ class APlayerController extends ChangeNotifier
     }
   }
 
-  Future<void> setDataSource(
+  Future<void> setDataSouce(
     String source, {
     APlayerKernel kernel = APlayerKernel.aliyun,
     List<APlayerConfigHeader> headers = const [],
@@ -129,7 +129,7 @@ class APlayerController extends ChangeNotifier
     }
     await methodChannel?.invokeMethod('setDataSource', {
       "kernel": kernel.index,
-      "url": Uri.encodeFull(source),
+      "url": source,
       "position": position,
       "httpHeaders": httpHeaders,
     });
@@ -137,7 +137,7 @@ class APlayerController extends ChangeNotifier
   }
 
   Future<void> setKernel(APlayerKernel kernel) async {
-    await setDataSource(
+    await setDataSouce(
       _currentSource,
       kernel: kernel,
       headers: _currenthttpHeaders,

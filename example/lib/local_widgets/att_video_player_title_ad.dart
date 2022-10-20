@@ -73,7 +73,7 @@ class _AttVideoPlayerTitleAdState extends State<AttVideoPlayerTitleAd> {
   }
 
   void _setupPlayer() async {
-    await controller.setDataSource(widget.url);
+    await controller.setDataSouce(widget.url);
   }
 
   @override
