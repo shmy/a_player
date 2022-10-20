@@ -114,7 +114,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     // TODO: setKernel
     // await aPlayerController.setKernel(kernel, position);
     uiController.status.value = AttVideoPlayerStatus.preparing;
-    await aPlayerController.setDataSouce(
+    await aPlayerController.setDataSource(
       dataSource,
       headers: headers,
       position: position,
