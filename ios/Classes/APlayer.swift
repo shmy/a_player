@@ -126,12 +126,12 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         let kernel = args["kernel"] as! Int
         let url = args["url"] as! String
         let position = args["position"] as! Int64
+        self.setKernel(kernel: kernel)
         if (APlayerUtil.isHttpProtocol(url: url) == true) {
             player?.setHttpDataSource(url: url, startAtPositionMs: position, headers: args["httpHeaders"] as! Dictionary<String, String>)
         } else if (APlayerUtil.isFileProtocol(url: url) == true) {
             player?.setFileDataSource(path: url, startAtPositionMs: position)
         }
-        self.setKernel(kernel: kernel)
         
     }
     private func setKernel(kernel: Int) {
