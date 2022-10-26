@@ -108,7 +108,8 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         }
         setupPlayer()
         queuingEventSink.success(event: [
-            "type": "initialized"
+            "type": "initialized",
+            "data": self.kernel
         ])
     }
     
