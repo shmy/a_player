@@ -19,12 +19,10 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
     private var _textureId: Int64!
     private var textureRegistry: FlutterTextureRegistry?
     private var player: APlayerInterface?
-    private var kernel: Int
-    private var lastDataSource: Dictionary<String, Any>?
+    private var kernel: Int?
     
-    init(registrar: FlutterPluginRegistrar, kernel: Int) {
+    init(registrar: FlutterPluginRegistrar) {
         self.registrar = registrar
-        self.kernel = kernel
         self.textureRegistry = registrar.textures()
         super.init()
         self.bindFlutter()
@@ -57,13 +55,8 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
               case "prepare":
                 self?.prepare()
                 break
-              case "setKernel":
-                let args = call.arguments as! Dictionary<String, Int>
-                self?.setKernel(kernel: args["kernel"]!, position: args["position"]!)
-                break
               case "setDataSource":
-                self?.lastDataSource = call.arguments as? Dictionary<String, Any>
-                self?.setDataSource()
+                self?.setDataSource(args: call.arguments as! Dictionary<String, Any>)
                 break
             case "restart":
                 self?.restartPlay()
@@ -127,28 +120,25 @@ class APlayer: NSObject, FlutterTexture, FlutterStreamHandler, APlayerListener {
         seekTo(position: 0)
         play()
     }
-    private func setDataSource() -> Void {
+    private func setDataSource(args: Dictionary<String, Any>) -> Void {
         resetValue()
-        let config: Dictionary<String, Any> = lastDataSource!
-        let url = config["url"] as! String
-        let position = config["position"] as! Int64
+        let kernel = args["kernel"] as! Int
+        let url = args["url"] as! String
+        let position = args["position"] as! Int64
         if (APlayerUtil.isHttpProtocol(url: url) == true) {
-            player?.setHttpDataSource(url: url, startAtPositionMs: position, headers: config["httpHeaders"] as! Dictionary<String, String>)
+            player?.setHttpDataSource(url: url, startAtPositionMs: position, headers: args["httpHeaders"] as! Dictionary<String, String>)
         } else if (APlayerUtil.isFileProtocol(url: url) == true) {
             player?.setFileDataSource(path: url, startAtPositionMs: position)
         }
+        self.setKernel(kernel: kernel)
         
     }
-    private func setKernel(kernel: Int, position: Int) {
+    private func setKernel(kernel: Int) {
         if (self.kernel == kernel) {
             return
         }
+        self.kernel = kernel
         createPlayer()
-        if (lastDataSource != nil) {
-            lastDataSource!["position"] = position
-            setDataSource()
-            prepare()
-        }
     }
     private func prepare() -> Void {
         player?.prepare()
