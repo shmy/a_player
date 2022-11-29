@@ -15,7 +15,7 @@ A new Flutter project.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'AliPlayerSDK_iOS', '~> 5.4.7.0'
+  s.dependency 'AliPlayerSDK_iOS', '~> 5.4.6.0'
   s.dependency 'BIJKPlayer', '~> 0.7.16'
   s.platform = :ios, '9.0'
   s.static_framework = true
