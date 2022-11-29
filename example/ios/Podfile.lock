@@ -1,0 +1,93 @@
+PODS:
+  - a_player (0.0.1):
+    - AliPlayerSDK_iOS (~> 5.4.7.0)
+    - BIJKPlayer (~> 0.7.16)
+    - Flutter
+  - AliPlayerSDK_iOS (5.4.7.1):
+    - AliPlayerSDK_iOS/AliPlayerSDK (= 5.4.7.1)
+  - AliPlayerSDK_iOS/AliPlayerSDK (5.4.7.1)
+  - battery_plus (1.0.0):
+    - Flutter
+  - BIJKPlayer (0.7.16)
+  - connectivity_plus (0.0.1):
+    - Flutter
+    - ReachabilitySwift
+  - Flutter (1.0.0)
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - orientation (0.0.1):
+    - Flutter
+  - path_provider_ios (0.0.1):
+    - Flutter
+  - ReachabilitySwift (5.0.0)
+  - screen_brightness_ios (0.1.0):
+    - Flutter
+  - sqflite (0.0.2):
+    - Flutter
+    - FMDB (>= 2.7.5)
+  - volume_controller (0.0.1):
+    - Flutter
+  - wakelock (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - a_player (from `.symlinks/plugins/a_player/ios`)
+  - battery_plus (from `.symlinks/plugins/battery_plus/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
+  - Flutter (from `Flutter`)
+  - orientation (from `.symlinks/plugins/orientation/ios`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - screen_brightness_ios (from `.symlinks/plugins/screen_brightness_ios/ios`)
+  - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - volume_controller (from `.symlinks/plugins/volume_controller/ios`)
+  - wakelock (from `.symlinks/plugins/wakelock/ios`)
+
+SPEC REPOS:
+  trunk:
+    - AliPlayerSDK_iOS
+    - BIJKPlayer
+    - FMDB
+    - ReachabilitySwift
+
+EXTERNAL SOURCES:
+  a_player:
+    :path: ".symlinks/plugins/a_player/ios"
+  battery_plus:
+    :path: ".symlinks/plugins/battery_plus/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
+  Flutter:
+    :path: Flutter
+  orientation:
+    :path: ".symlinks/plugins/orientation/ios"
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
+  screen_brightness_ios:
+    :path: ".symlinks/plugins/screen_brightness_ios/ios"
+  sqflite:
+    :path: ".symlinks/plugins/sqflite/ios"
+  volume_controller:
+    :path: ".symlinks/plugins/volume_controller/ios"
+  wakelock:
+    :path: ".symlinks/plugins/wakelock/ios"
+
+SPEC CHECKSUMS:
+  a_player: c38c87fa83c33ffc0d8d87908e244259d87ee2f6
+  AliPlayerSDK_iOS: f5214cba6536e635b21c0d625a438b05deecbadf
+  battery_plus: 7851ab482c336dd101ae735dc9363f01e1223c7c
+  BIJKPlayer: 4c5d66e5cb99ae5bade6f22a4fcc031722a81c64
+  connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  orientation: 6c9203efe86ce4cff379756910f18b2d745628c3
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
+  screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
+  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
+  volume_controller: 531ddf792994285c9b17f9d8a7e4dcdd29b3eae9
+  wakelock: d0fc7c864128eac40eba1617cb5264d9c940b46f
+
+PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
+
+COCOAPODS: 1.11.3
