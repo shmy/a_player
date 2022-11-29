@@ -1,11 +1,11 @@
 PODS:
   - a_player (0.0.1):
-    - AliPlayerSDK_iOS (~> 5.4.7.0)
+    - AliPlayerSDK_iOS (~> 5.4.6.0)
     - BIJKPlayer (~> 0.7.16)
     - Flutter
-  - AliPlayerSDK_iOS (5.4.7.1):
-    - AliPlayerSDK_iOS/AliPlayerSDK (= 5.4.7.1)
-  - AliPlayerSDK_iOS/AliPlayerSDK (5.4.7.1)
+  - AliPlayerSDK_iOS (5.4.6.0):
+    - AliPlayerSDK_iOS/AliPlayerSDK (= 5.4.6.0)
+  - AliPlayerSDK_iOS/AliPlayerSDK (5.4.6.0)
   - battery_plus (1.0.0):
     - Flutter
   - BIJKPlayer (0.7.16)
@@ -73,8 +73,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
-  a_player: c38c87fa83c33ffc0d8d87908e244259d87ee2f6
-  AliPlayerSDK_iOS: f5214cba6536e635b21c0d625a438b05deecbadf
+  a_player: 72b8d14ad418c9c473a7201992c67ae306b247bd
+  AliPlayerSDK_iOS: b81416756ef4d4814ecfe1fff0d97a97ee827cbb
   battery_plus: 7851ab482c336dd101ae735dc9363f01e1223c7c
   BIJKPlayer: 4c5d66e5cb99ae5bade6f22a4fcc031722a81c64
   connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
