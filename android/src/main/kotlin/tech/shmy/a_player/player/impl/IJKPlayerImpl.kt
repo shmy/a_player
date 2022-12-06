@@ -56,18 +56,20 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
     override fun stop() {
         ijkMediaPlayer.stop()
     }
+
     private fun willSetDataSource() {
         ijkMediaPlayer.stop()
         ijkMediaPlayer.reset()
         ijkMediaPlayer.setSurface(surface)
     }
+
     override fun setHttpDataSource(
         url: String,
         startAtPositionMs: Long,
         headers: Map<String, String>
     ) {
         willSetDataSource()
-        var userAgent: String? = null
+        var userAgent = ""
         val customHeaders: MutableMap<String, String> = mutableMapOf()
         headers.forEach { header ->
             when {
@@ -79,13 +81,12 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
                 }
             }
         }
-        if (userAgent != null) {
-            ijkMediaPlayer.setOption(
-                IjkMediaPlayer.OPT_CATEGORY_FORMAT,
-                "user_agent",
-                userAgent
-            )
-        }
+        ijkMediaPlayer.setOption(
+            IjkMediaPlayer.OPT_CATEGORY_FORMAT,
+            "user_agent",
+            userAgent
+        )
+
         ijkMediaPlayer.setOption(
             IjkMediaPlayer.OPT_CATEGORY_PLAYER,
             "seek-at-start",
@@ -186,6 +187,7 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         }
 
     }
+
     private fun removeEvent() {
         ijkMediaPlayer.resetListeners()
         ijkMediaPlayer.setOnVideoSizeChangedListener(null)

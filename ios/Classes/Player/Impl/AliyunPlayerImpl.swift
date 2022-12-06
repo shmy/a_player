@@ -46,8 +46,8 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
        playerConfig?.clearShowWhenStop = true
        playerConfig?.maxBufferDuration = 1000 * 60 * 10
        playerConfig?.mMAXBackwardDuration = 1 * 60 * 10
-       var userAgent: String? = nil
-       var referer: String? = nil
+       var userAgent: String = ""
+       var referer: String = ""
        let customHeaders: NSMutableArray = NSMutableArray.init()
        headers.forEach { (key: String, value: String) in
            if (APlayerUtil.isUserAgentKey(key: key)) {
@@ -58,12 +58,8 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
                customHeaders.add("\(key):\(value)")
            }
        }
-       if (userAgent != nil) {
-         playerConfig?.userAgent = userAgent
-       }
-       if (referer != nil) {
-         playerConfig?.referer = referer
-       }
+       playerConfig?.userAgent = userAgent
+       playerConfig?.referer = referer
 
 //       playerConfig?.httpHeaders = customHeaders
        aliPlayer.setConfig(playerConfig)

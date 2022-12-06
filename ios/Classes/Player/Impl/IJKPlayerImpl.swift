@@ -70,7 +70,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
     func setHttpDataSource(url: String, startAtPositionMs: Int64, headers: Dictionary<String, String>) {
         ijkPlayer?.stop()
         ijkPlayer?.reset()
-        var userAgent: String? = nil
+        var userAgent: String = ""
         let customHeaders: NSMutableArray = NSMutableArray.init()
         headers.forEach { (key: String, value: String) in
             if (APlayerUtil.isUserAgentKey(key: key)) {
@@ -79,9 +79,7 @@ class IJKPlayerImpl: NSObject, APlayerInterface, IJKMPEventHandler, IJKCVPBViewP
                 customHeaders.add("\(key):\(value)")
             }
         }
-        if (userAgent != nil) {
-            ijkPlayer?.setOptionValue(userAgent!, forKey: "user_agent", of: kIJKFFOptionCategoryFormat)
-        }
+        ijkPlayer?.setOptionValue(userAgent, forKey: "user_agent", of: kIJKFFOptionCategoryFormat)
         if (customHeaders.count > 0) {
             ijkPlayer?.setOptionValue(customHeaders.componentsJoined(by: "\r\n"), forKey: "headers", of: kIJKFFOptionCategoryFormat)
         }

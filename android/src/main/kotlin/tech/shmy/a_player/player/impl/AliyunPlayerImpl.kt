@@ -114,8 +114,8 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         val config = aliPlayer.config
         config.mMaxBufferDuration = 1000 * 60 * 10
         config.mMaxBackwardBufferDurationMs = 1 * 60 * 10
-        var userAgent: String? = null
-        var referer: String? = null
+        var userAgent = ""
+        var referer = ""
         val customHeaders: ArrayList<String> = ArrayList()
         headers.forEach { header ->
             when {
@@ -130,12 +130,8 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
                 }
             }
         }
-        if (userAgent != null) {
-            config.mUserAgent = userAgent
-        }
-        if (referer != null) {
-            config.mReferrer = referer
-        }
+        config.mUserAgent = userAgent
+        config.mReferrer = referer
         config.customHeaders = customHeaders.toTypedArray()
         aliPlayer.config = config
         aliPlayer.volume = 1.0f
