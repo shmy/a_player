@@ -47,8 +47,9 @@ class _APlayerState extends State<APlayer> {
         _videoWidth = widget.controller.videoWidth;
         return LayoutBuilder(
           builder: (context, constraints) {
-            final APlayerFit fit = widget.controller.fit;
+            final APlayerFitMode fitMode = widget.controller.fitMode;
             final APlayerMirrorMode mirrorMode = widget.controller.mirrorMode;
+            final APlayerFitDefs fit = APlayerFitDefs.fromEnum(fitMode);
             final Size childSize = _getTxSize(constraints, fit);
             final Offset offset = _getTxOffset(constraints, childSize, fit);
             final Rect pos = Rect.fromLTWH(
@@ -82,7 +83,7 @@ class _APlayerState extends State<APlayer> {
         return matrix4..rotateX(pi);
     }
   }
-  Size _getTxSize(BoxConstraints constraints, APlayerFit fit) {
+  Size _getTxSize(BoxConstraints constraints, APlayerFitDefs fit) {
     Size childSize = _applyAspectRatio(
         constraints, _getAspectRatio(constraints, fit.aspectRatio));
     double sizeFactor = fit.sizeFactor;
@@ -148,7 +149,7 @@ class _APlayerState extends State<APlayer> {
   }
 
   Offset _getTxOffset(
-      BoxConstraints constraints, Size childSize, APlayerFit fit) {
+      BoxConstraints constraints, Size childSize, APlayerFitDefs fit) {
     final Alignment resolvedAlignment = fit.alignment;
     final Offset diff = (constraints.biggest - childSize) as Offset;
     return resolvedAlignment.alongOffset(diff);

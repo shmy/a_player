@@ -67,12 +67,11 @@ mixin APlayerControllerListener {
   APlayerValueListener<void> get onCompletion => _onCompletion;
 }
 
-class APlayerController extends ChangeNotifier
-    with APlayerControllerListener {
+class APlayerController extends ChangeNotifier with APlayerControllerListener {
   EventChannel? eventChannel;
   MethodChannel? methodChannel;
   int textureId = -1;
-  APlayerFit _fit = APlayerFit.contain;
+  APlayerFitMode _fitMode = APlayerFitMode.contain;
   APlayerMirrorMode _mirrorMode = APlayerMirrorMode.none;
   int _videoHeight = 0;
   int _videoWidth = 0;
@@ -83,7 +82,7 @@ class APlayerController extends ChangeNotifier
 
   bool get hasTextureId => textureId != -1;
 
-  APlayerFit get fit => _fit;
+  APlayerFitMode get fitMode => _fitMode;
 
   APlayerMirrorMode get mirrorMode => _mirrorMode;
 
@@ -183,7 +182,6 @@ class APlayerController extends ChangeNotifier
     await methodChannel?.invokeMethod('seekTo', position);
   }
 
-
   Future<bool> enterPip() async {
     final bool isPipMode = await methodChannel?.invokeMethod('enterPip');
     if (!isPipMode) {
@@ -192,9 +190,8 @@ class APlayerController extends ChangeNotifier
     return isPipMode;
   }
 
-
-  void setFit(APlayerFit fit) async {
-    _fit = fit;
+  void setFit(APlayerFitMode fitMode) async {
+    _fitMode = fitMode;
     notifyListeners();
   }
 

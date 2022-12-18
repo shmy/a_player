@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
 
-class APlayerRatio {
-  APlayerRatio._();
-
-  static const double ratio16x9 = 16 / 9;
-  static const double ratio4x3 = 4 / 3;
-  static const double ratio1x1 = 1.0;
-}
-
-class APlayerFit {
-  const APlayerFit({
+class APlayerFitDefs {
+  const APlayerFitDefs({
     this.alignment = Alignment.center,
     this.aspectRatio = -1,
     this.sizeFactor = 1.0,
@@ -19,30 +11,49 @@ class APlayerFit {
   final double aspectRatio;
   final double sizeFactor;
 
-  static const APlayerFit fill = APlayerFit(
+  static const APlayerFitDefs fill = APlayerFitDefs(
     sizeFactor: 1.0,
     aspectRatio: double.infinity,
     alignment: Alignment.center,
   );
 
-  static const APlayerFit contain = APlayerFit(
+  static const APlayerFitDefs contain = APlayerFitDefs(
     sizeFactor: 1.0,
     aspectRatio: -1,
     alignment: Alignment.center,
   );
 
-  static const APlayerFit cover = APlayerFit(
+  static const APlayerFitDefs cover = APlayerFitDefs(
     sizeFactor: -0.5,
     aspectRatio: -1,
     alignment: Alignment.center,
   );
 
-  static const APlayerFit fitWidth = APlayerFit(sizeFactor: -1.5);
-  static const APlayerFit fitHeight = APlayerFit(sizeFactor: -2.5);
-  static const APlayerFit ar16_9 = APlayerFit(aspectRatio: 16.0 / 9.0);
-  static const APlayerFit ar4_3 = APlayerFit(aspectRatio: 4.0 / 3.0);
-  static const APlayerFit ar1_1 = APlayerFit(aspectRatio: 1.0 / 1.0);
+  // static const APlayerFitDefs fitWidth = APlayerFitDefs(sizeFactor: -1.5);
+  // static const APlayerFitDefs fitHeight = APlayerFitDefs(sizeFactor: -2.5);
+  static const APlayerFitDefs ar16_9 = APlayerFitDefs(aspectRatio: 16.0 / 9.0);
+  static const APlayerFitDefs ar4_3 = APlayerFitDefs(aspectRatio: 4.0 / 3.0);
+  static const APlayerFitDefs ar1_1 = APlayerFitDefs(aspectRatio: 1.0 / 1.0);
+  static APlayerFitDefs fromEnum(APlayerFitMode fitMode) {
+    switch(fitMode) {
+      case APlayerFitMode.contain:
+       return contain;
+      case APlayerFitMode.fill:
+        return fill;
+      case APlayerFitMode.cover:
+        return cover;
+      case APlayerFitMode.ar16_9:
+        return ar16_9;
+      case APlayerFitMode.ar4_3:
+        return ar4_3;
+      case APlayerFitMode.ar1_1:
+        return ar1_1;
+    }
+  }
 }
+
+
+enum APlayerFitMode { contain, fill, cover, ar16_9, ar4_3, ar1_1 }
 
 enum APlayerMirrorMode { none, horizontal, vertical }
 
