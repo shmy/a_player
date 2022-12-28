@@ -97,7 +97,7 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         ijkMediaPlayer.setOption(
             IjkMediaPlayer.OPT_CATEGORY_PLAYER,
             "max-buffer-size",
-            100 * 1024 * 1024
+            2048
         )
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30)
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
@@ -105,6 +105,7 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1)
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1) // 开硬解
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 1)
+        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max_cached_duration", 600 * 1000)
 
         ijkMediaPlayer.setDataSource(url, customHeaders)
     }
@@ -118,8 +119,8 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         handler = null
         listener = null
         surface = null
-        ijkMediaPlayer.setSurface(null)
         removeEvent()
+        ijkMediaPlayer.setSurface(null)
         ijkMediaPlayer.reset()
         ijkMediaPlayer.stop()
         ijkMediaPlayer.release()

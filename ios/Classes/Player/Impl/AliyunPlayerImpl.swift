@@ -44,8 +44,8 @@ class AliyunPlayerImpl: NSObject, APlayerInterface, AVPDelegate, CicadaRenderDel
        let urlSource = AVPUrlSource.init().url(with: url)
        let playerConfig = aliPlayer.getConfig()
        playerConfig?.clearShowWhenStop = true
-       playerConfig?.maxBufferDuration = 1000 * 60 * 10
-       playerConfig?.mMAXBackwardDuration = 1 * 60 * 10
+       playerConfig?.maxBufferDuration = 1000 * 600
+       playerConfig?.mMAXBackwardDuration = 1000 * 600
        var userAgent: String = ""
        var referer: String = ""
        let customHeaders: NSMutableArray = NSMutableArray.init()
