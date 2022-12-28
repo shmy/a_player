@@ -97,12 +97,12 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
         ijkMediaPlayer.setOption(
             IjkMediaPlayer.OPT_CATEGORY_PLAYER,
             "max-buffer-size",
-            10 * 1024 * 1024
+            100 * 1024 * 1024
         )
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 30)
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
-//        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "fastseek")
-//        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1)
+        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "fastseek")
+        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1)
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1) // 开硬解
         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 1)
 
@@ -146,7 +146,7 @@ class IJKPlayerImpl(private val context: Context) : APlayerInterface, Runnable {
     override fun run() {
         listener?.onCurrentPositionChangedListener(ijkMediaPlayer.currentPosition)
         listener?.onCurrentDownloadSpeedChangedListener(ijkMediaPlayer.tcpSpeed)
-//        listener?.onBufferedPositionChangedListener(ijkMediaPlayer.videoCachedDuration)
+        listener?.onBufferedPositionChangedListener(ijkMediaPlayer.videoCachedDuration)
         listener?.onPlayingListener(ijkMediaPlayer.isPlaying)
         handler?.postDelayed(this, 500)
     }

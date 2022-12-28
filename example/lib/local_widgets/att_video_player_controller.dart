@@ -107,7 +107,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
 
   void _setDataSource(
     String dataSource, {
-    APlayerKernel kernel = APlayerKernel.aliyun,
+    APlayerKernel kernel = APlayerKernel.ijk,
     List<APlayerConfigHeader> headers = const [],
     int position = 0,
   }) async {
@@ -117,6 +117,7 @@ class AttVideoPlayerController with WidgetsBindingObserver {
     await aPlayerController.setDataSource(
       dataSource,
       headers: headers,
+      kernel: kernel,
       position: position,
     );
   }

@@ -13,7 +13,10 @@ import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
-import com.google.android.exoplayer2.upstream.*
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import com.google.android.exoplayer2.upstream.FileDataSource
 import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.video.VideoSize
 import tech.shmy.a_player.player.APlayerInterface
@@ -24,12 +27,17 @@ import tech.shmy.a_player.player.APlayerUtil
 class ExoPlayerImpl(
     private val context: Context
 ) : Player.Listener, APlayerInterface, Runnable {
-    private val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build()
+    private val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).setLoadControl(
+        DefaultLoadControl.Builder()
+            .setBufferDurationsMs(600 * 1000, 600 * 1000, 1000, 1000)
+            .build()
+    ).build()
     private var listener: APlayerListener? = null
     private var _speed: Float = 1.0F
     private var handler: Handler? = null
 
     init {
+        exoPlayer.contentBufferedPosition
         exoPlayer.addListener(this)
         exoPlayer.addAnalyticsListener(object : AnalyticsListener {
             override fun onBandwidthEstimate(

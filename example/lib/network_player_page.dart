@@ -1,3 +1,4 @@
+import 'package:a_player/a_player_constant.dart';
 import 'package:a_player/a_player_value.dart';
 import 'package:a_player_example/local_widgets/att_video_player.dart';
 import 'package:a_player_example/local_widgets/att_video_player_constant.dart';
@@ -33,7 +34,9 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
         return AttVideoAnalysisResult(
           isSuccess: true,
           url: item.source,
-          headers: [],
+          headers: [
+            APlayerConfigHeader("referer", "https://wx.stariverpan.com/")
+          ],
           kernel: APlayerKernel.av,
           position: 0,
           reason: '',
@@ -45,14 +48,8 @@ class _NetworkPlayerPageState extends State<NetworkPlayerPage> {
         controller
           ..setPlaylist([
             AttVideoItem(
-                'https://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
+                'https://ipfsgw00.stariverpan.com:9095/ipfs/bafybeigidvl27kezpe5g5urdxt3jt7dybqyyqa5ppbxd3tm6bjmtvt2ff4',
                 '惊奇队长', {}),
-            AttVideoItem(
-                'https://vfx.mtime.cn/Video/2019/03/21/mp4/190321153853126488.mp4',
-                '--', {}),
-            AttVideoItem(
-                'https://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4',
-                '紧急救援', {}),
           ])
           ..playByIndex(0);
       });

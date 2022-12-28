@@ -112,8 +112,8 @@ class AliyunPlayerImpl(context: Context) : APlayerInterface {
         headers: Map<String, String>
     ) {
         val config = aliPlayer.config
-        config.mMaxBufferDuration = 1000 * 60 * 10
-        config.mMaxBackwardBufferDurationMs = 1 * 60 * 10
+        config.mMaxBufferDuration = 1000 * 600
+        config.mMaxBackwardBufferDurationMs = 1000 * 600
         var userAgent = ""
         var referer = ""
         val customHeaders: ArrayList<String> = ArrayList()
