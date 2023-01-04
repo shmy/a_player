@@ -77,9 +77,9 @@ class APlayerController extends ChangeNotifier with APlayerControllerListener {
   int _videoWidth = 0;
   APlayerKernel _kernel = APlayerKernel.aliyun;
   String _currentSource = '';
-  List<APlayerConfigHeader> _currenthttpHeaders = [];
+  List<APlayerConfigHeader> _currentHttpHeaders = [];
   int _currentPosition = 0;
-
+  bool _skiping = false;
   bool get hasTextureId => textureId != -1;
 
   APlayerFitMode get fitMode => _fitMode;
@@ -90,7 +90,7 @@ class APlayerController extends ChangeNotifier with APlayerControllerListener {
 
   String get currentSource => _currentSource;
 
-  List<APlayerConfigHeader> get currenthttpHeaders => _currenthttpHeaders;
+  List<APlayerConfigHeader> get currentHttpHeaders => _currentHttpHeaders;
 
   int get currentPosition => _currentPosition;
 
@@ -119,7 +119,7 @@ class APlayerController extends ChangeNotifier with APlayerControllerListener {
     int position = 0,
   }) async {
     _currentSource = source;
-    _currenthttpHeaders = headers;
+    _currentHttpHeaders = headers;
     _currentPosition = position;
     notifyListeners();
     Map<String, String> httpHeaders = {};
@@ -139,7 +139,7 @@ class APlayerController extends ChangeNotifier with APlayerControllerListener {
     await setDataSource(
       _currentSource,
       kernel: kernel,
-      headers: _currenthttpHeaders,
+      headers: _currentHttpHeaders,
       position: _currentPosition,
     );
   }
@@ -168,6 +168,16 @@ class APlayerController extends ChangeNotifier with APlayerControllerListener {
     await methodChannel?.invokeMethod('release');
     eventChannel = null;
     methodChannel = null;
+  }
+
+  Future<void> skip() async {
+    if (_skiping) {
+      return;
+    }
+    _skiping = true;
+    await stop();
+    _onCompletion.notifyListeners();
+    _skiping = false;
   }
 
   Future<void> setLoop(bool loop) async {
