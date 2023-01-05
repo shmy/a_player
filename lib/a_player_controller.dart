@@ -81,6 +81,7 @@ class APlayerController extends ChangeNotifier with APlayerControllerListener {
   int _currentPosition = 0;
   bool _skiping = false;
   bool get hasTextureId => textureId != -1;
+  bool get skiping => _skiping;
 
   APlayerFitMode get fitMode => _fitMode;
 
@@ -177,6 +178,9 @@ class APlayerController extends ChangeNotifier with APlayerControllerListener {
     _skiping = true;
     await stop();
     _onCompletion.notifyListeners();
+    _currentPosition = 0;
+    _onCurrentPositionChanged.value = _currentPosition;
+    _onCurrentPositionChanged.notifyListeners();
     _skiping = false;
   }
 
