@@ -176,6 +176,7 @@ class APlayerController extends ChangeNotifier with APlayerControllerListener {
       return;
     }
     _skiping = true;
+    await seekTo(0);
     await stop();
     _onCompletion.notifyListeners();
     _currentPosition = 0;
